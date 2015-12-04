@@ -1,6 +1,6 @@
 # RestAPI 
 ## Dependencias
-Instalar con "npm install"
+Instalar con "npm install".
 ## Ejecutar
-Abrir con WebStorm y click en play
-Para ejecutar desde consola "npm start"
+Abrir con WebStorm y click en play.
+Para ejecutar desde consola "npm start".
