@@ -8,8 +8,8 @@ var bodyParser = require('body-parser');
 var app = express();
 
 //MongoDB
-//var mongoose = require("mongoose");
-//mongoose.connect("");
+var mongoose = require("mongoose");
+mongoose.connect("mongodb://dessiuser:dessi2015@ds063134.mongolab.com:63134/dessi");
 
 // view engine setup: Solo para errores
 app.set('views', path.join(__dirname, 'views'));
