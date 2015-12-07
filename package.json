@@ -11,6 +11,8 @@
     "debug": "~2.2.0",
     "ejs": "~2.3.3",
     "express": "~4.13.1",
+    "kerberos": "0.0.17",
+    "mongodb": "^2.1.0",
     "mongoose": "^4.2.9",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0"
