@@ -1,15 +1,46 @@
 var express = require('express');
+
 var path = require('path');
 //var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+
+
 var app = express();
+
+var User   = require('./models/user'); // Modelo user
+var config = require('./config'); // archivo de configuración
+
+
+
+
 
 //MongoDB
 var mongoose = require("mongoose");
-mongoose.connect("mongodb://dessiuser:dessi2015@ds063134.mongolab.com:63134/dessi");
+var uriUtil = require('mongodb-uri');
+
+//mongoose.connect("mongodb://dessiuser:dessi2015@ds063134.mongolab.com:63134/dessi");
+
+
+
+var port = process.env.PORT || config.port; //3200
+app.set('superSecret', config.phrase); // setear frase secreta
+
+/* mongoconfig */
+var options = { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }, 
+                replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } };  
+
+var mongooseUri = uriUtil.formatMongoose(config.database);
+mongoose.connect(mongooseUri, options);
+
+
+
+
+
+
+
 
 // view engine setup: Solo para errores
 app.set('views', path.join(__dirname, 'views'));
@@ -25,14 +56,15 @@ app.use(cookieParser());
 //app.use(express.static(path.join(__dirname, 'public')));
 
 /******* MODULOS DE LAS RUTAS *******/
-
+// enrutador de usuarios 
 var users = require('./routes/users');
-
+//enrutador de autorizacion
+var authusers = require('./routes/authusers');
 
 /******* RUTAS DEL API *******/
 
 app.use('/api/v1/users', users);
-
+app.use('/api/v1/auth', authusers);
 
 // Si no encuentra la ruta, envia un 404
 app.use(function(req, res, next) {
