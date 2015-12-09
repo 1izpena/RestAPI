@@ -52,6 +52,14 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+//Handler para peticiones de otros dominios
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 // De momento no enviamos estaticos a los usuarios
 //app.use(express.static(path.join(__dirname, 'public')));
 
