@@ -4,7 +4,6 @@ var Hope      	= require('hope');
 var mongoose 	= require('mongoose');
 var Schema 	= mongoose.Schema;
 var bcrypt    	= require('bcrypt');
-var validators 	= require('mongoose-validators');
 var config 	= require('../config');
 
 
@@ -15,8 +14,7 @@ var userSchema = new Schema({
   mail      : {
     type  : String,
     unique: true, 
-    required: true,
-    validate: validators.isEmail({message: 'Mail format is invalid'}) 
+    required: true
   },
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
                       privateChannels: [ { type: Schema.ObjectId, ref: 'Channel' }]
@@ -55,25 +53,6 @@ userSchema.statics.signup = function signup (attributes) {
 
       var User = mongoose.model('User', userSchema);
       return new User(attributes).save(function (error, result) {
-
-	if(error){
-
-		var messageError = ''
-		if (error.errors.username != undefined)
-			messageError = error.errors.username.message
-	
-		else if(error.errors.password != undefined)
-			messageError = error.errors.password.message
-
-		else if(error.errors.mail != undefined)
-			messageError = error.errors.mail.message
-	
-
-		error = { code: 400, message: messageError };
-		return promise.done(error, null);
-	 }	
-
-
 	
         return promise.done(error, result);
       });
