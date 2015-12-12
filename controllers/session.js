@@ -3,6 +3,7 @@
 var Auth  = require('../helpers/authentication');
 var User  = require('../models/user');
 var Token = require('../helpers/token');
+var mail  =require('../services/mailer.js');
 
 exports.signup = function signup (request, response) {
 
@@ -53,19 +54,26 @@ exports.profile = function profile (request, response) {
   })
 };
 
-
 exports.forget = function forget(request, response){
  User.search(request.body,1).then (function search(error, result){
   if(error){
     response.status(error.code).json({message: error.message});
   } 
   else {
+    /*Envio de mail y token*/
+    var token = Token(result);
+    result.token=token;
     response.json(result.parse());
-    /*Falta generar token para mandarlo al frontend y el envio de emails*/
-      
-  }
- });
-};
+    
+    mail.check(result,function(error,result){
+      if(error){
+         response.status(error.code).json({message: error.message});
+       }else{
+        response.json(result.parse());
+       }
+      });      
+    }});
+  };
 
 exports.reset = function reset(request, response){
 
