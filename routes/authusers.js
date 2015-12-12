@@ -25,6 +25,11 @@ router.route('/login')
 router.route('/profile')
     .post(session.profile);
 
+router.route('/forget')
+    .post(session.forget);
+
+router.route('/reset')
+	.post(session.reset);
 
 
 
