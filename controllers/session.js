@@ -76,8 +76,16 @@ exports.forget = function forget(request, response){
   };
 
 exports.reset = function reset(request, response){
-
   
-
-/*Falta por implementar*/
+ Auth(request, response).then(function(error, result) {
+    if (error) {
+  /* nunca va a entrar */
+      response.status(error.code).json({message: error.message});
+    } else 
+    {
+      result.newPass= request.body.password;
+      User.reset(result);
+      response.json({message:"Contraseña cambiada con éxito"});
+    }
+  })
 };
