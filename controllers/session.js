@@ -1,4 +1,4 @@
-'use strict';
+  'use strict';
 
 var Auth  = require('../helpers/authentication');
 var User  = require('../models/user');
@@ -63,7 +63,7 @@ exports.forget = function forget(request, response){
     /*Envio de mail y token*/
     var token = Token(result);
     result.token=token;
-    response.json(result.parse());
+    response.json(token);
     
     mail.check(result,function(error,result){
       if(error){
@@ -76,6 +76,8 @@ exports.forget = function forget(request, response){
   };
 
 exports.reset = function reset(request, response){
+
+  
 
 /*Falta por implementar*/
 };
