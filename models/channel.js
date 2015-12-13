@@ -1,5 +1,7 @@
-var mongoose = require('mongoose');
+'use strict';
 
+var mongoose = require('mongoose');
+var Hope = require('hope');
 var Schema = mongoose.Schema;
 
 var channelSchema   = new Schema({
@@ -8,14 +10,73 @@ var channelSchema   = new Schema({
 });
 
 channelSchema.path('channelType').validate(function(channelType){
-        if(channelType == 'PUBLIC' || channelType == 'PRIVATE' )
-        {
-            return true
+    if(channelType == 'PUBLIC' || channelType == 'PRIVATE' )
+    {
+        return true
+    }
+    else {
+        return false
+    }
+}, 'Valid values form channelType: PUBLIC or PRIVATE');
+
+/* static methods */
+/* NUEVO CANAL , guarda el nuevo grupo y hace el populate a grupo */
+
+channelSchema.statics.newchannel = function newchannel (attributes) {
+    var promise = new Hope.Promise();
+    var Channel = mongoose.model('Channel', channelSchema);
+    Channel = new Channel(attributes).save(function (error, result) {
+        if(error){
+            var messageError = '';
+            if (error.errors.channelName != undefined)
+                messageError= error.errors.channelName;
+            error = { code: 400, message: messageError };
+            return promise.done(error, null);
         }
-        else {
-            return false
+        return promise.done(error, result);
+    });
+    return promise;
+};
+
+/* BUSCAR */
+channelSchema.statics.search = function search (query, limit) {
+    var promise = new Hope.Promise();
+    this.find(query).limit(limit).exec(function(error, value) {
+        if (limit === 1 && !error) {
+            if (value.length === 0) {
+                error = {
+                    code: 402,
+                    message: "Group not found."
+                };
+            }
+            value = value[0];
         }
-    }, 'Valid values form channelType: PUBLIC or PRIVATE');
+        return promise.done(error, value);
+    });
+    return promise;
+};
+
+/* ACTUALIZAR */
+channelSchema.statics.updatechannel = function updatechannel (id, update, options) {
+    var promise = new Hope.Promise();
+    this.findByIdAndUpdate(id, update, options,function(error, group) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            return promise.done(error, group);
+        }
+    });
+    return promise;
+};
+
+channelSchema.methods.parse = function parse () {
+    var channel = this;
+    return {
+        id         : channel._id,
+        channelName: channel.channelName,
+        channelType: channel.channelType
+    };
+};
 
 module.exports = mongoose.model('Channel', channelSchema);
 

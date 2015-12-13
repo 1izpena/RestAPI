@@ -68,11 +68,14 @@ app.use(function(req, res, next) {
 var users = require('./routes/users');
 //enrutador de autorizacion
 var authusers = require('./routes/authusers');
+//enrutador de chat
+var chat = require('./routes/chat');
 
 /******* RUTAS DEL API *******/
 
 app.use('/api/v1/users', users);
 app.use('/api/v1/auth', authusers);
+app.use('/api/v1/chat', chat);
 
 // Si no encuentra la ruta, envia un 404
 app.use(function(req, res, next) {

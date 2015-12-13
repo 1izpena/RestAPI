@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 var Hope      	= require('hope');
 var mongoose 	= require('mongoose');
@@ -58,15 +58,15 @@ userSchema.statics.signup = function signup (attributes) {
 
 	if(error){
 
-		var messageError = ''
+		var messageError = '';
 		if (error.errors.username != undefined)
-			messageError = error.errors.username.message
+			messageError = error.errors.username.message;
 	
 		else if(error.errors.password != undefined)
-			messageError = error.errors.password.message
+			messageError = error.errors.password.message;
 
 		else if(error.errors.mail != undefined)
-			messageError = error.errors.mail.message
+			messageError = error.errors.mail.message;
 	
 
 		error = { code: 400, message: messageError };
@@ -146,6 +146,19 @@ userSchema.statics.reset = function reset(attributes){
     }    
   });
   return promise;
+};
+
+/*ACTUALIZAR */
+userSchema.statics.updateuser = function updateuser (id, update, options) {
+    var promise = new Hope.Promise();
+    this.findByIdAndUpdate(id, update, options,function(error, user) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            return promise.done(error, user);
+        }
+    });
+    return promise;
 };
 
 /* Instance methods
