@@ -5,6 +5,7 @@ var mongoose 	= require('mongoose');
 var Schema 	= mongoose.Schema;
 var bcrypt    	= require('bcrypt');
 var validators 	= require('mongoose-validators');
+var nodevalida	= require('validator');
 var config 	= require('../config');
 
 
@@ -88,23 +89,42 @@ userSchema.statics.signup = function signup (attributes) {
 userSchema.statics.login = function login (attributes) {
   var promise = new Hope.Promise();
   var user = this;
-  user.findOne({
-    mail: attributes.mail
-  }, function(error, user) {
-    
-     if (user && bcrypt.compareSync(attributes.password, user.password)) {
-      return promise.done(null, user);
+  var error = '';
 
-    } else {
-      error = {
+  if (nodevalida.isNull(attributes.mail)){
+	console.log("nodevalida"+ nodevalida.isNull(attributes.mail));
+	error = {
         code: 403,
-        message: "Incorrect credentials."
+        message: "Mail is required."
       };
+      console.log("Mail is required.");
       return promise.done(error, null);
-    }
-  });
+
+  }
+  
+  else {
+	  
+	  user.findOne({
+	    mail: attributes.mail
+	  }, function(error, user) {
+	    
+	     if (user && bcrypt.compareSync(attributes.password, user.password)) {
+	      return promise.done(null, user);
+
+	    } else {
+	      error = {
+		code: 403,
+		message: "Incorrect credentials."
+	      };
+	      return promise.done(error, null);
+	    }
+	  });
+  }
   return promise;
 };
+
+
+
 
 
 /* BUSCAR */

@@ -24,12 +24,14 @@ exports.signup = function signup (request, response) {
 
 
 exports.login = function login (request, response) {
-
+	console.log("funciona"+ request.body);
   User.login(request.body).then(function login (error, result) {
 
     if (error) {
+	console.log("error en session"+ error.message);
       response.status(error.code).json({message: error.message});
     } else {
+	console.log("no funciona");
       var token = Token(result);
       //request.session.user = token;
       var user = result.parse();

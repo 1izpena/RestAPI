@@ -1,9 +1,11 @@
-'use strict'
+'use strict';
 
 var Hope      	= require('hope');
 var mongoose 	= require('mongoose');
 var Schema 	= mongoose.Schema;
 var bcrypt    	= require('bcrypt');
+var validators 	= require('mongoose-validators');
+var nodevalida	= require('validator');
 var config 	= require('../config');
 
 
@@ -14,7 +16,8 @@ var userSchema = new Schema({
   mail      : {
     type  : String,
     unique: true, 
-    required: true
+    required: true,
+    validate: validators.isEmail({message: 'Mail format is invalid'}) 
   },
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
                       privateChannels: [ { type: Schema.ObjectId, ref: 'Channel' }]
@@ -53,6 +56,25 @@ userSchema.statics.signup = function signup (attributes) {
 
       var User = mongoose.model('User', userSchema);
       return new User(attributes).save(function (error, result) {
+
+	if(error){
+
+		var messageError = '';
+		if (error.errors.username != undefined)
+			messageError = error.errors.username.message;
+	
+		else if(error.errors.password != undefined)
+			messageError = error.errors.password.message;
+
+		else if(error.errors.mail != undefined)
+			messageError = error.errors.mail.message;
+	
+
+		error = { code: 400, message: messageError };
+		return promise.done(error, null);
+	 }	
+
+
 	
         return promise.done(error, result);
       });
@@ -67,23 +89,42 @@ userSchema.statics.signup = function signup (attributes) {
 userSchema.statics.login = function login (attributes) {
   var promise = new Hope.Promise();
   var user = this;
-  user.findOne({
-    mail: attributes.mail
-  }, function(error, user) {
-    
-     if (user && bcrypt.compareSync(attributes.password, user.password)) {
-      return promise.done(null, user);
+  var error = '';
 
-    } else {
-      error = {
+  if (nodevalida.isNull(attributes.mail)){
+	console.log("nodevalida"+ nodevalida.isNull(attributes.mail));
+	error = {
         code: 403,
-        message: "Incorrect credentials."
+        message: "Mail is required."
       };
+      console.log("Mail is required.");
       return promise.done(error, null);
-    }
-  });
+
+  }
+  
+  else {
+	  
+	  user.findOne({
+	    mail: attributes.mail
+	  }, function(error, user) {
+	    
+	     if (user && bcrypt.compareSync(attributes.password, user.password)) {
+	      return promise.done(null, user);
+
+	    } else {
+	      error = {
+		code: 403,
+		message: "Incorrect credentials."
+	      };
+	      return promise.done(error, null);
+	    }
+	  });
+  }
   return promise;
 };
+
+
+
 
 
 /* BUSCAR */
@@ -104,6 +145,40 @@ userSchema.statics.search = function search (query, limit) {
     return promise.done(error, value);
   });
   return promise;
+};
+
+/*CAMBIAR CONTRASEÑA*/
+userSchema.statics.reset = function reset(attributes){
+  var promise = new Hope.Promise();
+  var user = this;
+  user.findById(attributes.id,function(err,user){
+    if (err) return  promise.done(err,null);
+    else
+    {
+      user.password = attributes.newPass;
+      user.save(function (err){
+        if(err) return promise.done(error,null);
+        else
+        {
+          return promise.done(null,user);
+        }
+      });
+    }    
+  });
+  return promise;
+};
+
+/*ACTUALIZAR */
+userSchema.statics.updateuser = function updateuser (id, update, options) {
+    var promise = new Hope.Promise();
+    this.findByIdAndUpdate(id, update, options,function(error, user) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            return promise.done(error, user);
+        }
+    });
+    return promise;
 };
 
 /* Instance methods
