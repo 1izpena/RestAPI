@@ -4,11 +4,12 @@ var Auth  = require('../helpers/authentication');
 var User  = require('../models/user');
 var Token = require('../helpers/token');
 var mail  =require('../services/mailer.js');
+var LoginErrorsHandler = require('../helpers/loginErrorsHandler');
 
 exports.signup = function signup (request, response) {
 
   User.signup(request.body).then(function signup (error, result) {
-    console.log(error)
+    
     if (error) {
       
       response.status(error.code).json({message: error.message});
@@ -24,19 +25,27 @@ exports.signup = function signup (request, response) {
 
 
 exports.login = function login (request, response) {
-
-  User.login(request.body).then(function login (error, result) {
-
-    if (error) {
-      response.status(error.code).json({message: error.message});
-    } else {
-      var token = Token(result);
-      //request.session.user = token;
-      var user = result.parse();
-      user.token = token;
-      response.json(user);
+    var loginerrorshandler = LoginErrorsHandler(request.body);
+  
+    if (loginerrorshandler) {   
+	response.status(loginerrorshandler.code).json({message: loginerrorshandler.message});	
     }
-  });
+    else {
+        
+	User.login(request.body).then(function login (error, result) {
+
+	  if (error) {
+	     response.status(error.code).json({message: error.message});
+	  } else {
+	      var token = Token(result);
+	      //request.session.user = token;
+	      var user = result.parse();
+	      user.token = token;
+	      response.json(user);
+	    }
+  	});
+	
+   }
 };
 
 
