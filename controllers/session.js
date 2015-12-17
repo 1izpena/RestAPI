@@ -3,7 +3,7 @@
 var Auth  = require('../helpers/authentication');
 var User  = require('../models/user');
 var Token = require('../helpers/token');
-var mail  =require('../services/mailer.js');
+var mail  =require('../services/mailer');
 var LoginErrorsHandler = require('../helpers/loginErrorsHandler');
 
 exports.signup = function signup (request, response) {
@@ -95,6 +95,17 @@ exports.reset = function reset(request, response){
       result.newPass= request.body.password;
       User.reset(result);
       response.json({message:"Contraseña cambiada con éxito"});
+      //mail de confirmacion
+      result.token=null;
+      mail.check(result,function(error,result){
+      if(error){
+        
+         response.status(error.code).json({message: error.message});
+       }else{
+
+         console.log("mail confirmacion");
+       }
+      });  
     }
   })
 };

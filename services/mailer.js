@@ -16,12 +16,12 @@ exports.check = function check(request, response){
 
 	if(request.token!=null){ //Si el token tiene contenido manda mail para validar usuario
     	var html = "<img src='http://squares.thinkcommand.com/images/forgot_pass/ForgotPasswordIcon.png' style='width:128px;height:128px;'><br/>"+
-    	"<p>Para resetear tu pass accede a <a href='/api/v1/auth/"+request.token+"'>RESETEO</a></p>";
+    	"<p>Para resetear tu pass accede a <a href='http://localhost:9000/#/reset/"+request.token+"'>RESETEO</a></p>";
 
 	}else{ // token vacio mail de confirmación de cambio de pass
 		
-		var html = "Hola " + request.username +" !! Tu contraseña ha sido reseteada"+
-		"<a href='/api/v1/login'>Login</a>"; 
+	var html = "Hola " + request.username +" !! Tu contraseña ha sido reseteada <br/>"+
+		"<a href='http://localhost:9000/#/login/'>Login</a>";
   }
 
   var mailOptions = {
