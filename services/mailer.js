@@ -8,7 +8,7 @@ exports.check = function check(request, response){
   var smtpTransport = nodemailer.createTransport("SMTP",{
     service: "Gmail",
 	auth: {
-	  user: "dessimailer@gmail.com",
+	  user: "dessiailer@gmail.com",
 	  pass: "dessimailer!"
 	 }
   	});
@@ -33,9 +33,13 @@ exports.check = function check(request, response){
 				    
   smtpTransport.sendMail(mailOptions, function(error, result){
     if(error){
-    	response.status(error.code).json({message: error.message});
+    	//response.status(error).json({message: error.message});
+    	
+    	response({message: "error mail"});
+
 	}else{
-	 	console.log("mail txatxi");
+		response({message: "correcto"});
+	 	console.log("mail enviado");
 	}
 
   });	

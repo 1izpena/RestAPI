@@ -76,9 +76,12 @@ exports.forget = function forget(request, response){
     
     mail.check(result,function(error,result){
       if(error){
-         response.status(error.code).json({message: error.message});
+       // response=error.message;
+        console.log(error.message);
+       console.log(token);
        }else{
-        response.json(result.parse());
+        console.log(result.message);
+        
        }
       });      
     }});
@@ -97,15 +100,16 @@ exports.reset = function reset(request, response){
       response.json({message:"Contraseña cambiada con éxito"});
       //mail de confirmacion
       result.token=null;
-      mail.check(result,function(error,result){
+          mail.check(result,function(error,result){
       if(error){
-        
-         response.status(error.code).json({message: error.message});
+        response=error.message;
+        console.log(error.message);
+       
        }else{
-
-         console.log("mail confirmacion");
+        console.log(result.message);
+        
        }
-      });  
+      }); 
     }
   })
 };
