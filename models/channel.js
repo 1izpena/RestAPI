@@ -32,7 +32,11 @@ channelSchema.statics.newchannel = function newchannel (attributes,userid, group
         if(error){
             var messageError = '';
             if (error.errors.channelName != undefined)
-                messageError= error.errors.channelName;
+                //messageError= error.errors.channelName;
+                messageError = 'channel name is required';
+            else if (error.errors.channelType != undefined)
+                //messageError= error.errors.channelName;
+                messageError = 'channel type is required: PUBLIC/PRIVATE';
             error = { code: 400, message: messageError };
             return promise.done(error, null);
         }else {

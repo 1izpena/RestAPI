@@ -19,7 +19,7 @@ groupSchema.statics.newgroup = function newgroup (attributes,userid) {
         if(error){
             var messageError = '';
             if (error.errors.groupName != undefined)
-                messageError = error.errors.groupName;
+                messageError = 'Group name required';
             error = { code: 400, message: messageError };
             return promise.done(error, null);
         }else {

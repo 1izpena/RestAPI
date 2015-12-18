@@ -27,7 +27,6 @@ exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
             for (i=0;i<listaGrupos.length;i++){
                 if (listaGrupos[i].groupName == groupname){
                     encontrado = true;
-                    break;
                 }
             }
            if (encontrado) {
@@ -62,7 +61,6 @@ exports.checkchannelnameunique = function checkchannelnameunique(userid,groupnam
             for (i=0;i<listaGrupos.length;i++){
                 if (listaGrupos[i].channelName == channelName){
                     encontrado = true;
-                    break;
                 }
             }
             if (encontrado) {
