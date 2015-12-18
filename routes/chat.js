@@ -18,12 +18,12 @@ router.get('/', function(req, res, next) {
 /*  POST Crea y guarda un nuevo grupo, crea un canal publico por defecto, asocia el canal al grupo,
   asocia el grupo al usuario
 */
-router.route('/group')
+router.route('/groups')
     .post(group.newgroup);
 
 
 //POST Crea y guarda un nuevo canal, dentro del grupo con el groupid, actualiza referencias en grupo y usuario
-router.route('/group/channel')
+router.route('/groups/:groupname/channels')
     .post(channel.newchannel);
 
 module.exports = router;
