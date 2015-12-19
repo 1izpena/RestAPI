@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 var Hope = require('hope');
 var Schema = mongoose.Schema;
 
+
 var channelSchema   = new Schema({
     channelName: { type: String, required: true },
     channelType: { type: String, required: true }
@@ -22,18 +23,50 @@ channelSchema.path('channelType').validate(function(channelType){
 /* static methods */
 /* NUEVO CANAL , guarda el nuevo grupo y hace el populate a grupo */
 
-channelSchema.statics.newchannel = function newchannel (attributes) {
+channelSchema.statics.newchannel = function newchannel (attributes,userid, groupid) {
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel', channelSchema);
+    var Group = mongoose.model('Group');
+    var User = mongoose.model('User');
     Channel = new Channel(attributes).save(function (error, result) {
         if(error){
             var messageError = '';
             if (error.errors.channelName != undefined)
-                messageError= error.errors.channelName;
+                //messageError= error.errors.channelName;
+                messageError = 'channel name is required';
+            else if (error.errors.channelType != undefined)
+                //messageError= error.errors.channelName;
+                messageError = 'channel type is required: PUBLIC/PRIVATE';
             error = { code: 400, message: messageError };
             return promise.done(error, null);
+        }else {
+            var channel = result;
+            var options = { safe: true, upsert: true };
+            var selection = { _id: groupid};
+            var updateQuery = { $push: { channels: channel.id} };
+            Group.update(selection,updateQuery,options,function (error){
+                if(error){
+                    return promise.done(error,null);
+                }else{
+                    if (channel.channelType == "PRIVADO"){
+                        var selection = { _id: userid, _group: groupid };
+                        var updateQuery = { $push: {privateChannels: channel._id} };
+                        var options = { safe: true, upsert: true };
+                        var User = mongoose.model('User');
+                        User.update(selection,updateQuery,options,function (error){
+                            if(error){
+                                return promise.done(error,null);
+                            }else{
+                                return promise.done(error, channel);
+                            }
+                        });
+                    }else {
+                        return promise.done(error, channel);
+                    }
+
+                }
+            });
         }
-        return promise.done(error, result);
     });
     return promise;
 };

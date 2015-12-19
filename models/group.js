@@ -11,23 +11,40 @@ var groupSchema   = new Schema({
 
 /* static methods */
 /* NUEVO GRUPO , guarda el nuevo grupo */
-groupSchema.statics.newgroup = function newgroup (attributes) {
+groupSchema.statics.newgroup = function newgroup (attributes,userid) {
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group', groupSchema);
     Group = new Group(attributes);
-    Group.save(function (error, result) {
+    Group.save(function (error, group) {
         if(error){
             var messageError = '';
             if (error.errors.groupName != undefined)
-                messageError = error.errors.groupName;
+                messageError = 'Group name required';
             error = { code: 400, message: messageError };
             return promise.done(error, null);
         }else {
-            return promise.done(error, result);
+            var privatechannels = [];
+            var dat = {
+                _group: group.id,
+                privateChannels: privatechannels
+            };
+            var selection = { _id: userid};
+            var updateQuery = { $push: { _group: group.id,privateChannels: privatechannels} };
+            var options = { safe: true, upsert: true };
+            //var update ={$push: {'groups': {'_group':group.id,'privateChannels':privatechannels}}};
+            var User = mongoose.model('User');
+            User.update(selection,updateQuery,options,function (error){
+                if(error){
+                    return promise.done(error,null);
+                }else{
+                    return promise.done(error, group);
+                }
+            });
         }
     });
     return promise;
 };
+
 
 /* BUSCAR */
 groupSchema.statics.search = function search (query, limit) {
