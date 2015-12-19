@@ -72,16 +72,12 @@ exports.forget = function forget(request, response){
     /*Envio de mail y token*/
     var token = Token(result);
     result.token=token;
-    response.json(token);
     
-    mail.check(result,function(error,result){
-      if(error){
-       // response=error.message;
-        console.log(error.message);
-       console.log(token);
+    mail.check(result,function(res){
+      if(res.message=="ok"){
+      response.json(token);         
        }else{
-        console.log(result.message);
-        
+      response.json(res.message);
        }
       });      
     }});
@@ -98,18 +94,10 @@ exports.reset = function reset(request, response){
       result.newPass= request.body.password;
       User.reset(result);
       response.json({message:"Contraseña cambiada con éxito"});
-      //mail de confirmacion
-      result.token=null;
-          mail.check(result,function(error,result){
-      if(error){
-        response=error.message;
-        console.log(error.message);
-       
-       }else{
-        console.log(result.message);
-        
-       }
-      }); 
-    }
-  })
+
+      //solo ínforma del cambio de pass
+      result.token=null; 
+      mail.check(result,function(res){
+       });
+    }});
 };

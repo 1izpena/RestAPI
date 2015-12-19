@@ -8,7 +8,7 @@ exports.check = function check(request, response){
   var smtpTransport = nodemailer.createTransport("SMTP",{
     service: "Gmail",
 	auth: {
-	  user: "dessiailer@gmail.com",
+	  user: "dessimailer@gmail.com",
 	  pass: "dessimailer!"
 	 }
   	});
@@ -18,11 +18,14 @@ exports.check = function check(request, response){
     	var html = "<img src='http://squares.thinkcommand.com/images/forgot_pass/ForgotPasswordIcon.png' style='width:128px;height:128px;'><br/>"+
     	"<p>Para resetear tu pass accede a <a href='http://localhost:9000/#/reset/"+request.token+"'>RESETEO</a></p>";
 
-	}else{ // token vacio mail de confirmación de cambio de pass
+	}else if(request.active=="false"){
+		console.log("active");
+	}else 
+	{ // token vacio mail de confirmación de cambio de pass
 		
-	var html = "Hola " + request.username +" !! Tu contraseña ha sido reseteada <br/>"+
-		"<a href='http://localhost:9000/#/login/'>Login</a>";
-  }
+		var html = "Hola " + request.username +" !! Tu contraseña ha sido reseteada"+
+		"<a href='http://localhost:9000/#/login/'>Login</a>"; 
+  	}
 
   var mailOptions = {
     from: "Dessi2015", 
@@ -33,13 +36,9 @@ exports.check = function check(request, response){
 				    
   smtpTransport.sendMail(mailOptions, function(error, result){
     if(error){
-    	//response.status(error).json({message: error.message});
-    	
-    	response({message: "error mail"});
-
+    	 response({message:"error"});    	
 	}else{
-		response({message: "correcto"});
-	 	console.log("mail enviado");
+	 	response({message:"ok"});
 	}
 
   });	
