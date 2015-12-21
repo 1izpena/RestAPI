@@ -11,7 +11,7 @@ var groupSchema   = new Schema({
 
 /* static methods */
 /* NUEVO GRUPO , guarda el nuevo grupo */
-groupSchema.statics.newgroup = function newgroup (attributes,userid) {
+groupSchema.statics.creategroup = function creategroup (attributes,userid) {
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group', groupSchema);
     Group = new Group(attributes);
@@ -29,9 +29,8 @@ groupSchema.statics.newgroup = function newgroup (attributes,userid) {
                 privateChannels: privatechannels
             };
             var selection = { _id: userid};
-            var updateQuery = { $push: { _group: group.id,privateChannels: privatechannels} };
+            var updateQuery = { $push: { "groups": dat} };
             var options = { safe: true, upsert: true };
-            //var update ={$push: {'groups': {'_group':group.id,'privateChannels':privatechannels}}};
             var User = mongoose.model('User');
             User.update(selection,updateQuery,options,function (error){
                 if(error){

@@ -23,7 +23,7 @@ channelSchema.path('channelType').validate(function(channelType){
 /* static methods */
 /* NUEVO CANAL , guarda el nuevo grupo y hace el populate a grupo */
 
-channelSchema.statics.newchannel = function newchannel (attributes,userid, groupid) {
+channelSchema.statics.createchannel = function createchannel (attributes,userid, groupid) {
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel', channelSchema);
     var Group = mongoose.model('Group');
@@ -32,11 +32,9 @@ channelSchema.statics.newchannel = function newchannel (attributes,userid, group
         if(error){
             var messageError = '';
             if (error.errors.channelName != undefined)
-                //messageError= error.errors.channelName;
                 messageError = 'channel name is required';
             else if (error.errors.channelType != undefined)
-                //messageError= error.errors.channelName;
-                messageError = 'channel type is required: PUBLIC/PRIVATE';
+               messageError = 'channel type is required: PUBLIC/PRIVATE';
             error = { code: 400, message: messageError };
             return promise.done(error, null);
         }else {
