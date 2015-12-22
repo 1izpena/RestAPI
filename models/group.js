@@ -25,7 +25,7 @@ groupSchema.statics.creategroup = function creategroup (attributes,userid) {
         }else {
             var privatechannels = [];
             var dat = {
-                _group: group.id,
+                _group: group._id,
                 privateChannels: privatechannels
             };
             var selection = { _id: userid};
@@ -68,7 +68,6 @@ groupSchema.statics.updategroup = function updategroup (id, update, options) {
     var promise = new Hope.Promise();
     this.findByIdAndUpdate(id, update, options,function(error, group) {
         if (error) {
-            console.log("error al updategroup: " + error);
             return promise.done(error, null);
         }else {
             return promise.done(error, group);

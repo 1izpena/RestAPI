@@ -9,7 +9,60 @@ var chatErrors  = require('../helpers/chatErrorsHandler');
 var mongoose = require('mongoose');
 
 
-exports.newgroup = function newgroup (request, response) {
+exports.getusergrouplist = function getusergrouplist (request, response) {
+    var checktoken = chatErrors.checktoken(request);
+    if (checktoken) {
+        response.status(checktoken.code).json({message: checktoken.message});
+    }
+    else {
+        Auth(request, response).then(function(error, result) {
+            if (error) {
+                response.status(error.code).json({message: error.message});
+            } else {
+                groupservice.getgrouplist(result._id).then(function (error,result){
+                    if(error){
+                        response.status(error.code).json({message: error.message});
+                    }else{
+                        response.json(result);
+                    }
+                });
+            }
+        });
+    }
+};
+
+
+exports.getgroupinfo = function getgroupinfo (request, response) {
+    var checktoken = chatErrors.checktoken(request);
+    if (checktoken) {
+        response.status(checktoken.code).json({message: checktoken.message});
+    }
+    else {
+        Auth(request, response).then(function(error, result) {
+            if (error) {
+                response.status(error.code).json({message: error.message});
+            } else {
+                groupservice.obtaingroupid(result._id, request.params.groupname).then(function (error,result) {
+                    if (error) {
+                        response.status(error.code).json({message: error.message});
+                    } else {
+                        groupservice.getinfo(result).then(function (error,result){
+                            if(error){
+                                response.status(error.code).json({message: error.message});
+                            }else{
+                                response.json(result);
+                            }
+                        });
+                    }
+                });
+
+            }
+        });
+    }
+};
+
+
+exports.newgroup = function newgroup (request, response){
     var groupid='';
     var userid = '';
     var Group = mongoose.model('Group');
@@ -28,7 +81,6 @@ exports.newgroup = function newgroup (request, response) {
                     if (error){
                         response.status(error.code).json({message: error.message});
                     }else {
-                        console.log ("userid: " + userid);
                         var ats = {
                             groupName: request.body.groupName,
                             _admin: result._id
@@ -61,4 +113,5 @@ exports.newgroup = function newgroup (request, response) {
             }
         });
     }
+
 };

@@ -35,6 +35,56 @@ exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
     return promise;
 };
 
+exports.getgrouplist = function getgrouplist(userid){
+    var User = mongoose.model('User');
+    var promise = new Hope.Promise();
+    User.findOne({ _id: userid}).populate('groups._group').exec(function (error, user) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else if (user){
+            promise.done(null,user.groups);
+        }
+    });
+    return promise;
+};
+
+exports.getinfo = function getinfo(groupid){
+    var promise = new Hope.Promise();
+    var Group = mongoose.model('Group');
+    Group.findOne({ _id: groupid}).populate('channels').exec(function (error, group) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else if (group){
+            promise.done(null, group.parse());
+        }
+    });
+    return promise;
+};
+
+exports.obtaingroupid = function obtaingroupid(userid,groupname){
+    var promise = new Hope.Promise();
+    var User = mongoose.model('User');
+    User.findOne({ _id: userid}).populate('groups._group').exec(function (error, user) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else if (user){
+            var listaGrupos = [];
+            listaGrupos = user.groups;
+            for (i=0;i<listaGrupos.length;i++){
+                if (listaGrupos[i]._group.groupName === groupname){
+                    var vuelta = listaGrupos[i]._group._id;
+                    promise.done(null, vuelta);
+                }
+            }
+        }
+    });
+    return promise;
+};
+
+
 
 
 

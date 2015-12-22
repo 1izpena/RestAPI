@@ -6,24 +6,26 @@ var channel = require('../controllers/channel');
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
 // Aqui podemos poner lo que queramos para tratar las rutas inicialmente
-    console.log('accediendo a la ruta /api/v1/chat'+req.path);
+    console.log('accediendo a la ruta /api/v1/auth'+req.path);
     next(); // Pasa a la siguiente ruta
 });
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-    res.json({ message: 'Accediendo a /chat' });
-});
+/* GET Devuelve lista de grupos del usuario */
+router.route('/').get(group.getusergrouplist);
 
-/*  POST Crea y guarda un nuevo grupo, crea un canal publico por defecto, asocia el canal al grupo,
-  asocia el grupo al usuario
-*/
-router.route('/groups')
-    .post(group.newgroup);
+/* GET Devuelve lista de grupos del usuario */
+router.route('/groups').get(group.getusergrouplist);
 
+/* POST Crea y guarda un nuevo grupo, crea un canal publico por defecto, asocia el canal al grupo,asocia el grupo al usuario */
+router.route('/groups').post(group.newgroup);
 
-//POST Crea y guarda un nuevo canal, dentro del grupo con el groupid, actualiza referencias en grupo y usuario
-router.route('/groups/:groupname/channels')
-    .post(channel.newchannel);
+/* GET Devuelve la información del grupo seleccionado */
+router.route('/groups/:groupname').get(group.getgroupinfo);
+
+/* POST Crea y guarda un nuevo canal, dentro del grupo con el groupid, actualiza referencias en grupo y usuario */
+router.route('/groups/:groupname/channels').post(channel.newchannel);
+
+/* GET Devuelve la lista de usuarios del grupo */
+//router.route('/groups/:groupname/users').get(group.getgroupuserlist);
 
 module.exports = router;

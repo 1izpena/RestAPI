@@ -46,22 +46,7 @@ channelSchema.statics.createchannel = function createchannel (attributes,userid,
                 if(error){
                     return promise.done(error,null);
                 }else{
-                    if (channel.channelType == "PRIVADO"){
-                        var selection = { _id: userid, _group: groupid };
-                        var updateQuery = { $push: {privateChannels: channel._id} };
-                        var options = { safe: true, upsert: true };
-                        var User = mongoose.model('User');
-                        User.update(selection,updateQuery,options,function (error){
-                            if(error){
-                                return promise.done(error,null);
-                            }else{
-                                return promise.done(error, channel);
-                            }
-                        });
-                    }else {
-                        return promise.done(error, channel);
-                    }
-
+                    return promise.done(error, channel);
                 }
             });
         }

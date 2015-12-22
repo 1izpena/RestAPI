@@ -4,25 +4,6 @@ var Channel = require('../models/channel');
 var Hope  = require('hope');
 var mongoose = require('mongoose');
 
-exports.obtaingroupid = function obtaingroupid(userid,groupname){
-    var promise = new Hope.Promise();
-    User.findOne({ _id: userid}).populate('groups._group').exec(function (error, user) {
-        if (error){
-            return promise.done(error,null);
-        }
-        else if (user){
-            var listaGrupos = [];
-            listaGrupos = user.groups;
-            for (i=0;i<listaGrupos.length;i++){
-                if (listaGrupos[i]._group.groupName === groupname){
-                    var vuelta = listaGrupos[i]._group._id;
-                    promise.done(null, vuelta);
-                }
-            }
-        }
-    });
-    return promise;
-};
 
 exports.updateuserchannelprivatelist = function updateuserchannelprivatelist(userid,groupid,channelid){
     var promise = new Hope.Promise();
@@ -31,17 +12,13 @@ exports.updateuserchannelprivatelist = function updateuserchannelprivatelist(use
             return promise.done(error,null);
         }
         else if (user){
-            var listaGrupos = [];
-            listaGrupos = user.groups;
-            for (i=0;i<user.groups.length;i++){
-                if (user.groups[i]._group._id === groupid){
-                    user.groups[i]._group.privateChannels.push(channelid);
+            var listaGrupos = user.groups;
+            for (i=0;i<listaGrupos.length;i++){
+                if (groupid.equals(listaGrupos[i]._group._id)){
+                    listaGrupos[i].privateChannels.push(channelid);
                 }
             }
-
-            var update = '';
-            update = {"groups":user.groups};
-
+            var update = {"groups":listaGrupos};
             var options = {multi: true};
             User.updateuser(userid,update,options).then(function updateuser (error){
                 if(error){
@@ -78,7 +55,7 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                     console.log ("si encontrado");
                     var err = {
                         code   : 403,
-                        message: 'user already has the channel name'
+                        message: 'the group already has a public channel with that name'
                     };
                     return promise.done(err, null);
                 }else {
@@ -88,33 +65,27 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
         });
     }if (channeltype == "PRIVATE"){
         console.log("El canal es privado");
-        User.findOne({ _id: userid}).populate('groups._group groups.privateChannels').exec(function (error, user) {
+        Group.findOne({ _id: groupid}).populate('channels').exec(function (error, group) {
             if (error){
                 return promise.done(error,null);
             }
-            else if (user){
-                var encontrado=false;
-                var listaGrupos = user.groups;
-                for (i=0;i<listaGrupos.length;i++){
-                    if (listaGrupos[i]._group._id === groupid){
-                        console.log("son iguales");
-                        for (j=0;j<listaGrupos[i].privateChannels.length;j++){
-                            console.log ("channelname de su lista: " + listaGrupos[i].privateChannels[j].channelName);
-                            if (listaGrupos[i].privateChannels[j].channelName === channelname){
-                                encontrado = true;
-                            }
-                        }
+            else if (group){
+                var encontrado = false;
+                var canales = group.channels;
+                for (i=0;i<group.channels.length;i++){
+                    if (channelname === canales[i].channelName){
+                        encontrado = true;
                     }
                 }
                 if (encontrado === true){
                     console.log ("si encontrado");
                     var err = {
                         code   : 403,
-                        message: 'user already has the channel name'
+                        message: 'the group already has a private channel with that name'
                     };
                     return promise.done(err, null);
                 }else {
-                    return promise.done(null, user);
+                    return promise.done(null, group);
                 }
             }
         });
