@@ -18,7 +18,17 @@ exports.signup = function signup (request, response) {
       var token = Token(result);
       //request.session.user = token;
       result.token = token;
-      response.json(result.parse());
+      //response.json(result.parse());
+
+      // Mail activación//
+      result.action=0;
+      mail.check(result,function(res){
+      if(res.message=="ok"){   
+      response.json(token); 
+       }else{
+      response.json(res.message);
+       }
+      });
     }
   });
 };
@@ -73,6 +83,7 @@ exports.forget = function forget(request, response){
     var token = Token(result);
     result.token=token;
     
+   result.action=1;
     mail.check(result,function(res){
       if(res.message=="ok"){
       response.json(token);         
@@ -96,8 +107,22 @@ exports.reset = function reset(request, response){
       response.json({message:"Contraseña cambiada con éxito"});
 
       //solo ínforma del cambio de pass
-      result.token=null; 
+       result.action=2;
       mail.check(result,function(res){
        });
+    }});
+};
+
+exports.activate = function activate(request, response){
+
+ Auth(request, response).then(function(error, result) {
+    if (error) {
+  /* nunca va a entrar */
+      response.status(error.code).json({message: error.message});
+    } else 
+    {
+      User.activate(result);
+      response.json({message:"Cuenta activada"});
+
     }});
 };

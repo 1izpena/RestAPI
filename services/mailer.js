@@ -14,23 +14,44 @@ exports.check = function check(request, response){
   	});
 
 
-	if(request.token!=null){ //Si el token tiene contenido manda mail para validar usuario
+switch(request.action){
+
+		case 0:
+
+		var html = "<img src='http://www.investrade.com/gunnallen/images/activate.png' style='width:200px;height:128px;'><br/>"+
+    	"<p>Para activar tu cuenta accede a <a href='http://localhost:9000/#/activate/"+request.token+"'>activar</a></p>";
+    	var subject = "Activa tu cuenta";
+
+    	break;
+
+    	case 1:
+
     	var html = "<img src='http://squares.thinkcommand.com/images/forgot_pass/ForgotPasswordIcon.png' style='width:128px;height:128px;'><br/>"+
     	"<p>Para resetear tu pass accede a <a href='http://localhost:9000/#/reset/"+request.token+"'>RESETEO</a></p>";
+    	var subject = "Resetear contraseña";
 
-	}else if(request.active=="false"){
-		console.log("active");
-	}else 
-	{ // token vacio mail de confirmación de cambio de pass
-		
-		var html = "Hola " + request.username +" !! Tu contraseña ha sido reseteada"+
+    	break;
+
+    	case 2:
+
+    	var html = "Hola " + request.username +" !! Tu contraseña ha sido reseteada"+
 		"<a href='http://localhost:9000/#/login/'>Login</a>"; 
-  	}
+		var subject = "Contraseña reseteada";
+
+		break;
+
+		default:
+			console.log("error template email");
+
+}
+
+
+	
 
   var mailOptions = {
     from: "Dessi2015", 
 	to: request.mail, 
-	subject: "Resetea tu contraseña", 
+	subject: subject, 
 	html: html
   }
 				    
@@ -43,6 +64,9 @@ exports.check = function check(request, response){
 
   });	
 }
+
+
+
 
 
 

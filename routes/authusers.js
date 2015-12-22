@@ -30,7 +30,9 @@ router.route('/forget')
 
 router.route('/reset')
 	.post(session.reset);
-
+	
+router.route('/activate')
+	.post(session.activate);
 
 
 

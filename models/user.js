@@ -21,7 +21,8 @@ var userSchema = new Schema({
   },
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
                       privateChannels: [ { type: Schema.ObjectId, ref: 'Channel' }]
-                    }]
+                    }],
+  active  : { type: Boolean, default: false }
   
 });
 
@@ -180,6 +181,28 @@ userSchema.statics.updateuser = function updateuser (id, update, options) {
         }
     });
     return promise;
+};
+
+//ACTIVAR CUENTA
+userSchema.statics.activate = function activate(attributes){
+  var promise = new Hope.Promise();
+  var user = this;
+
+  user.findById(attributes.id,function(err,user){
+    if (err) return  promise.done(err,null);
+    else
+    {
+      user.active = true;
+      user.save(function (err){
+        if(err) return promise.done(error,null);
+        else
+        {
+          return promise.done(null,user);
+        }
+      });
+    }    
+  });
+  return promise;
 };
 
 /* Instance methods
