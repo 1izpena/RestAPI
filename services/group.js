@@ -4,46 +4,100 @@ var Channel = require('../models/channel');
 var mongoose = require('mongoose');
 var Hope  = require('hope');
 
-exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
+
+
+exports.getgrouplist = function getgrouplist(userid){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
-    User.findOne({ _id: userid}).populate('groups._group').exec(function (error, user) {
+    User.findOne({ _id: userid}).populate('groups._group','_id groupName').exec(function (error, user) {
         if (error){
             return promise.done(error,null);
         }
-        else if (user){
-            var listaGrupos = [];
-            var encontrado=false;
-            listaGrupos = user.groups;
-            for (i=0;i<listaGrupos.length;i++){
-                if (listaGrupos[i]._group.groupName === groupname){
-                    encontrado = true;
+        else {
+            if (user){
+                var vuelta = [];
+                for (i=0;i<user.groups.length;i++){
+                    var elto = {
+                        id        : user.groups[i]._group._id,
+                        groupName  : user.groups[i]._group.groupName
+                    };
+                    vuelta.push(elto);
                 }
-            }
-            if (encontrado === true){
-                console.log ("si encontrado");
+                promise.done(null,vuelta);
+            }else {
                 var err = {
                     code   : 403,
-                    message: 'user already has the group name'
+                    message: 'the user has no groups'
                 };
                 return promise.done(err, null);
-            }else {
-                return promise.done(null, user);
             }
         }
     });
     return promise;
 };
 
-exports.getgrouplist = function getgrouplist(userid){
+exports.getchatinfo = function getchatinfo(userid){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
-    User.findOne({ _id: userid}).populate('groups._group').exec(function (error, user) {
+    User.findOne({ _id: userid}).populate('groups._group','_id groupName').exec(function (error, user) {
         if (error){
             return promise.done(error,null);
         }
-        else if (user){
-            promise.done(null,user.groups);
+        else {
+            if (user){
+                var grupos = [];
+                for (i=0;i<user.groups.length;i++){
+                    var elto = {
+                        id        : user.groups[i]._group._id,
+                        groupName  : user.groups[i]._group.groupName
+                    };
+                    grupos.push(elto);
+                }
+                var vuelta = {
+                    id: user._id,
+                    username: user.username,
+                    groups: grupos
+                };
+                promise.done(null,vuelta);
+            }else {
+                var err = {
+                    code   : 403,
+                    message: 'User not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
+exports.getuserlist = function getuserlist(groupid){
+    var User = mongoose.model('User');
+    var Group = mongoose.model('Group');
+    var promise = new Hope.Promise();
+    Group.findOne({_id: groupid}).populate('users').exec(function (error, group) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else{
+            if (group){
+                var vuelta = [];
+                for (i=0;i<group.users.length;i++){
+                    var elto = {
+                        id        : group.users[i]._id,
+                        username  : group.users[i].username,
+                        mail      :group.users[i].mail
+                    };
+                    vuelta.push(elto);
+                }
+                promise.done(null,vuelta);
+            } else {
+                var err = {
+                    code   : 403,
+                    message: 'group not found'
+                };
+                return promise.done(err, null);
+            }
         }
     });
     return promise;
@@ -56,29 +110,45 @@ exports.getinfo = function getinfo(groupid){
         if (error){
             return promise.done(error,null);
         }
-        else if (group){
-            promise.done(null, group.parse());
+        else {
+            if (group){
+                promise.done(null, group.parse());
+            }else {
+                var err = {
+                    code   : 403,
+                    message: 'group not found'
+                };
+                return promise.done(err, null);
+            }
         }
     });
     return promise;
 };
 
-exports.obtaingroupid = function obtaingroupid(userid,groupname){
+exports.createnewgroup = function createnewgroup(ats,userid){
     var promise = new Hope.Promise();
-    var User = mongoose.model('User');
-    User.findOne({ _id: userid}).populate('groups._group').exec(function (error, user) {
+    var Group = mongoose.model('Group');
+    Group.creategroup(ats,userid).then(function creategroup (error, result){
         if (error){
-            return promise.done(error,null);
-        }
-        else if (user){
-            var listaGrupos = [];
-            listaGrupos = user.groups;
-            for (i=0;i<listaGrupos.length;i++){
-                if (listaGrupos[i]._group.groupName === groupname){
-                    var vuelta = listaGrupos[i]._group._id;
-                    promise.done(null, vuelta);
+            return promise.done(error, null);
+        }else {
+            var groupid = result._id;
+            var ats = {channelName:"GENERAL",channelType:"PUBLIC"};
+            Channel.createchannel (ats,userid,groupid).then(function createchannel (error, result){
+                if (error){
+                    return promise.done(error, null);
+                } else {
+                    var limit = 1;
+                    var query = {"_id":groupid};
+                    Group.search(query, limit).then(function search (error, group){
+                        if(error){
+                            return promise.done(error, null);
+                        }else{
+                            return promise.done(null, group);
+                        }
+                    });
                 }
-            }
+            });
         }
     });
     return promise;

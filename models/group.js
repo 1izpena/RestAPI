@@ -6,7 +6,8 @@ var Schema = mongoose.Schema;
 var groupSchema   = new Schema({
     groupName: { type: String, required: true },
     _admin: { type: Schema.ObjectId, ref: 'User' },
-    channels:  [ { type: Schema.ObjectId, ref: 'Channel' }]
+    channels:  [ { type: Schema.ObjectId, ref: 'Channel' }],
+    users:  [ { type: Schema.ObjectId, ref: 'User' }]
 });
 
 /* static methods */
@@ -82,7 +83,8 @@ groupSchema.methods.parse = function parse () {
         id:        group._id,
         groupName: group.groupName,
         admin:     group._admin,
-        channels:  group.channels
+        channels:  group.channels,
+        users:     group.users
     };
 };
 
