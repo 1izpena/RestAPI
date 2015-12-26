@@ -3,7 +3,8 @@ var Group = require('../models/group');
 var Channel = require('../models/channel');
 var Hope  = require('hope');
 var mongoose = require('mongoose');
-
+var chatErrors  = require('../helpers/chatErrorsHandler');
+var channelservice  = require('../services/channel');
 
 exports.updateuserchannelprivatelist = function updateuserchannelprivatelist(userid,groupid,channelid){
     var promise = new Hope.Promise();
@@ -14,7 +15,7 @@ exports.updateuserchannelprivatelist = function updateuserchannelprivatelist(use
         else if (user){
             var listaGrupos = user.groups;
             for (i=0;i<listaGrupos.length;i++){
-                if (groupid.equals(listaGrupos[i]._group._id)){
+                if (groupid == listaGrupos[i]._group._id){
                     listaGrupos[i].privateChannels.push(channelid);
                 }
             }
@@ -32,65 +33,34 @@ exports.updateuserchannelprivatelist = function updateuserchannelprivatelist(use
     return promise;
 };
 
-exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,channelname,channeltype){
+exports.createnewchannel = function createnewchannel(ats,userid,groupid,channelName,channelType){
+    var promise = new Hope.Promise();
+    var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
-    var Channel = mongoose.model('Channel');
-    var promise = new Hope.Promise();
-    if (channeltype == "PUBLIC"){
-        console.log("El canal es publico");
-        Group.findOne({ _id: groupid}).populate('channels').exec(function (error, group) {
-            if (error){
-                return promise.done(error,null);
-            }
-            else if (group){
-                var encontrado = false;
-                var canales = group.channels;
-                for (i=0;i<group.channels.length;i++){
-                    if (channelname === canales[i].channelName){
-                        encontrado = true;
-                    }
-                }
-                if (encontrado === true){
-                    console.log ("si encontrado");
-                    var err = {
-                        code   : 403,
-                        message: 'the group already has a public channel with that name'
-                    };
-                    return promise.done(err, null);
-                }else {
-                    return promise.done(null, group);
-                }
-            }
-        });
-    }if (channeltype == "PRIVATE"){
-        console.log("El canal es privado");
-        Group.findOne({ _id: groupid}).populate('channels').exec(function (error, group) {
-            if (error){
-                return promise.done(error,null);
-            }
-            else if (group){
-                var encontrado = false;
-                var canales = group.channels;
-                for (i=0;i<group.channels.length;i++){
-                    if (channelname === canales[i].channelName){
-                        encontrado = true;
-                    }
-                }
-                if (encontrado === true){
-                    console.log ("si encontrado");
-                    var err = {
-                        code   : 403,
-                        message: 'the group already has a private channel with that name'
-                    };
-                    return promise.done(err, null);
-                }else {
-                    return promise.done(null, group);
-                }
-            }
-        });
-    }
 
+    chatErrors.chechchannelnameunique(userid,groupid,channelName,channelType).then(function (error,result){
+        if (error){
+            return promise.done(error,null);
+        }else {
+            Channel.createchannel (ats,userid,groupid).then(function createchannel (error, result){
+                if (error){
+                    return promise.done(error,null);
+                } else {
+                    var channelid = result._id;
+                    var channel = result;
+                    if (channelType == "PRIVATE"){
+                        channelservice.updateuserchannelprivatelist(userid,groupid, result._id).then(function(error,result){
+                            if (error){
+                                return promise.done(error,null);
+                            }
+                        });
+                    }
+                    return promise.done(null,channel);
+                }
+            });
+        }
+    });
     return promise;
 };
 

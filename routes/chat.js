@@ -11,7 +11,7 @@ router.use(function(req, res, next) {
 });
 
 /* GET Devuelve lista de grupos del usuario */
-router.route('/').get(group.getusergrouplist);
+router.route('/').get(group.getuserchatinfo);
 
 /* GET Devuelve lista de grupos del usuario */
 router.route('/groups').get(group.getusergrouplist);
@@ -20,12 +20,12 @@ router.route('/groups').get(group.getusergrouplist);
 router.route('/groups').post(group.newgroup);
 
 /* GET Devuelve la información del grupo seleccionado */
-router.route('/groups/:groupname').get(group.getgroupinfo);
+router.route('/groups/:groupid').get(group.getgroupinfo);
 
 /* POST Crea y guarda un nuevo canal, dentro del grupo con el groupid, actualiza referencias en grupo y usuario */
-router.route('/groups/:groupname/channels').post(channel.newchannel);
+router.route('/groups/:groupid/channels').post(channel.newchannel);
 
 /* GET Devuelve la lista de usuarios del grupo */
-//router.route('/groups/:groupname/users').get(group.getgroupuserlist);
+router.route('/groups/:groupid/users').get(group.getgroupuserlist);
 
 module.exports = router;
