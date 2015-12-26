@@ -6,7 +6,7 @@ var channel = require('../controllers/channel');
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
 // Aqui podemos poner lo que queramos para tratar las rutas inicialmente
-    console.log('accediendo a la ruta /api/v1/auth'+req.path);
+    console.log('accediendo a la ruta /api/v1/users/:username/chat'+req.path);
     next(); // Pasa a la siguiente ruta
 });
 
