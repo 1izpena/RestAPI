@@ -80,12 +80,21 @@ var users = require('./routes/users');
 var authusers = require('./routes/authusers');
 //enrutador de chat
 var chat = require('./routes/chat');
+//enrutador para egstion de ficheros subidos a s3
+var file = require('./routes/file');
 
 /******* RUTAS DEL API *******/
+// Los parametros no llegan al router. Los metemos en el body
+app.param('userid', function (req, res, next, param) {
+  req.userid = param;
+    next();
+});
 
 app.use('/api/v1/users', users);
 app.use('/api/v1/auth', authusers);
-app.use('/api/v1/users/:username/chat', chat);
+app.use('/api/v1/users/:userid/chat', chat);
+app.use('/api/v1/file', file);
+app.use('/api/v1/users', users);
 
 // Si no encuentra la ruta, envia un 404
 app.use(function(req, res, next) {
@@ -101,6 +110,8 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
     app.use(function(err, req, res, next) {
+        console.error(err.stack);
+
         res.status(err.status || 500);
         res.render('error', {
         message: err.message,

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var group = require('../controllers/group');
 var channel = require('../controllers/channel');
+var message = require('../controllers/message');
 
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
@@ -27,5 +28,8 @@ router.route('/groups/:groupid/channels').post(channel.newchannel);
 
 /* GET Devuelve la lista de usuarios del grupo */
 router.route('/groups/:groupid/users').get(group.getgroupuserlist);
+
+
+router.route('/channels/:channelid/messages').post(message.newmessage);
 
 module.exports = router;
