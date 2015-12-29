@@ -94,14 +94,21 @@ userSchema.statics.login = function login (attributes) {
     mail: attributes.mail
   }, function(error, user) {
     
-     if (user && bcrypt.compareSync(attributes.password, user.password)) {
+     if (user && bcrypt.compareSync(attributes.password, user.password) && (user.active===true)) {
       return promise.done(null, user);
 
     } else {
+        if (user && bcrypt.compareSync(attributes.password, user.password) && (user.active===false)) {
+        error = {
+        code: 401,
+        message: "Must activate account.Check your email.",
+        user: user
+      };}
+      else{
       error = {
         code: 403,
         message: "Incorrect credentials."
-      };
+      };}
       return promise.done(error, null);
     }
   });

@@ -45,7 +45,23 @@ exports.login = function login (request, response) {
 	User.login(request.body).then(function login (error, result) {
 
 	  if (error) {
-	     response.status(error.code).json({message: error.message});
+       //mail Activacion     
+      if (error.code==401){
+      var user = error.user;
+      var token = Token(user);
+      user.token = token;
+      user.action=0;
+
+      mail.check(user,function(res){
+      if(res.message=="ok"){   
+      response.status(error.code).json({message: error.message, token: token}); 
+       }else{
+      console.log("fallo envio mail activacion a " + user.mail);
+       }
+      });
+       }else{
+       response.status(error.code).json({message: error.message}); 
+        }
 	  } else {
 	      var token = Token(result);
 	      //request.session.user = token;
@@ -117,7 +133,6 @@ exports.activate = function activate(request, response){
 
  Auth(request, response).then(function(error, result) {
     if (error) {
-  /* nunca va a entrar */
       response.status(error.code).json({message: error.message});
     } else 
     {

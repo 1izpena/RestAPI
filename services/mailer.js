@@ -57,7 +57,7 @@ switch(request.action){
 				    
   smtpTransport.sendMail(mailOptions, function(error, result){
     if(error){
-    	 response({message:"error"});    	
+    response({message:"error"});    	
 	}else{
 	 	response({message:"ok"});
 	}
