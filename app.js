@@ -84,15 +84,9 @@ var chat = require('./routes/chat');
 var file = require('./routes/file');
 
 /******* RUTAS DEL API *******/
-// Los parametros no llegan al router. Los metemos en el body
-app.param('userid', function (req, res, next, param) {
-  req.userid = param;
-    next();
-});
-
 app.use('/api/v1/users', users);
 app.use('/api/v1/auth', authusers);
-app.use('/api/v1/users/:userid/chat', chat);
+app.use('/api/v1/users/:username/chat', chat);
 app.use('/api/v1/file', file);
 app.use('/api/v1/users', users);
 
