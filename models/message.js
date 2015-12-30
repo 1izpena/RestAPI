@@ -41,54 +41,43 @@ messageSchema.statics.newMessage = function (data) {
     var promise = new Hope.Promise();
 
     Channel.search({_id: data.channelid}, limit = 1).then(function(error, channel) {
-        if (error) {
-            return promise.done(error, null);
-        }
 
-        if (channel === null) {
+        if (error || (channel === null)) {
             error = { code: 400, message: 'Channel not found.' };
             return promise.done(error, null);
         }
 
-        User.search({id: data.userid}, limit = 1).then(function(error, user) {
+        var Message = mongoose.model('Message', messageSchema);
+        data._channel = data.channelid;
+        data._user = data.userid;
+        data.datetime = new Date();
 
-            if (error) {
+        if (data.messageType === 'FILE') {
+            data.content = { path: data.filename}
+        }
+        else if (data.messageType === 'TEXT') {
+            data.content = { text: data.text}
+        }
+
+        Message = new Message(data);
+        Message.save(function (error, message) {
+            if(error){
+                var messageError = '';
+                for (err in error.errors) {
+                    if (messageError !== '')
+                        messageError += '.';
+                    messageError += error.errors[err].message;
+                }
+
+                error = { code: 400, message: messageError };
                 return promise.done(error, null);
             }
-            if (user === null) {
-                error = { code: 400, message: 'User not found.' };
-                return promise.done(error, null);
+            else {
+                return promise.done(error, message);
             }
-
-            var Message = mongoose.model('Message', messageSchema);
-            data._channel = channel.id;
-            data._user = user.id;
-            data.datetime = new Date();
-
-            if (data.messageType === 'FILE') {
-                data.content = { path: data.filename}
-            }
-
-            Message = new Message(data);
-            Message.save(function (error, message) {
-                if(error){
-                    var messageError = '';
-                    for (err in error.errors) {
-                        if (messageError !== '')
-                            messageError += '.';
-                        messageError += error.errors[err].message;
-                    }
-
-                    error = { code: 400, message: messageError };
-                    return promise.done(error, null);
-                }
-                else {
-                    return promise.done(error, message);
-                }
-            });
-
-
         });
+
+
 
     });
     return promise;

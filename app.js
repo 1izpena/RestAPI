@@ -60,8 +60,8 @@ app.use(function(req, res, next) {
   
 
     res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token")
-   
+    res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token");
+
    /* res.header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
     res.header('Access-Control-Allow-Headers: Content-Type, x-xsrf-token');
     res.header('Access-Control-Allow-Headers: Content-Type, x-access-token');*/

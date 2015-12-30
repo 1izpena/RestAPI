@@ -20,10 +20,6 @@ exports.getSignedUrl = function getSignedUrl (request, response) {
         ACL: 'public-read'
     };
 
-    console.log(s3_params);
-
-    console.log('Get signedUrl for '+ request.body.filename);
-
     var url = s3.getSignedUrl('putObject', s3_params);
 
     response.json({url: url});
