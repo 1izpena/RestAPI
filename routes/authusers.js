@@ -22,8 +22,6 @@ router.route('/signup')
 router.route('/login')
     .post(session.login);
 
-router.route('/profile')
-    .post(session.profile);
 
 router.route('/forget')
     .post(session.forget);

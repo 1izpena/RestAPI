@@ -9,17 +9,14 @@ router.use(function(req, res, next) {
     next(); // Pasa a la siguiente ruta
 });
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-     res.json({ message: 'Accediendo a los usuarios del sistema' });
-});
 
 
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-     res.json({ message: 'Accediendo a los usuarios del sistema' });
-});
+
+router.route('/')
+    .get(session.userlist);
+
 
 /* GET selected user's public information */
 router.route('/:userid')

@@ -119,7 +119,7 @@ userSchema.statics.login = function login (attributes) {
 /* BUSCAR */
 userSchema.statics.search = function search (query, limit) {
   var promise = new Hope.Promise();
-
+  var value2 = [];
   this.find(query).limit(limit).exec(function(error, value) {
     if (limit === 1 && !error) {
       if (value.length === 0) {
@@ -129,7 +129,19 @@ userSchema.statics.search = function search (query, limit) {
         };
       }
       value = value[0];
-    }
+
+    } else {
+
+	value.forEach(function(user){
+		
+		user = user.parse();
+		value2.push(user);
+
+	})
+     value= value2;
+   } /* end else:: want multiple values & parse this values */
+
+
 
     return promise.done(error, value);
   });

@@ -78,24 +78,33 @@ exports.login = function login (request, response) {
 
 
 
+exports.userlist = function userlist (request, response) {
 
-exports.profile = function profile (request, response) {
   Auth(request, response).then(function(error, result) {
-    if (error) {
-	/* nunca va a entrar */
+    if (error) {	
       response.status(error.code).json({message: error.message});
+
     } else {
-	/* devuelve el usuario entero */
-      response.json(result.parse());
+      
+          var filter = {};
+	  User.search(filter, 5).then(function(error, user) {
+			if (user === null) {
+			    response.status(400).json({message: 'User not found.'});
+			  
+			} else { 
+			
+			    response.json(user);
+			}
+	  })
     }
   })
 };
 
 
-/* coger de la url el id*/
+
+
 /* 1. Mira si esta logeado */
 /* 2. Coge el id de la url y devuelve el user */
-/* 3. Si es private mira que coincida token y el username */
 exports.publicprofile = function profile (request, response) {
 
   Auth(request, response).then(function(error, result) {
@@ -118,7 +127,10 @@ exports.publicprofile = function profile (request, response) {
 };
 
 //user 1: 5665ab58973e2bde19be5269
-// user 2: 5665b8f739c92cae1a6d3b7b
+//user 2: 5665b8f739c92cae1a6d3b7b
+/* 1. Mira si esta logeado */
+/* 2. Coge el id de la url y devuelve el user */
+/* 3. Si es private mira que coincida token y el userid de la url */
 exports.privateprofile = function profile (request, response) {
 
   Auth(request, response).then(function(error, result) {
