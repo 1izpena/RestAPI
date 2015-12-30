@@ -117,10 +117,24 @@ userSchema.statics.login = function login (attributes) {
 
 
 /* BUSCAR */
-userSchema.statics.search = function search (query, limit) {
+userSchema.statics.search = function search (query, limit, page) {
+
+  /* skip is number of results that not show */
+  if(typeof page === "undefined") {
+    page = 0;
+  }
+
+  if(typeof limit === "undefined") {
+    limit = 0;
+  }
+
+  var skip = (page * limit);
+
+
   var promise = new Hope.Promise();
   var value2 = [];
-  this.find(query).limit(limit).exec(function(error, value) {
+  console.log
+  this.find(query).skip(skip).limit(limit).exec(function(error, value) {
     if (limit === 1 && !error) {
       if (value.length === 0) {
         error = {

@@ -77,7 +77,7 @@ exports.login = function login (request, response) {
 };
 
 
-
+/* http://localhost:3000/api/v1/users?limit=6&page=0 */
 exports.userlist = function userlist (request, response) {
 
   Auth(request, response).then(function(error, result) {
@@ -85,9 +85,13 @@ exports.userlist = function userlist (request, response) {
       response.status(error.code).json({message: error.message});
 
     } else {
-      
+	/* comprovaciones de si es nulo en la otra parte */
+          var limit = request.param('limit');
+          var page = request.param('page');
+          //var offset = (page * limit);
+	  	  
           var filter = {};
-	  User.search(filter, 5).then(function(error, user) {
+	  User.search(filter, limit, page).then(function(error, user) {
 			if (user === null) {
 			    response.status(400).json({message: 'User not found.'});
 			  

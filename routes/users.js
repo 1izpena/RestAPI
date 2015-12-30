@@ -13,6 +13,7 @@ router.use(function(req, res, next) {
 
 
 /* GET users listing. */
+/* http://localhost:3000/api/v1/users?limit=6&page=2 */
 
 router.route('/')
     .get(session.userlist);
