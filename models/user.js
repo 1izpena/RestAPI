@@ -136,6 +136,11 @@ userSchema.statics.search = function search (query, limit) {
   return promise;
 };
 
+
+
+
+
+
 /*CAMBIAR CONTRASEÑA*/
 userSchema.statics.reset = function reset(attributes){
   var promise = new Hope.Promise();
