@@ -94,14 +94,21 @@ userSchema.statics.login = function login (attributes) {
     mail: attributes.mail
   }, function(error, user) {
     
-     if (user && bcrypt.compareSync(attributes.password, user.password)) {
+     if (user && bcrypt.compareSync(attributes.password, user.password) && (user.active===true)) {
       return promise.done(null, user);
 
     } else {
+        if (user && bcrypt.compareSync(attributes.password, user.password) && (user.active===false)) {
+        error = {
+        code: 401,
+        message: "Must activate account.Check your email.",
+        user: user
+      };}
+      else{
       error = {
         code: 403,
         message: "Incorrect credentials."
-      };
+      };}
       return promise.done(error, null);
     }
   });
@@ -110,10 +117,24 @@ userSchema.statics.login = function login (attributes) {
 
 
 /* BUSCAR */
-userSchema.statics.search = function search (query, limit) {
-  var promise = new Hope.Promise();
+userSchema.statics.search = function search (query, limit, page) {
 
-  this.find(query).limit(limit).exec(function(error, value) {
+  /* skip is number of results that not show */
+  if(typeof page === "undefined") {
+    page = 0;
+  }
+
+  if(typeof limit === "undefined") {
+    limit = 0;
+  }
+
+  var skip = (page * limit);
+
+
+  var promise = new Hope.Promise();
+  var value2 = [];
+  
+  this.find(query).skip(skip).limit(limit).exec(function(error, value) {
     if (limit === 1 && !error) {
       if (value.length === 0) {
         error = {
@@ -122,12 +143,29 @@ userSchema.statics.search = function search (query, limit) {
         };
       }
       value = value[0];
-    }
+
+    } else {
+
+	value.forEach(function(user){
+		
+		user = user.parse();
+		value2.push(user);
+
+	})
+     value= value2;
+   } /* end else:: want multiple values & parse this values */
+
+
 
     return promise.done(error, value);
   });
   return promise;
 };
+
+
+
+
+
 
 /*CAMBIAR CONTRASEÑA*/
 userSchema.statics.reset = function reset(attributes){
