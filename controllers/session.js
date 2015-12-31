@@ -85,10 +85,10 @@ exports.userlist = function userlist (request, response) {
       response.status(error.code).json({message: error.message});
 
     } else {
-	/* comprovaciones de si es nulo en la otra parte */
-          var limit = request.param('limit');
-          var page = request.param('page');
-          //var offset = (page * limit);
+
+          var limit = request.query.limit;
+          var page = request.query.page;
+          
 	  	  
           var filter = {};
 	  User.search(filter, limit, page).then(function(error, user) {

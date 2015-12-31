@@ -31,24 +31,31 @@ module.exports = function(request, response) {
 
 	}
 	else {
+
+		/*
+			1campo
+			message: {
+			name: "JsonWebTokenError"
+			message: "invalid token" }
+
+			2-3campo
+			message: {
+			name: "JsonWebTokenError"
+			message: "invalid signature" }
+		*/
 		response.status(401).json({message:error});
 
 	}
   });
 
-/*
-1campo
-message: {
-name: "JsonWebTokenError"
-message: "invalid token"
-
-2-3campo
-name: "JsonWebTokenError"
-message: "invalid signature"
-*/
-
     		
+  } else {
+	response.status(403).json({message: 'Access control token header required. ' });
+
   }
+
+
+
   return promise;
 };
 
