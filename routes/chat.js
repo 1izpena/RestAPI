@@ -7,7 +7,7 @@ var message = require('../controllers/message');
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
 // Aqui podemos poner lo que queramos para tratar las rutas inicialmente
-    console.log('accediendo a la ruta /api/v1/users/:username/chat'+req.path);
+    console.log('accediendo a la ruta /api/v1/users/:userid/chat'+req.path);
     next(); // Pasa a la siguiente ruta
 });
 

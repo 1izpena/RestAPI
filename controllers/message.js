@@ -14,19 +14,23 @@ exports.newmessage = function newmessage (request, response) {
         }
 
         var data = request.body;
-        data.userid=result._id;
-        data.channelid = request.params.channelid;
-        Message.newMessage(data).then(function newmessage (error, result) {
-                if (error) {
-                    response.status(error.code).json({message: error.message});
+        if (data.userid == result._id) {
+            data.channelid = request.params.channelid;
+            Message.newMessage(data).then(function newmessage(error, result) {
+                    if (error) {
+                        response.status(error.code).json({message: error.message});
+                    }
+                    else {
+                        // Notificamos al canal que hay nuevo mensaje
+                        socketio.getIO().sockets.to(data.channelid).emit('newMessage', result);
+                        response.json(result);
+                    }
                 }
-                else {
-                    // Notificamos al canal que hay nuevo mensaje
-                    socketio.getIO().sockets.to(data.channelid).emit('newMessage', result);
-                    response.json(result);
-                }
-            }
-        );
+            );
+        }
+        else {
+            response.status(401).json({message: 'Not authorized to post messages from another user'});
+        }
     });
 };
 
