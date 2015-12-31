@@ -31,6 +31,18 @@ module.exports = function(request, response) {
 
 	}
 	else {
+
+		/*
+			1campo
+			message: {
+			name: "JsonWebTokenError"
+			message: "invalid token" }
+
+			2-3campo
+			message: {
+			name: "JsonWebTokenError"
+			message: "invalid signature" }
+		*/
 		response.status(401).json({message:error});
 
 	}
