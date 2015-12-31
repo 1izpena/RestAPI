@@ -22,7 +22,6 @@ router.route('/signup')
 router.route('/login')
     .post(session.login);
 
-
 router.route('/forget')
     .post(session.forget);
 
@@ -31,6 +30,9 @@ router.route('/reset')
 	
 router.route('/activate')
 	.post(session.activate);
+
+router.route('/remove')
+    .post(session.remove);
 
 
 

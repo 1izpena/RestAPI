@@ -219,3 +219,17 @@ exports.activate = function activate(request, response){
 
     }});
 };
+
+//ELIMINAR CUENTA
+exports.remove = function remove(request, response){
+
+ Auth(request, response).then(function(error, result) {
+    if (error) {
+      response.status(error.code).json({message: error.message});
+    } else 
+    {
+      User.remove(result);
+      response.json({message:"Cuenta eliminada"});
+
+    }});
+};

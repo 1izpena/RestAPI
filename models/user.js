@@ -243,6 +243,28 @@ userSchema.statics.activate = function activate(attributes){
   return promise;
 };
 
+
+//ELIMINAR CUENTA
+userSchema.statics.remove = function remove(attributes){
+  var promise = new Hope.Promise();
+  var user = this;
+  user.findById(attributes.id,function(err,user){
+    if (err) return  promise.done(err,null);
+    else
+    {     
+
+      user.remove(function (err){
+        if(err) return promise.done(error,null);
+        else
+        {
+          return promise.done(null,user);
+        }
+      });
+    }    
+  });
+  return promise;
+};
+
 /* Instance methods
    para que no te muestre la contraseña y el id no sea _id
  */
