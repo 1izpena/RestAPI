@@ -82,6 +82,8 @@ var authusers = require('./routes/authusers');
 var chat = require('./routes/chat');
 //enrutador para egstion de ficheros subidos a s3
 var file = require('./routes/file');
+//enrutador de foro
+var forum = require('./routes/foro.js')
 
 /******* RUTAS DEL API *******/
 app.use('/api/v1/users', users);
@@ -89,6 +91,7 @@ app.use('/api/v1/auth', authusers);
 app.use('/api/v1/users/:userid/chat', chat);
 app.use('/api/v1/file', file);
 app.use('/api/v1/users', users);
+app.use('/api/v1/forum', forum);
 
 
 // Los parametros no llegan al router. Los metemos en el body
