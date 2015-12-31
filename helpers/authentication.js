@@ -31,10 +31,9 @@ module.exports = function(request, response) {
 
 	}
 	else {
-		response.status(403).json({message: 'Access control token header required. ' });
+		response.status(401).json({message:error});
 
 	}
-
   });
 
     		
