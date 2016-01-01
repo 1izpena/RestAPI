@@ -103,13 +103,13 @@ channelSchema.statics.updatechannel = function updatechannel (id, update, option
 };
 
 /* ELIMINAR */
-channelSchema.statics.deletechannel = function deletechannel (id, options) {
+channelSchema.statics.deletechannel = function deletechannel (id) {
     var promise = new Hope.Promise();
     this.remove(id,function(error) {
         if (error) {
             return promise.done(error, null);
         }else {
-            return promise.done(error, {message: 'channel deleted successfully'});
+            return promise.done(null, {message: 'channel deleted successfully'});
         }
     });
     return promise;

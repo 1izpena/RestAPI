@@ -255,6 +255,34 @@ exports.addusertogroup = function addusertogroup (request, response){
     });
 };
 
+exports.updategroupinfo = function updategroupinfo (request, response){
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        } else {
+            if (request.params.userid == result._id){
+                chatErrors.checkisgroupadmin(request.params.groupid,request.params.userid).then(function (error,result){
+                    if(error){
+                        response.status(error.code).json({message: error.message});
+                    }else{
+                        groupservice.updategroupname(request.params.groupid,request.body.groupName).then(function (error,result){
+                            if(error){
+                                response.status(error.code).json({message: error.message});
+                            }else{
+                                response.json(result);
+                            }
+                        });
+                    }
+                });
+
+            } else {
+                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+
+            }
+        }
+    });
+};
+
 exports.newgroup = function newgroup (request, response){
     Auth(request, response).then(function(error, result) {
         if (error) {

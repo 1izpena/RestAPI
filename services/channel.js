@@ -276,6 +276,63 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
     return promise;
 };
 
+exports.updatechannelname = function updatechannelname(channelid,channelName){
+    var promise = new Hope.Promise();
+    var Channel = mongoose.model('Channel');
+    var options = {new: true};
+    var query = {"channelName": channelName};
+    Channel.updatechannel (channelid,query,options).then(function(error,channel){
+        if (error){
+            return promise.done(error,null);
+        }
+        else{
+            return promise.done(null,channel.parse());
+        }
+    });
+    return promise;
+};
+
+exports.getinfo = function getinfo(channelid){
+    var User = mongoose.model('User');
+    var Channel = mongoose.model('Channel');
+    var promise = new Hope.Promise();
+    Channel.findOne({_id: channelid}).populate('users').exec(function (error, channel) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else{
+            if (channel){
+                var usuarios = [];
+                for (i=0;i<channel.users.length;i++){
+                    var elto = {
+                        id        : channel.users[i]._id,
+                        username  : channel.users[i].username,
+                        mail      :channel.users[i].mail
+                    };
+                    usuarios.push(elto);
+                }
+                var vuelta = {
+                    id: channel._id,
+                    channelName: channel.channelName,
+                    channelType: channel.channelType,
+                    users: usuarios
+                };
+                promise.done(null,vuelta);
+            } else {
+                var err = {
+                    code   : 403,
+                    message: 'group not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
+
+
+
 
 
 

@@ -318,7 +318,6 @@ exports.subscribegroup = function subscribegroup(groupid,user){
             return promise.done(error,null);
         }
         else{
-            var grupo = group;
             var privatechannels = [];
             var dat = {
                 _group: group._id,
@@ -435,7 +434,11 @@ exports.createnewgroup = function createnewgroup(ats,userid){
                         if(error){
                             return promise.done(error, null);
                         }else{
-                            return promise.done(null, group);
+                            var vuelta = {
+                                id: group._id,
+                                groupName: group.groupName
+                            };
+                            return promise.done(null,vuelta);
                         }
                     });
                 }
@@ -445,7 +448,21 @@ exports.createnewgroup = function createnewgroup(ats,userid){
     return promise;
 };
 
-
+exports.updategroupname = function updategroupname(groupid,groupName){
+    var promise = new Hope.Promise();
+    var Group = mongoose.model('Group');
+    var options = {new: true};
+    var query = {"groupName": groupName};
+    Group.updategroup (groupid,query,options).then (function (error,group){
+        if (error){
+            return promise.done(error,null);
+        }
+        else{
+            return promise.done(null,group.parse());
+        }
+    });
+    return promise;
+};
 
 
 

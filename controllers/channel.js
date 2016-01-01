@@ -40,7 +40,6 @@ exports.getchanneluserlist = function getchanneluserlist (request, response) {
                 });
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-
             }
         }
     });
@@ -61,7 +60,6 @@ exports.getgroupchannellist = function getgroupchannellist (request, response) {
                 });
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-
             }
         }
     });
@@ -80,10 +78,8 @@ exports.addusertochannel = function addusertochannel (request, response){
                         response.json(result);
                     }
                 });
-
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-
             }
         }
     });
@@ -104,7 +100,6 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                 });
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-
             }
         }
     });
@@ -125,8 +120,48 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                 });
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-
             }
         }
     });
 };
+
+exports.updatechannelinfo = function updatechannelinfo (request, response){
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        } else {
+            if (request.params.userid == result._id){
+                channelservice.updatechannelname(request.params.channelid,request.body.channelName).then(function (error,result){
+                    if(error){
+                        response.status(error.code).json({message: error.message});
+                    }else{
+                        response.json(result);
+                    }
+                });
+            } else {
+                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+            }
+        }
+    });
+};
+
+exports.getchannelinfo = function getchannelinfo (request, response){
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        } else {
+            if (request.params.userid == result._id){
+                channelservice.getinfo(request.params.channelid,request.body.channelName).then(function (error,result){
+                    if(error){
+                        response.status(error.code).json({message: error.message});
+                    }else{
+                        response.json(result);
+                    }
+                });
+            } else {
+                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+            }
+        }
+    });
+};
+
