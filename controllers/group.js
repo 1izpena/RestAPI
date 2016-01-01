@@ -32,7 +32,7 @@ exports.getgroupinfo = function getgroupinfo (request, response) {
             response.status(error.code).json({message: error.message});
         } else {
             if ( request.body.userid == result._id){
-                groupservice.getinfo(request.params.groupid).then(function (error,result){
+                groupservice.getinfo(request.params.groupid,request.body.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{

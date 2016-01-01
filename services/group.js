@@ -39,13 +39,14 @@ exports.getgrouplist = function getgrouplist(userid){
 exports.getchatinfo = function getchatinfo(userid){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
-    User.findOne({ _id: userid}).populate('groups._group','_id groupName').exec(function (error, user) {
+    User.findOne({ _id: userid}).populate('groups._group invitations','_id groupName').exec(function (error, user) {
         if (error){
             return promise.done(error,null);
         }
         else {
             if (user){
                 var grupos = [];
+                var invitaciones = [];
                 for (i=0;i<user.groups.length;i++){
                     var elto = {
                         id        : user.groups[i]._group._id,
@@ -53,10 +54,18 @@ exports.getchatinfo = function getchatinfo(userid){
                     };
                     grupos.push(elto);
                 }
+                for (j=0;j<user.invitations.length;j++){
+                    var elto2 = {
+                        groupid        : user.invitations[j]._id,
+                        groupname  : user.invitations[j].groupName
+                    };
+                    invitaciones.push(elto2);
+                }
                 var vuelta = {
                     id: user._id,
                     username: user.username,
-                    groups: grupos
+                    groups: grupos,
+                    invitations: invitaciones
                 };
                 return promise.done(null,vuelta);
             }else {
@@ -133,16 +142,58 @@ exports.getinvitations = function getinvitations(userid){
     return promise;
 };
 
-exports.getinfo = function getinfo(groupid){
+exports.getinfo = function getinfo(groupid,userid){
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group');
-    Group.findOne({ _id: groupid}).populate('channels').exec(function (error, group) {
+    Group.findOne({ _id: groupid}).populate('channels users').exec(function (error, group) {
         if (error){
             return promise.done(error,null);
         }
         else {
             if (group){
-                promise.done(null, group.parse());
+                var publicos = [];
+                var privados = [];
+                var usuarios = [];
+                for (i=0;i<group.channels.length;i++){
+                    if (group.channels[i].channelType == "PUBLIC" ){
+                        var elto = {
+                            id        : group.channels[i]._id,
+                            channelName  : group.channels[i].channelName
+                        };
+                        publicos.push(elto);
+                    }else {
+                        var encontrado = false;
+                        var j = 0;
+                        while (encontrado == false && j<group.channels[i].users.length){
+                            if (userid == group.channels[i].users[j]){
+                                var elto2 = {
+                                    id        : group.channels[i]._id,
+                                    channelName  : group.channels[i].channelName
+                                };
+                                privados.push(elto2);
+                                encontrado = true;
+                            }
+                            j++;
+                        }
+                    }
+
+                }
+                for (k=0;k<group.users.length;k++){
+                    var elto = {
+                        id        : group.users[k]._id,
+                        username  : group.users[k].username,
+                        mail      :group.users[k].mail
+                    };
+                    usuarios.push(elto);
+                }
+                var vuelta = {
+                    id: group._id,
+                    groupName: group.groupName,
+                    users: usuarios,
+                    publicChannels: publicos,
+                    privateChannels: privados
+                };
+                promise.done(null, vuelta);
             }else {
                 var err = {
                     code   : 403,
@@ -247,7 +298,7 @@ exports.adduser = function adduser(groupid,userid){
                     return promise.done(error,null);
                 }
                 else{
-                    return promise.done(error, grupo);
+                    return promise.done(error, grupo.parse());
                 }
             });
         }
