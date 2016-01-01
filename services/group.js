@@ -64,6 +64,7 @@ exports.getchatinfo = function getchatinfo(userid){
                 var vuelta = {
                     id: user._id,
                     username: user.username,
+                    mail: user.mail,
                     groups: grupos,
                     invitations: invitaciones
                 };
