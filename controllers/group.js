@@ -11,7 +11,7 @@ exports.getusergrouplist = function getusergrouplist (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
+            if (request.params.userid == result._id){
                 groupservice.getgrouplist(result._id).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
@@ -31,8 +31,8 @@ exports.getgroupinfo = function getgroupinfo (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                groupservice.getinfo(request.params.groupid,request.body.userid).then(function (error,result){
+            if (request.params.userid == result._id){
+                groupservice.getinfo(request.params.groupid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
@@ -51,7 +51,7 @@ exports.getuserchatinfo = function getuserchatinfo (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
+            if (request.params.userid == result._id){
                 groupservice.getchatinfo(result._id).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
@@ -71,7 +71,7 @@ exports.getgroupuserlist = function getgroupuserlist (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
+            if (request.params.userid == result._id){
                 groupservice.getuserlist(request.params.groupid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
@@ -92,8 +92,8 @@ exports.getinvitationslist = function getinvitationslist (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                groupservice.getinvitations(request.body.userid).then(function (error,result){
+            if (request.params.userid == result._id){
+                groupservice.getinvitations(request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
@@ -113,12 +113,12 @@ exports.inviteusertogroup = function inviteusertogroup (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                chatErrors.checkisgroupadmin(request.params.groupid,request.body.userid).then(function (error,result){
+            if (request.params.userid == result._id){
+                chatErrors.checkisgroupadmin(request.params.groupid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
-                        groupservice.inviteuser(request.params.groupid,request.params.userid).then(function (error,result){
+                        groupservice.inviteuser(request.params.groupid,request.params.userid1).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
@@ -140,7 +140,7 @@ exports.regretinvitation = function regretinvitation (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
+            if (request.params.userid == result._id){
                 groupservice.deleteinvitation(request.params.groupid,result).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
@@ -161,7 +161,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
+            if (request.params.userid == result._id){
                 groupservice.subscribegroup(request.params.groupid,result).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
@@ -183,12 +183,12 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                chatErrors.checkisgroupadmin(request.params.groupid,request.body.userid).then(function (error,result){
+            if (request.params.userid == result._id){
+                chatErrors.checkisgroupadmin(request.params.groupid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
-                        groupservice.deleteuser(request.params.groupid,request.params.userid).then(function (error,result){
+                        groupservice.deleteuser(request.params.groupid,request.params.userid1).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
@@ -211,8 +211,8 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                groupservice.deleteuser(request.params.groupid,request.body.userid).then(function (error,result){
+            if (request.params.userid == result._id){
+                groupservice.deleteuser(request.params.groupid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
@@ -232,12 +232,12 @@ exports.addusertogroup = function addusertogroup (request, response){
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                chatErrors.checkisgroupadmin(request.params.groupid,request.body.userid).then(function (error,result){
+            if (request.params.userid == result._id){
+                chatErrors.checkisgroupadmin(request.params.groupid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
-                        groupservice.adduser(request.params.groupid,request.params.userid).then(function (error,result){
+                        groupservice.adduser(request.params.groupid,request.params.userid1).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
@@ -261,7 +261,7 @@ exports.newgroup = function newgroup (request, response){
             response.status(error.code).json({message: error.message});
         } else {
             var userid = result._id;
-            if ( request.body.userid == result._id){
+            if (request.params.userid == result._id){
                 chatErrors.checkgroupnameunique(result._id,request.body.groupName).then(function (error,result){
                     if (error){
                         response.status(error.code).json({message: error.message});

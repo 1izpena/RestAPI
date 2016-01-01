@@ -10,7 +10,7 @@ exports.newchannel = function newchannel (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
+            if (request.params.userid == result._id){
                 channelservice.createnewchannel(request.body,result._id,request.params.groupid,request.body.channelName,request.body.channelType).then(function (error,channel){
                     if (error){
                         response.status(error.code).json({message: error.message});
@@ -30,7 +30,7 @@ exports.getchanneluserlist = function getchanneluserlist (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
+            if (request.params.userid == result._id){
                 channelservice.getuserlist(request.params.channelid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
@@ -51,8 +51,8 @@ exports.getgroupchannellist = function getgroupchannellist (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                channelservice.getchannellist(request.params.groupid,request.body.userid).then(function (error,result){
+            if (request.params.userid == result._id){
+                channelservice.getchannellist(request.params.groupid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
@@ -72,8 +72,8 @@ exports.addusertochannel = function addusertochannel (request, response){
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                channelservice.adduser(request.params.groupid,request.params.userid,request.params.channelid).then(function (error,result){
+            if (request.params.userid == result._id){
+                channelservice.adduser(request.params.groupid,request.params.userid1,request.params.channelid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
@@ -94,8 +94,8 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                channelservice.deleteuser(request.params.groupid,request.params.userid,request.params.channelid).then(function (error,result){
+            if (request.params.userid == result._id){
+                channelservice.deleteuser(request.params.groupid,request.params.userid1,request.params.channelid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
@@ -115,8 +115,8 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
-            if ( request.body.userid == result._id){
-                channelservice.deleteuser(request.params.groupid,request.body.userid,request.params.channelid).then(function (error,result){
+            if (request.params.userid == result._id){
+                channelservice.deleteuser(request.params.groupid,request.params.userid,request.params.channelid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
