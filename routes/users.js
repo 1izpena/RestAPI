@@ -6,6 +6,7 @@ var session = require('../controllers/session');
 router.use(function(req, res, next) {
     // Aqui podemos poner lo que queramos para tratar las rutas inicialmente
     console.log('accediendo a la ruta /api/v1/users'+req.path);
+
     next(); // Pasa a la siguiente ruta
 });
 

@@ -22,7 +22,8 @@ var userSchema = new Schema({
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
                       privateChannels: [ { type: Schema.ObjectId, ref: 'Channel' }]
                     }],
-  active  : { type: Boolean, default: false }
+  active  : { type: Boolean, default: false },
+  invitations:  [ { type: Schema.ObjectId, ref: 'Group' }]
   
 });
 
@@ -151,7 +152,7 @@ userSchema.statics.search = function search (query, limit, page) {
 		user = user.parse();
 		value2.push(user);
 
-	})
+	});
      value= value2;
    } /* end else:: want multiple values & parse this values */
 
@@ -188,25 +189,6 @@ userSchema.statics.reset = function reset(attributes){
   return promise;
 };
 
-userSchema.statics.addgroup = function reset(attributes){
-  var promise = new Hope.Promise();
-  var user = this;
-  user.findById(attributes.id,function(err,user){
-    if (err) return  promise.done(err,null);
-    else
-    {
-      user.password = attributes.newPass;
-      user.save(function (err){
-        if(err) return promise.done(error,null);
-        else
-        {
-          return promise.done(null,user);
-        }
-      });
-    }
-  });
-  return promise;
-};
 
 /*ACTUALIZAR */
 userSchema.statics.updateuser = function updateuser (id, update, options) {
@@ -277,8 +259,6 @@ userSchema.methods.parse = function parse () {
     mail      : user.mail
   };
 };
-
-
 
 
 /* exportamos el schema con nombre User */

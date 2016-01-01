@@ -162,7 +162,7 @@ exports.privateprofile = function profile (request, response) {
     } /* else:: not error */
 
 
-  }) /* end Auth promise */
+  });/* end Auth promise */
 }; /* end privateprofile */
 
 

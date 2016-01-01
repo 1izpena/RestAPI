@@ -86,9 +86,10 @@ var file = require('./routes/file');
 /******* RUTAS DEL API *******/
 app.use('/api/v1/users', users);
 app.use('/api/v1/auth', authusers);
-app.use('/api/v1/users/:userid/chat', chat);
 app.use('/api/v1/file', file);
+app.use('/api/v1/users/:userid/chat', chat);
 app.use('/api/v1/users', users);
+
 
 
 // Los parametros no llegan al router. Los metemos en el body
@@ -96,6 +97,8 @@ app.param('userid', function (req, res, next, param) {
     req.body.userid = param;
     next();
 });
+
+
 
 // Si no encuentra la ruta, envia un 404
 app.use(function(req, res, next) {
