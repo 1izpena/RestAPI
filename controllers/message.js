@@ -15,19 +15,25 @@ exports.newmessage = function newmessage (request, response) {
 
         if (request.params.userid == result._id) {
             var data = request.body;
-            data.channelid = request.params.channelid;
-            data.userid = request.params.userid;
-            Message.newMessage(data).then(function newmessage(error, result) {
-                    if (error) {
-                        response.status(error.code).json({message: error.message});
+            var check = checkNewMessageInput(data);
+            if (!check.checked) {
+                response.status(check.errorcode).json({message: check.message});
+            }
+            else {
+                data.channelid = request.params.channelid;
+                data.userid = request.params.userid;
+                Message.newMessage(data).then(function newmessage(error, result) {
+                        if (error) {
+                            response.status(error.code).json({message: error.message});
+                        }
+                        else {
+                            // Notificamos al canal que hay nuevo mensaje
+                            socketio.getIO().sockets.to(data.channelid).emit('newMessage', result);
+                            response.json(result);
+                        }
                     }
-                    else {
-                        // Notificamos al canal que hay nuevo mensaje
-                        socketio.getIO().sockets.to(data.channelid).emit('newMessage', result);
-                        response.json(result);
-                    }
-                }
-            );
+                );
+            }
         }
         else {
             response.status(401).json({message: 'Not authorized to post messages from another user'});
@@ -45,8 +51,11 @@ exports.getmessages = function getmessages (request, response) {
 
         if (request.params.userid == result._id) {
             var data = request.body;
+
             data.channelid = request.params.channelid;
             data.userid = request.params.userid;
+            data.limit = request.query.limit;
+            data.page = request.query.page;
             Message.getMessages(data).then(function(error, result) {
                     if (error) {
                         response.status(error.code).json({message: error.message});
@@ -62,4 +71,48 @@ exports.getmessages = function getmessages (request, response) {
         }
     });
 };
+
+
+function checkNewMessageInput (data)
+{
+    var checked = true;
+    var errorcode=400;
+    var message="";
+    var fieldsReq = [];
+
+    if (!data.messageType) {
+        fieldsReq.push('messageType');
+    }
+    else {
+        if (data.messageType == 'TEXT') {
+            if (!data.text) {
+                fieldsReq.push('text');
+            }
+        }
+        if (data.messageType == 'FILE') {
+            if (!data.filename) {
+                fieldsReq.push('filename');
+            }
+        }
+    }
+
+    if (fieldsReq.length > 0) {
+        checked = false;
+        errorcode=400;
+        for(var i in fieldsReq) {
+            if (message !== "" ) {
+                message += ", ";
+            }
+            message += fieldsReq[i];
+        }
+        message += " required";
+    }
+
+    return {
+        'checked': checked,
+        'errorcode': errorcode,
+        'message': message
+    }
+
+}
 
