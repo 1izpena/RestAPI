@@ -11,7 +11,7 @@ exports.newchannel = function newchannel (request, response) {
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                channelservice.createnewchannel(request.body,result._id,request.params.groupid,request.body.channelName,request.body.channelType).then(function (error,channel){
+                channelservice.createnewchannel(result._id,request.params.groupid,request.body.channelName,request.body.channelType).then(function (error,channel){
                     if (error){
                         response.status(error.code).json({message: error.message});
                     }else {
@@ -151,7 +151,7 @@ exports.getchannelinfo = function getchannelinfo (request, response){
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                channelservice.getinfo(request.params.channelid,request.body.channelName).then(function (error,result){
+                channelservice.getinfo(request.params.channelid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{

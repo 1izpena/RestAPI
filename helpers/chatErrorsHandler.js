@@ -47,6 +47,7 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                 return promise.done(error,null);
             }
             else if (group){
+                var i=0;
                 var encontrado = false;
                 var canales = group.channels;
                 while (encontrado === false && i<canales.length){
@@ -74,6 +75,7 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                 return promise.done(error,null);
             }
             else if (group){
+                var i = 0;
                 var encontrado = false;
                 var canales = group.channels;
                 while (encontrado === false && i<canales.length){

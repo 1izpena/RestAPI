@@ -300,11 +300,11 @@ exports.newgroup = function newgroup (request, response){
                             _admin: result._id,
                             users: userslist
                         };
-                        groupservice.createnewgroup(ats,userid).then(function createnewgroup (error, group){
+                        groupservice.createnewgroup(ats,userid).then(function (error, group){
                             if (error){
                                 response.status(error.code).json({message: error.message});
                             }else {
-                                response.json(group.parse());
+                                response.json(group);
                             }
                         });
                     }

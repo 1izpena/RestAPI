@@ -102,6 +102,15 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid').put(channel.up
 /* GET devuelve la lista de usuarios del canal :channelid */
 router.route('/:userid/chat/channels/:channelid/users').get(channel.getchanneluserlist);
 
+/* GET devuelve la lista de usuarios del canal :channelid */
+router.route('/:userid/chat/channels/:channelid').get(channel.getchannelinfo);
+
+/* PUT El usuario logeado, modifica el nombre del canal */
+router.route('/:userid/chat/channels/:channelid').put(channel.updatechannelinfo);
+
+/* DELETE el usuario logeado se va del canal */
+//router.route('/:userid/chat/channels/:channelid/unsuscribe').delete(channel.unsuscribefromchannel);
+
 /* POST crea un nuevo mensaje dentro del canal :channelid */
 router.route('/:userid/chat/channels/:channelid/messages').post(message.newmessage);
 
