@@ -20,9 +20,10 @@ var userSchema = new Schema({
     validate: validators.isEmail({message: 'Mail format is invalid'}) 
   },
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
-                      privateChannels: [ { type: Schema.ObjectId, ref: 'Channel' }]
+                      privateChannels: [{type: Schema.ObjectId, ref: 'Channel'}]
                     }],
-  active  : { type: Boolean, default: false }
+  active  : { type: Boolean, default: false },
+  invitations:  [ { type: Schema.ObjectId, ref: 'Group' }]
   
 });
 
@@ -151,7 +152,7 @@ userSchema.statics.search = function search (query, limit, page) {
 		user = user.parse();
 		value2.push(user);
 
-	})
+	});
      value= value2;
    } /* end else:: want multiple values & parse this values */
 
@@ -162,7 +163,26 @@ userSchema.statics.search = function search (query, limit, page) {
   return promise;
 };
 
-
+userSchema.statics.searchpopulated = function searchpopulated (query,populate) {
+    var promise = new Hope.Promise();
+    this.findOne(query).populate(populate).exec(function (error, user) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            if (user){
+                promise.done(null, user);
+            }else {
+                var err = {
+                    code   : 403,
+                    message: 'user not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
 
 
 
@@ -188,25 +208,6 @@ userSchema.statics.reset = function reset(attributes){
   return promise;
 };
 
-userSchema.statics.addgroup = function reset(attributes){
-  var promise = new Hope.Promise();
-  var user = this;
-  user.findById(attributes.id,function(err,user){
-    if (err) return  promise.done(err,null);
-    else
-    {
-      user.password = attributes.newPass;
-      user.save(function (err){
-        if(err) return promise.done(error,null);
-        else
-        {
-          return promise.done(null,user);
-        }
-      });
-    }
-  });
-  return promise;
-};
 
 /*ACTUALIZAR */
 userSchema.statics.updateuser = function updateuser (id, update, options) {
@@ -215,7 +216,7 @@ userSchema.statics.updateuser = function updateuser (id, update, options) {
         if (error) {
             return promise.done(error, null);
         }else {
-            return promise.done(error, user);
+            return promise.done(null, user);
         }
     });
     return promise;
@@ -243,6 +244,28 @@ userSchema.statics.activate = function activate(attributes){
   return promise;
 };
 
+
+//ELIMINAR CUENTA
+userSchema.statics.remove = function remove(attributes){
+  var promise = new Hope.Promise();
+  var user = this;
+  user.findById(attributes.id,function(err,user){
+    if (err) return  promise.done(err,null);
+    else
+    {     
+
+      user.remove(function (err){
+        if(err) return promise.done(error,null);
+        else
+        {
+          return promise.done(null,user);
+        }
+      });
+    }    
+  });
+  return promise;
+};
+
 /* Instance methods
    para que no te muestre la contraseña y el id no sea _id
  */
@@ -255,8 +278,6 @@ userSchema.methods.parse = function parse () {
     mail      : user.mail
   };
 };
-
-
 
 
 /* exportamos el schema con nombre User */

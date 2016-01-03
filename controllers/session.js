@@ -162,7 +162,7 @@ exports.privateprofile = function profile (request, response) {
     } /* else:: not error */
 
 
-  }) /* end Auth promise */
+  });/* end Auth promise */
 }; /* end privateprofile */
 
 
@@ -216,6 +216,20 @@ exports.activate = function activate(request, response){
     {
       User.activate(result);
       response.json({message:"Cuenta activada"});
+
+    }});
+};
+
+//ELIMINAR CUENTA
+exports.remove = function remove(request, response){
+
+ Auth(request, response).then(function(error, result) {
+    if (error) {
+      response.status(error.code).json({message: error.message});
+    } else 
+    {
+      User.remove(result);
+      response.json({message:"Cuenta eliminada"});
 
     }});
 };

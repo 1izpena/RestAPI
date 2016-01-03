@@ -12,8 +12,9 @@ exports.newmessage = function newmessage (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         }
-
+        request.body.userid = request.params.userid;
         var data = request.body;
+
         if (data.userid == result._id) {
             data.channelid = request.params.channelid;
             Message.newMessage(data).then(function newmessage(error, result) {

@@ -4,20 +4,6 @@ var Channel = require('../models/channel');
 var mongoose = require('mongoose');
 var Hope  = require('hope');
 
-exports.checktoken = function(parameters) {
-    var error = null;
-    var token = parameters.body.token || parameters.query.token || parameters.headers['x-access-token'];
-    if (token != null && token!=undefined){
-        console.log ("Llega token");
-    } else {
-        error = {
-            code: 403,
-            message: "Token required on header"
-        };
-    }
-    return error;
-};
-
 exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
@@ -38,7 +24,7 @@ exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
             if (encontrado === true){
                 var err = {
                     code   : 403,
-                    message: 'user already has the group name'
+                    message: 'The user already has a group with that name'
                 };
                 return promise.done(err, null);
             }else {
@@ -61,12 +47,14 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                 return promise.done(error,null);
             }
             else if (group){
+                var i=0;
                 var encontrado = false;
                 var canales = group.channels;
-                for (i=0;i<group.channels.length;i++){
+                while (encontrado === false && i<canales.length){
                     if (channelname === canales[i].channelName && canales[i].channelType=="PUBLIC"){
                         encontrado = true;
                     }
+                    i++;
                 }
                 if (encontrado === true){
                     console.log ("si encontrado");
@@ -87,12 +75,14 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                 return promise.done(error,null);
             }
             else if (group){
+                var i = 0;
                 var encontrado = false;
                 var canales = group.channels;
-                for (i=0;i<group.channels.length;i++){
+                while (encontrado === false && i<canales.length){
                     if (channelname === canales[i].channelName && canales[i].channelType=="PRIVATE"){
                         encontrado = true;
                     }
+                    i++;
                 }
                 if (encontrado === true){
                     console.log ("si encontrado");
@@ -111,3 +101,34 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
     return promise;
 };
 
+exports.checkisgroupadmin = function(groupid,userid) {
+    var promise = new Hope.Promise();
+    var Group = mongoose.model('Group');
+    var query = {_id: groupid};
+    var limit = 1;
+    Group.search(query,limit).then(function (error, group) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            if (group){
+                if (userid == group._admin){
+                    return promise.done(null, group);
+                }else {
+                    var err = {
+                        code   : 401,
+                        message: 'you are not the admin of the group'
+                    };
+                    return promise.done(err, null);
+                }
+            }else {
+                var err = {
+                    code   : 403,
+                    message: 'group not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
