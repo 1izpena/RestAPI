@@ -8,7 +8,8 @@ var Schema = mongoose.Schema;
 var channelSchema   = new Schema({
     channelName: { type: String, required: true },
     channelType: { type: String, required: true },
-    users:  [ { type: Schema.ObjectId, ref: 'User' }]
+    users:  [ { type: Schema.ObjectId, ref: 'User' }],
+    group:  { type: Schema.ObjectId, ref: 'Group' }
 });
 
 channelSchema.path('channelType').validate(function(channelType){
@@ -24,11 +25,10 @@ channelSchema.path('channelType').validate(function(channelType){
 /* static methods */
 /* NUEVO CANAL , guarda el nuevo grupo y hace el populate a grupo */
 
-channelSchema.statics.createchannel = function createchannel (attributes,userid, groupid) {
+channelSchema.statics.createchannel = function createchannel (attributes) {
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel', channelSchema);
-    var Group = mongoose.model('Group');
-    var User = mongoose.model('User');
+    console.log("ha entrado a crear canal");
     Channel = new Channel(attributes).save(function (error, result) {
         if(error){
             var messageError = '';
@@ -39,17 +39,7 @@ channelSchema.statics.createchannel = function createchannel (attributes,userid,
             error = { code: 400, message: messageError };
             return promise.done(error, null);
         }else {
-            var channel = result;
-            var options = { safe: true, upsert: true };
-            var selection = { _id: groupid};
-            var updateQuery = { $push: { channels: channel.id} };
-            Group.update(selection,updateQuery,options,function (error){
-                if(error){
-                    return promise.done(error,null);
-                }else{
-                    return promise.done(error, channel);
-                }
-            });
+            return promise.done (null,result);
         }
     });
     return promise;
@@ -89,6 +79,27 @@ channelSchema.statics.search = function search (query, limit, page) {
     return promise;
 };
 
+channelSchema.statics.searchpopulated = function searchpopulated (query,populate) {
+    var promise = new Hope.Promise();
+    this.findOne(query).populate(populate).exec(function (error, channel) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            if (channel){
+                promise.done(null, channel);
+            }else {
+                var err = {
+                    code   : 403,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
 /* ACTUALIZAR */
 channelSchema.statics.updatechannel = function updatechannel (id, update, options) {
     var promise = new Hope.Promise();
@@ -102,14 +113,26 @@ channelSchema.statics.updatechannel = function updatechannel (id, update, option
     return promise;
 };
 
+channelSchema.statics.updatechannels = function updatechannels (query, update, options) {
+    var promise = new Hope.Promise();
+    this.update(query, update, options,function(error, channel) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            return promise.done(null, channel);
+        }
+    });
+    return promise;
+};
+
 /* ELIMINAR */
-channelSchema.statics.deletechannel = function deletechannel (id, options) {
+channelSchema.statics.deletechannel = function deletechannel (id) {
     var promise = new Hope.Promise();
     this.remove(id,function(error) {
         if (error) {
             return promise.done(error, null);
         }else {
-            return promise.done(error, {message: 'channel deleted successfully'});
+            return promise.done(null, {message: 'channel deleted successfully'});
         }
     });
     return promise;

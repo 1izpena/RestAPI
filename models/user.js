@@ -20,7 +20,7 @@ var userSchema = new Schema({
     validate: validators.isEmail({message: 'Mail format is invalid'}) 
   },
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
-                      privateChannels: [ { type: Schema.ObjectId, ref: 'Channel' }]
+                      privateChannels: [{type: Schema.ObjectId, ref: 'Channel'}]
                     }],
   active  : { type: Boolean, default: false },
   invitations:  [ { type: Schema.ObjectId, ref: 'Group' }]
@@ -163,7 +163,26 @@ userSchema.statics.search = function search (query, limit, page) {
   return promise;
 };
 
-
+userSchema.statics.searchpopulated = function searchpopulated (query,populate) {
+    var promise = new Hope.Promise();
+    this.findOne(query).populate(populate).exec(function (error, user) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            if (user){
+                promise.done(null, user);
+            }else {
+                var err = {
+                    code   : 403,
+                    message: 'user not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
 
 
 
@@ -197,7 +216,7 @@ userSchema.statics.updateuser = function updateuser (id, update, options) {
         if (error) {
             return promise.done(error, null);
         }else {
-            return promise.done(error, user);
+            return promise.done(null, user);
         }
     });
     return promise;

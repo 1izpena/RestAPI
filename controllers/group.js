@@ -255,6 +255,34 @@ exports.addusertogroup = function addusertogroup (request, response){
     });
 };
 
+exports.updategroupinfo = function updategroupinfo (request, response){
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        } else {
+            if (request.params.userid == result._id){
+                chatErrors.checkisgroupadmin(request.params.groupid,request.params.userid).then(function (error,result){
+                    if(error){
+                        response.status(error.code).json({message: error.message});
+                    }else{
+                        groupservice.updategroupname(request.params.groupid,request.body.groupName).then(function (error,result){
+                            if(error){
+                                response.status(error.code).json({message: error.message});
+                            }else{
+                                response.json(result);
+                            }
+                        });
+                    }
+                });
+
+            } else {
+                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+
+            }
+        }
+    });
+};
+
 exports.newgroup = function newgroup (request, response){
     Auth(request, response).then(function(error, result) {
         if (error) {
@@ -272,11 +300,11 @@ exports.newgroup = function newgroup (request, response){
                             _admin: result._id,
                             users: userslist
                         };
-                        groupservice.createnewgroup(ats,userid).then(function createnewgroup (error, group){
+                        groupservice.createnewgroup(ats,userid).then(function (error, group){
                             if (error){
                                 response.status(error.code).json({message: error.message});
                             }else {
-                                response.json(group.parse());
+                                response.json(group);
                             }
                         });
                     }
