@@ -84,7 +84,12 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/users/:userid1')
 /* DELETE el usuario logeado se va del canal */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/unsuscribe').delete(channel.unsuscribefromchannel);
 
+
 /* POST crea un nuevo mensaje dentro del canal :channelid */
-router.route('/:userid/chat/channels/:channelid/messages').post(message.newmessage);
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').post(message.newmessage);
+
+
+/* POST crea un nuevo mensaje dentro del canal :channelid */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').get(message.getmessages);
 
 module.exports = router;

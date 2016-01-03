@@ -12,11 +12,11 @@ exports.newmessage = function newmessage (request, response) {
         if (error) {
             response.status(error.code).json({message: error.message});
         }
-        request.body.userid = request.params.userid;
-        var data = request.body;
 
-        if (data.userid == result._id) {
+        if (request.params.userid == result._id) {
+            var data = request.body;
             data.channelid = request.params.channelid;
+            data.userid = request.params.userid;
             Message.newMessage(data).then(function newmessage(error, result) {
                     if (error) {
                         response.status(error.code).json({message: error.message});
@@ -31,6 +31,34 @@ exports.newmessage = function newmessage (request, response) {
         }
         else {
             response.status(401).json({message: 'Not authorized to post messages from another user'});
+        }
+    });
+};
+
+exports.getmessages = function getmessages (request, response) {
+
+    // Verificamos si el token es valido y corresponde a un usuario
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        }
+
+        if (request.params.userid == result._id) {
+            var data = request.body;
+            data.channelid = request.params.channelid;
+            data.userid = request.params.userid;
+            Message.getMessages(data).then(function(error, result) {
+                    if (error) {
+                        response.status(error.code).json({message: error.message});
+                    }
+                    else {
+                        response.json(result);
+                    }
+                }
+            );
+        }
+        else {
+            response.status(401).json({message: 'Not authorized to get messages from another user'});
         }
     });
 };
