@@ -13,14 +13,14 @@ var channelSchema   = new Schema({
 });
 
 channelSchema.path('channelType').validate(function(channelType){
-    if(channelType == 'PUBLIC' || channelType == 'PRIVATE' )
+    if(channelType == 'PUBLIC' || channelType == 'PRIVATE' || channelType == 'DIRECT')
     {
         return true
     }
     else {
         return false
     }
-}, 'Valid values form channelType: PUBLIC or PRIVATE');
+}, 'Valid values form channelType: PUBLIC or PRIVATE or DIRECT');
 
 /* static methods */
 /* NUEVO CANAL , guarda el nuevo grupo y hace el populate a grupo */
@@ -35,7 +35,7 @@ channelSchema.statics.createchannel = function createchannel (attributes) {
             if (error.errors.channelName != undefined)
                 messageError = 'channel name is required';
             else if (error.errors.channelType != undefined)
-               messageError = 'channel type is required: PUBLIC/PRIVATE';
+               messageError = 'channel type is required: PUBLIC/PRIVATE/DIRECT';
             error = { code: 400, message: messageError };
             return promise.done(error, null);
         }else {
