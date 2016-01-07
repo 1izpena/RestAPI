@@ -28,7 +28,7 @@ exports.newmessage = function newmessage (request, response) {
                         }
                         else {
                             // Notificamos al canal que hay nuevo mensaje
-                            socketio.getIO().sockets.to(data.channelid).emit('newMessage', result);
+                            socketio.getIO().sockets.to('CH_'+data.channelid).emit('newMessage', result);
                             response.json(result);
                         }
                     }

@@ -20,7 +20,8 @@ var userSchema = new Schema({
     validate: validators.isEmail({message: 'Mail format is invalid'}) 
   },
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
-                      privateChannels: [{type: Schema.ObjectId, ref: 'Channel'}]
+                      privateChannels: [{type: Schema.ObjectId, ref: 'Channel'}],
+                      directMessageChannels: [{type: Schema.ObjectId, ref: 'Channel'}]
                     }],
   active  : { type: Boolean, default: false },
   invitations:  [ { type: Schema.ObjectId, ref: 'Group' }]

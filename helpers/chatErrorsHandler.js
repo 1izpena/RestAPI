@@ -41,7 +41,6 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
     var Channel = mongoose.model('Channel');
     var promise = new Hope.Promise();
     if (channeltype == "PUBLIC"){
-        console.log("El canal es publico");
         Group.findOne({ _id: groupid}).populate('channels').exec(function (error, group) {
             if (error){
                 return promise.done(error,null);
@@ -57,7 +56,6 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                     i++;
                 }
                 if (encontrado === true){
-                    console.log ("si encontrado");
                     var err = {
                         code   : 403,
                         message: 'the group already has a public channel with that name'
@@ -69,7 +67,6 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
             }
         });
     }if (channeltype == "PRIVATE"){
-        console.log("El canal es privado");
         Group.findOne({ _id: groupid}).populate('channels').exec(function (error, group) {
             if (error){
                 return promise.done(error,null);
@@ -80,6 +77,33 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                 var canales = group.channels;
                 while (encontrado === false && i<canales.length){
                     if (channelname === canales[i].channelName && canales[i].channelType=="PRIVATE"){
+                        encontrado = true;
+                    }
+                    i++;
+                }
+                if (encontrado === true){
+                    console.log ("si encontrado");
+                    var err = {
+                        code   : 403,
+                        message: 'the group already has a private channel with that name'
+                    };
+                    return promise.done(err, null);
+                }else {
+                    return promise.done(null, group);
+                }
+            }
+        });
+    } if (channeltype == "DIRECT"){
+        Group.findOne({ _id: groupid}).populate('channels').exec(function (error, group) {
+            if (error){
+                return promise.done(error,null);
+            }
+            else if (group){
+                var i = 0;
+                var encontrado = false;
+                var canales = group.channels;
+                while (encontrado === false && i<canales.length){
+                    if (channelname === canales[i].channelName && canales[i].channelType=="DIRECT"){
                         encontrado = true;
                     }
                     i++;

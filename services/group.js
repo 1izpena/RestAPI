@@ -10,7 +10,7 @@ exports.getgrouplist = function getgrouplist(userid){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
     var query = { _id: userid};
-    var populate = 'groups._group';
+    var populate = 'groups._group invitations';
     User.searchpopulated(query,populate).then(function (error, user) {
         if (error){
             return promise.done(error,null);
@@ -34,7 +34,7 @@ exports.getchatinfo = function getchatinfo(userid){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
     var query = { _id: userid};
-    var populate = 'groups._group';
+    var populate = 'groups._group invitations';
     User.searchpopulated(query,populate).then(function (error, user) {
         if (error){
             return promise.done(error,null);
@@ -131,15 +131,16 @@ exports.getinfo = function getinfo(groupid,userid){
         else {
             var publicos = [];
             var privados = [];
+            var directos = [];
             var usuarios = [];
             for (i=0;i<group.channels.length;i++){
-                if (group.channels[i].channelType == "PUBLIC" ){
+                if (group.channels[i].channelType == "PUBLIC"){
                     var elto = {
                         id        : group.channels[i]._id,
                         channelName  : group.channels[i].channelName
                     };
                     publicos.push(elto);
-                }else {
+                }if (group.channels[i].channelType == "PRIVATE"){
                     var encontrado = false;
                     var j = 0;
                     while (encontrado == false && j<group.channels[i].users.length){
@@ -153,23 +154,38 @@ exports.getinfo = function getinfo(groupid,userid){
                         }
                         j++;
                     }
+                }if (group.channels[i].channelType == "DIRECT"){
+                    var encontrado1 = false;
+                    var k = 0;
+                    while (encontrado1 == false && k<group.channels[i].users.length){
+                        if (userid == group.channels[i].users[k]){
+                            var elto3 = {
+                                id        : group.channels[i]._id,
+                                channelName  : group.channels[i].channelName
+                            };
+                            directos.push(elto3);
+                            encontrado = true;
+                        }
+                        k++;
+                    }
                 }
 
             }
-            for (k=0;k<group.users.length;k++){
-                var elto = {
-                    id        : group.users[k]._id,
-                    username  : group.users[k].username,
-                    mail      :group.users[k].mail
+            for (l=0;l<group.users.length;l++){
+                var elto4 = {
+                    id        : group.users[l]._id,
+                    username  : group.users[l].username,
+                    mail      :group.users[l].mail
                 };
-                usuarios.push(elto);
+                usuarios.push(elto4);
             }
             var vuelta = {
                 id: group._id,
                 groupName: group.groupName,
                 users: usuarios,
                 publicChannels: publicos,
-                privateChannels: privados
+                privateChannels: privados,
+                directMessageChannels: directos
             };
             promise.done(null, vuelta);
         }
@@ -187,21 +203,30 @@ exports.inviteuser = function inviteuser(groupid,userid){
             return promise.done(error,null);
         }
         else{
-            var invitaciones = [];
-            for (i=0;i<user.invitations.length;i++){
-                var elto = {
-                    groupid        : user.invitations[i]._id,
-                    groupname  : user.invitations[i].groupName
-                };
-                invitaciones.push(elto);
-            }
-            var vuelta = {
-                id: user._id,
-                username: user.username,
-                mail:user.mail,
-                invitations: invitaciones
-            };
-            return promise.done(null,vuelta);
+            var query = {_id: user._id};
+            var populate = 'invitations';
+            User.searchpopulated(query,populate).then(function (error, user) {
+                if (error){
+                    return promise.done(error,null);
+                }
+                else{
+                    var invitaciones = [];
+                    for (i=0;i<user.invitations.length;i++){
+                        var elto = {
+                            groupid    : user.invitations[i]._id,
+                            groupname  : user.invitations[i].groupName
+                        };
+                        invitaciones.push(elto);
+                    }
+                    var vuelta = {
+                        id: user._id,
+                        username: user.username,
+                        mail:user.mail,
+                        invitations: invitaciones
+                    };
+                    return promise.done(null,vuelta);
+                }
+            });
         }
     });
     return promise;
@@ -226,13 +251,30 @@ exports.deleteinvitation = function deleteinvitation(groupid,user){
             return promise.done(error,null);
         }
         else{
-            var vuelta = {
-                id: user._id,
-                username: user.username,
-                mail:user.mail,
-                invitations: user.invitations
-            };
-            return promise.done(null,vuelta);
+            var query = {_id: user._id};
+            var populate = 'invitations';
+            User.searchpopulated(query,populate).then(function (error, user) {
+                if (error){
+                    return promise.done(error,null);
+                }
+                else{
+                    var invitaciones = [];
+                    for (i=0;i<user.invitations.length;i++){
+                        var elto = {
+                            groupid    : user.invitations[i]._id,
+                            groupname  : user.invitations[i].groupName
+                        };
+                        invitaciones.push(elto);
+                    }
+                    var vuelta = {
+                        id: user._id,
+                        username: user.username,
+                        mail:user.mail,
+                        invitations: invitaciones
+                    };
+                    return promise.done(null,vuelta);
+                }
+            });
         }
     });
     return promise;
@@ -267,7 +309,8 @@ exports.adduser = function adduser(groupid,userid){
                     }
                     var dat = {
                         _group: grupo._id,
-                        privateChannels: []
+                        privateChannels: [],
+                        directMessageChannels: []
                     };
                     var query2 = {$push:{"groups":dat}};
                     User.updateuser (userid,query2,{new:true}).then (function (error,user){
@@ -282,7 +325,7 @@ exports.adduser = function adduser(groupid,userid){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    return promise.done(null,grupo.parse());
+                                    return promise.done(null,grupo);
                                 }
                             });
                         }
@@ -322,7 +365,8 @@ exports.subscribegroup = function subscribegroup(groupid,user){
                     }
                     var dat = {
                         _group: grupo._id,
-                        privateChannels: []
+                        privateChannels: [],
+                        directMessageChannels: []
                     };
                     var encontrado = false;
                     var i = 0;
@@ -333,7 +377,7 @@ exports.subscribegroup = function subscribegroup(groupid,user){
                         }
                         i++;
                     }
-                    var query = { $push: { "groups": dat}, "invitations": user.invitations };
+                    var query = {$push:{"groups": dat}, "invitations": user.invitations };
                     User.updateuser (user._id,query,options).then (function (error,user){
                         if (error){
                             return promise.done(error,null);
@@ -346,7 +390,7 @@ exports.subscribegroup = function subscribegroup(groupid,user){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    return promise.done(null,user.invitations);
+                                    return promise.done(null,user);
                                 }
                             });
                         }
@@ -406,7 +450,7 @@ exports.deleteuser = function deleteuser(groupid,userid){
                                         return promise.done(error,null);
                                     }
                                     else{
-                                        promise.done(null, grupo.parse());
+                                        promise.done(null, grupo);
                                     }
                                 });
 
@@ -453,7 +497,8 @@ exports.createnewgroup = function createnewgroup(ats,userid){
                     var channel = result;
                     var dat = {
                         _group: groupid,
-                        privateChannels: []
+                        privateChannels: [],
+                        directMessageChannels: []
                     };
                     var query = {$push:{"groups":dat}};
                     var options = {new: true};
@@ -494,7 +539,7 @@ exports.updategroupname = function updategroupname(groupid,groupName){
             return promise.done(error,null);
         }
         else{
-            return promise.done(null,group.parse());
+            return promise.done(null,group);
         }
     });
     return promise;

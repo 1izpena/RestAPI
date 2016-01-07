@@ -39,6 +39,29 @@ exports.updateuserchannellist = function updateuserchannellist(userid,groupid,ch
                     }
                 });
             }
+            if (channelType == "DIRECT"){
+                var listaGrupos = user.groups;
+                var encontrado = false;
+                var i = 0;
+                while (encontrado === false && i<user.groups.length){
+                    if (groupid == listaGrupos[i]._group._id){
+                        {
+                            listaGrupos[i].directMessageChannels.push(channelid);
+                            encontrado = true;
+                        }
+                    }
+                    i++;
+                }
+                var update = {"groups":listaGrupos};
+                var options = {multi: true};
+                User.updateuser(userid,update,options).then(function (error,user){
+                    if(error){
+                        return promise.done(error,null);
+                    }else{
+                        promise.done(null,user);
+                    }
+                });
+            }
         }
     });
     return promise;
@@ -87,7 +110,7 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
                         if(error){
                             return promise.done(error,null);
                         }else{
-                            if (channelType == "PRIVATE"){
+                            if (channelType == "PRIVATE" || channelType == "DIRECT"){
                                 channelservice.updateuserchannellist(userid,groupid, result._id,channelType).then(function(error,result){
                                     if (error){
                                         return promise.done(error,null);
@@ -148,6 +171,7 @@ exports.getchannellist = function getchannellist(groupid,userid){
         else{
             var publicos = [];
             var privados = [];
+            var directos = [];
             for (i=0;i<group.channels.length;i++){
                 var encontrado = false;
                 var j = 0;
@@ -159,8 +183,10 @@ exports.getchannellist = function getchannellist(groupid,userid){
                         };
                         if (group.channels[i].channelType == "PUBLIC" ){
                             publicos.push(elto);
-                        }else {
+                        }if (group.channels[i].channelType == "PRIVATE" ) {
                             privados.push(elto);
+                        }if (group.channels[i].channelType == "DIRECT" ) {
+                            directos.push(elto);
                         }
                         encontrado = true;
                     }
@@ -169,7 +195,8 @@ exports.getchannellist = function getchannellist(groupid,userid){
             }
             var vuelta = {
                 publicChannels: publicos,
-                privateChannels: privados
+                privateChannels: privados,
+                directMessageChannels: directos
             };
             promise.done(null,vuelta);
         }
@@ -315,7 +342,7 @@ exports.updatechannelname = function updatechannelname(channelid,channelName){
             return promise.done(error,null);
         }
         else{
-            return promise.done(null,channel.parse());
+            return promise.done(null,channel);
         }
     });
     return promise;
