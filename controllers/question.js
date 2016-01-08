@@ -29,6 +29,39 @@ exports.newquestion = function newquestion (request, response){
 	});
 }
 
+
+
+exports.getquestions = function getquestions(request, response)
+{
+	Question.getQuestions().then(function getQuestions(error, result){
+
+		if (error)
+		{
+			console.log("ERROR");
+			response.status(error.code).json({message: error.message});
+		}
+		else
+		{
+			response.json(result);
+		}
+	});
+}
+
+exports.getquestionbyid = function getquestionbyid(request, response)
+{
+	Question.getQuestion(request.params.questionid).then(function getQuestion(error,result){
+		if(error)
+		{
+			response.status(error.code).json({message: error.message});
+		}
+		else
+		{
+			response.status("200").json(result);
+		}
+	});
+	
+}
+
 exports.upvote = function upvote (request , response){
 	Auth(request, response).then(function(error, result) {
 		if(error)
@@ -64,7 +97,6 @@ exports.downvote = function downvote (request , response){
 		{
 			var user = {"_id" : result.id};
 			request.body._user = user;
-			/*
 			Question.voteQuestion(request.params.questionid, request.body).then(function voteQuestion(error,result){
 				if(error)
 				{
@@ -74,7 +106,7 @@ exports.downvote = function downvote (request , response){
 				{
 					response.json(result.message);
 				}
-			});*/
+			});
 		}
 	});
 }
@@ -105,47 +137,3 @@ exports.commentquestion = function commentquestion(request, response)
 	});
 }
 
-exports.mostvoted = function mostvoted(request, response)
-{
-	Question.mostVoted().then(function mostVoted(error, result){
-
-		if (error)
-		{
-			response.status(error.code).json({message: error.message});
-		}
-		else
-		{
-			response.json(result);
-		}
-	});
-}
-
-exports.lastquestions = function lastquestions(request, response)
-{
-	Question.lastQuestions().then(function lastQuestions(error, result){
-
-		if (error)
-		{
-			response.status(error.code).json({message: error.message});
-		}
-		else
-		{
-			response.json(result);
-		}
-	});
-}
-
-exports.mostvisited = function mostvisited(request, response)
-{
-	Question.mostVisited().then(function mostVisited(error, result){
-
-		if (error)
-		{
-			response.status(error.code).json({message: error.message});
-		}
-		else
-		{
-			response.json(result);
-		}
-	});
-}

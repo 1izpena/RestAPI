@@ -1,21 +1,22 @@
 'use strict';
 var mongoose = require('mongoose');
+var User  = require('./user');
 var Hope      	= require('hope');
 var Schema = mongoose.Schema;
 
 var questionSchema = new Schema({
 	title:{ type: String, required: true },
 	body:{ type: String, required: true },
-	_user : { type: Schema.ObjectId, ref: 'user', required: true},
+	_user : { type: Schema.ObjectId, ref: 'User', required: true},
 	created:{ type: Date, required: true },
 	modified:{ type: Date },
 	answercount: Number,
 	votes: Number,
 	views: Number,
-	comments:[{comment: String, _user:{ type: Schema.ObjectId, ref: 'user'}, created: Date}],
+	comments:[{comment: String, _user:{ type: Schema.ObjectId, ref: 'User'}, created: Date}],
 	tags:[{ tag: String }],
 	answers:[{type: Schema.ObjectId, ref: 'Answer'}],
-	userVotes:[{type: Schema.ObjectId, ref: 'user'}]
+	userVotes:[{type: Schema.ObjectId, ref: 'User'}]
 });
 
 
@@ -65,6 +66,7 @@ questionSchema.statics.updateQuestion = function updatequestion (id, update, opt
     var promise = new Hope.Promise();
     this.findByIdAndUpdate(id, update, options,function(error, question) {
         if (error) {
+
         	console.log(error);
             return promise.done(error, null);
         }else {
@@ -78,71 +80,55 @@ questionSchema.statics.updateQuestion = function updatequestion (id, update, opt
 /* método para votar*/
 questionSchema.statics.voteQuestion = function votequestion (id , attributes)
 {
-	var promise = new Hope.Promise();
-	var Question = mongoose.model('Question', questionSchema);
-	var query = { $and: [ {_id: id }, { userVotes: { $ne: attributes._user }}]};
-	var update = { $inc: {votes: attributes.vote}, $push: {userVotes:  attributes._user}};
-	var options = { new: true};
-	Question.findOneAndUpdate(query, update, options,function(error,result) {
-		if(error)
-		{
-			var messageError = '';
-			console.log(error.errors);
-			return promise.done(error,null);
-			
-		}
-		else 
-		{
-			console.log(result);
-		}
-	});
-	return promise;
-}
-
-/* static methods */
-/* obtener preguntas mas votadas*/
-questionSchema.statics.mostVoted = function mostVoted(){
-	var promise = new Hope.Promise();
-	var Question = mongoose.model('Question', questionSchema);
-	Question.find(function(error,result){
-		if(error)
-		{
-			var messageError = '';
-			return promise.done(error,null);
-		}
-		else
-		{
-			return promise.done(error,result);
-		}
-	}).sort({votes: -1});
-	return promise;
-}
-
-/* static methods */
-/* obtener preguntas mas visitadas*/
-questionSchema.statics.mostVisited = function mostVoted(){
-	var promise = new Hope.Promise();
-	var Question = mongoose.model('Question', questionSchema);
-	Question.find(function(error,result){
-		if(error)
-		{
-			var messageError = '';
-			return promise.done(error,null);
-		}
-		else
-		{
-			return promise.done(error,result);
-		}
-	}).sort({views: -1});
+	var messageError = '';
+	if(id === null)
+	{
+		messageError = "question ID is required";
+		error = { code: 400, messageError };
+        return promise.done(error, null);
+	}
+	else if(attributes._user === null)
+	{
+		messageError = "User is required";
+		error = { code: 400, messageError };
+        return promise.done(error, null);
+	}
+	else if(attributes.vote === null)
+	{
+		messageError = "Vote is required";
+		error = { code: 400, messageError };
+        return promise.done(error, null);
+	}
+	else
+	{
+		var promise = new Hope.Promise();
+		var Question = mongoose.model('Question', questionSchema);
+		var query = { $and: [ {_id: id }, { userVotes: { $ne: attributes._user }}]};
+		var update = { $inc: {votes: attributes.vote}, $push: {userVotes:  attributes._user}};
+		var options = { new: true};
+		Question.findOneAndUpdate(query, update, options,function(error,result) {
+			if(error)
+			{
+				console.log(error.errors);
+				return promise.done(error,null);
+				
+			}
+			else 
+			{
+				console.log(result);
+				return promise.done(error,result);
+			}
+		});
+	}
 	return promise;
 }
 
 /* static methods */
 /* Obtener últimas preguntas*/
-questionSchema.statics.lastQuestions = function mostVoted(){
+questionSchema.statics.getQuestions = function getQuestions(){
 	var promise = new Hope.Promise();
 	var Question = mongoose.model('Question', questionSchema);
-	Question.find(function(error,result){
+	Question.find().populate('_user').exec(function(error,result){
 		if(error)
 		{
 			var messageError = '';
@@ -152,18 +138,60 @@ questionSchema.statics.lastQuestions = function mostVoted(){
 		{
 			return promise.done(error,result);
 		}
-	}).sort({created: -1});
+	});
 	return promise;
 }
 
+/* static methods*/
+/* obtener la pregunta*/
+questionSchema.statics.getQuestion = function getQuestion(attributes)
+{
+	var promise = new Hope.Promise();
+	var Question = mongoose.model('Question', questionSchema);
+	Question.findOne({_id: attributes}).populate('_user comments._user').exec(function(error,value){
+		if(error)
+		{
+			return promise.done(error,null);
+		}
+		else
+		{   if (value.length === 0) {
+                error = {
+                    code: 402,
+                    message: "Question not found."
+                };
+                return promise.done(error,null);
+            }
+            else{
+            	return promise.done(error,value.parse());
+            }	
+		}
+	});
+	return promise;
+}
 
-
+/*Parser de una*/
 questionSchema.methods.parse = function parse () {
     var question = this;
     return {
         id:        question._id,
         title:     question.title,
-        body:      qustion.body,   
-    };
+        body:      question.body, 
+        user: {
+            id         : (question._user._id) ? question._user._id : question._user,
+            username   : (question._user.username) ? question._user.username :  ''
+        },
+        created:   question.created,
+        modified:  question.modified,
+        answercount: question.answercount,
+		votes: question.votes,
+		views: question.view,
+		/*comments: {
+			comment: question.comments.comment,
+			user: {
+            id         : (question.comments._user._id) ? question.comments._user._id : question.comments._user,
+            username   : (question.comments._user.username) ? question.comments._user.username :  ''
+        	}
+		}*/
+    };  
 };
 module.exports = mongoose.model('Question', questionSchema);

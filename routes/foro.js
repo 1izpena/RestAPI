@@ -16,14 +16,11 @@ router.get('/', function(req, res, next) {
 /*POST Crea una pregunta nueva*/
 router.route('/question').post(question.newquestion);
 
-/*GET Obtiene las preguntas ordenadas por votos de manera descendente*/
-router.route('/question/mostvoted').get(question.mostvoted);
+/*Get Obtiene todas las preguntas*/
+router.route('/questions').get(question.getquestions);
 
-/*GET Obtiene las preguntas ordenadas por fecha */
-router.route('/question/lastquestions').get(question.lastquestions);
-
-/*GET Obtiene las preguntas ordenadas por visitas de manera descendente*/
-router.route('/question/mostvisited').get(question.mostvisited);
+/*GET Obtiene la pregunta por identificador*/
+router.route('/question/:questionid').get(question.getquestionbyid);
 
 /*POST Votar positivo a la pregunta*/
 router.route('/question/:questionid/upvote').post(question.upvote);
