@@ -84,7 +84,6 @@ var file = require('./routes/file');
 var forum = require('./routes/foro.js')
 
 /******* RUTAS DEL API *******/
-app.use('/api/v1/users', users);
 app.use('/api/v1/auth', authusers);
 app.use('/api/v1/file', file);
 app.use('/api/v1/users', users);
