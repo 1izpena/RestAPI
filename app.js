@@ -82,7 +82,6 @@ var authusers = require('./routes/authusers');
 var file = require('./routes/file');
 
 /******* RUTAS DEL API *******/
-app.use('/api/v1/users', users);
 app.use('/api/v1/auth', authusers);
 app.use('/api/v1/file', file);
 app.use('/api/v1/users', users);
