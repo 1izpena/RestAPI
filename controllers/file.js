@@ -22,8 +22,12 @@ exports.getSignedUrl = function getSignedUrl (request, response) {
             else if (!data.channelid) {
                 response.status(400).json({message: "channelid required"});
             }
+            else if (!data.operation) {
+                response.status(400).json({message: "operation required"});
+            }
             else {
                 var filename = 'GR'+data.groupid+'/CH'+data.channelid+'/'+data.filename;
+                console.log("Filename: "+filename);
                 aws.config.update({
                     accessKeyId: config.accessKeyId,
                     secretAccessKey: config.secretAccessKey,
@@ -35,11 +39,20 @@ exports.getSignedUrl = function getSignedUrl (request, response) {
                 var s3_params = {
                     Bucket: config.bucketName,
                     Key: filename,
-                    Expires: 60,
-                    ACL: 'public-read'
+                    Expires: 60
                 };
 
-                var url = s3.getSignedUrl('putObject', s3_params);
+                var op;
+                if (data.operation == 'PUT') {
+                    op = 'putObject';
+                }
+                else {
+                    op = 'getObject';
+                    s3_params.ResponseContentDisposition = 'attachment';
+                }
+                var url = s3.getSignedUrl(op, s3_params);
+
+                console.log ("URL: "+url);
 
                 response.json({url: url});
             }
