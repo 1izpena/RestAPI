@@ -114,15 +114,21 @@ exports.inviteusertogroup = function inviteusertogroup (request, response) {
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                chatErrors.checkisgroupadmin(request.params.groupid,request.params.userid).then(function (error,result){
-                    if(error){
+                chatErrors.checkuseringroup(request.params.groupid,request.params.userid1).then(function (error,result) {
+                    if (error){
                         response.status(error.code).json({message: error.message});
-                    }else{
-                        groupservice.inviteuser(request.params.groupid,request.params.userid1).then(function (error,result){
+                    } else {
+                        chatErrors.checkisgroupadmin(request.params.groupid,request.params.userid).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                response.json(result);
+                                groupservice.inviteuser(request.params.groupid,request.params.userid1).then(function (error,result){
+                                    if(error){
+                                        response.status(error.code).json({message: error.message});
+                                    }else{
+                                        response.json(result);
+                                    }
+                                });
                             }
                         });
                     }
