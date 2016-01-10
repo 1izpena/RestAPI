@@ -3,6 +3,7 @@
 var Auth  = require('../helpers/authentication');
 var channelservice  = require('../services/channel');
 var mongoose = require('mongoose');
+var chatErrors  = require('../helpers/chatErrorsHandler');
 
 
 exports.newchannel = function newchannel (request, response) {
@@ -71,13 +72,20 @@ exports.addusertochannel = function addusertochannel (request, response){
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                channelservice.adduser(request.params.groupid,request.params.userid1,request.params.channelid).then(function (error,result){
-                    if(error){
+                chatErrors.checkuserinchannel(request.params.channelid,request.params.userid1).then(function (error,result) {
+                    if (error){
                         response.status(error.code).json({message: error.message});
-                    }else{
-                        response.json(result);
+                    } else {
+                        channelservice.adduser(request.params.groupid,request.params.userid1,request.params.channelid).then(function (error,result){
+                            if(error){
+                                response.status(error.code).json({message: error.message});
+                            }else{
+                                response.json(result);
+                            }
+                        });
                     }
                 });
+
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
