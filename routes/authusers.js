@@ -34,7 +34,8 @@ router.route('/activate')
 router.route('/remove')
     .post(session.remove);
 
-
+router.route('/social')
+    .post(session.social);
 
 
 

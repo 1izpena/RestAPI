@@ -24,6 +24,7 @@ var userSchema = new Schema({
                       directMessageChannels: [{type: Schema.ObjectId, ref: 'Channel'}]
                     }],
   active  : { type: Boolean, default: false },
+  id_social  : { type: Number, required: false },
   invitations:  [ { type: Schema.ObjectId, ref: 'Group' }]
   
 });
@@ -246,7 +247,7 @@ userSchema.statics.activate = function activate(attributes){
 };
 
 
-//ELIMINAR CUENTA
+//eliminar cuenta
 userSchema.statics.remove = function remove(attributes){
   var promise = new Hope.Promise();
   var user = this;
@@ -266,6 +267,29 @@ userSchema.statics.remove = function remove(attributes){
   });
   return promise;
 };
+
+//login redes sociales
+userSchema.statics.social = function social (attributes) {
+
+  var promise = new Hope.Promise();
+  this.findOne({
+    id_social: attributes.id_social
+  }, function (error, user) {
+    if (user) {
+      return promise.done(error, user);
+    } else {
+
+      var User = mongoose.model('User', userSchema);
+      return new User(attributes).save(function (error, result) {
+  
+        return promise.done(error, result);
+      });
+    }
+  });
+  return promise;
+};
+
+
 
 /* Instance methods
    para que no te muestre la contraseña y el id no sea _id

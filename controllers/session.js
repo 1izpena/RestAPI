@@ -233,3 +233,23 @@ exports.remove = function remove(request, response){
 
     }});
 };
+
+exports.social = function social (request, response) {
+
+          request.body.mail = request.body.id_social+"@localhost.com";
+          request.body.password = "0000000";
+
+    User.social(request.body).then(function social (error, result) {
+    if (error) {
+      response.status(error.code).json({message: error.message}); 
+    } else {
+      var token = Token(result);
+      response.json({token: token,
+                    id_social: result.id_social,
+                    username: result.username,
+                    id: result.id
+                  });      
+    }
+  });  
+};
+
