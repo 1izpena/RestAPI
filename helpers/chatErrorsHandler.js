@@ -23,7 +23,7 @@ exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
             }
             if (encontrado === true){
                 var err = {
-                    code   : 403,
+                    code   : 401,
                     message: 'The user already has a group with that name'
                 };
                 return promise.done(err, null);
@@ -57,7 +57,7 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                 }
                 if (encontrado === true){
                     var err = {
-                        code   : 403,
+                        code   : 401,
                         message: 'the group already has a public channel with that name'
                     };
                     return promise.done(err, null);
@@ -147,7 +147,7 @@ exports.checkisgroupadmin = function(groupid,userid) {
                 }
             }else {
                 var err = {
-                    code   : 403,
+                    code   : 401,
                     message: 'group not found'
                 };
                 return promise.done(err, null);
@@ -156,3 +156,4 @@ exports.checkisgroupadmin = function(groupid,userid) {
     });
     return promise;
 };
+
