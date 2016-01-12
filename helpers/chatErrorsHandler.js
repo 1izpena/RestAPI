@@ -157,6 +157,38 @@ exports.checkisgroupadmin = function(groupid,userid) {
     return promise;
 };
 
+exports.checkischanneladmin = function(channelid,userid) {
+    var promise = new Hope.Promise();
+    var Channel = mongoose.model('Channel');
+    var query = {_id: channelid};
+    var limit = 1;
+    Channel.search(query,limit).then(function (error, channel) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            if (channel){
+                if (userid == channel._admin){
+                    return promise.done(null, channel);
+                }else {
+                    var err = {
+                        code   : 401,
+                        message: 'you are not the admin of the channel'
+                    };
+                    return promise.done(err, null);
+                }
+            }else {
+                var err1 = {
+                    code   : 401,
+                    message: 'channel found'
+                };
+                return promise.done(err1, null);
+            }
+        }
+    });
+    return promise;
+};
+
 exports.checkuseringroup = function(groupid,userid) {
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
