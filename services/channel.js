@@ -96,6 +96,7 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
             var ats = {
                 channelName: channelName,
                 channelType: channelType,
+                _admin: userid,
                 users: users,
                 group: groupid
             };
