@@ -161,6 +161,46 @@ exports.checkuseringroup = function(groupid,userid) {
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
     var query = {_id: userid};
+    var populate = 'groups._group';
+    User.searchpopulated(query,populate).then(function (error, user) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            if (user){
+                var encontrado = false;
+                var j = 0;
+                while (encontrado == false && j<user.groups.length){
+                    if (groupid == user.groups[j]._group._id){
+                        encontrado = true;
+                    }
+                    j++;
+                }
+                if (encontrado){
+                    var err = {
+                        code   : 401,
+                        message: 'the user is already a member of the group'
+                    };
+                    return promise.done(err, null);
+                }else {
+                    return promise.done(null, user);
+                }
+            }else {
+                var err2 = {
+                    code   : 401,
+                    message: 'group not found'
+                };
+                return promise.done(err2, null);
+            }
+        }
+    });
+    return promise;
+};
+
+exports.checkuserinvitedorgroup = function(groupid,userid) {
+    var promise = new Hope.Promise();
+    var User = mongoose.model('User');
+    var query = {_id: userid};
     var populate = 'groups._group invitations';
     User.searchpopulated(query,populate).then(function (error, user) {
         if (error) {
@@ -194,7 +234,7 @@ exports.checkuseringroup = function(groupid,userid) {
                     if (encontrado1) {
                         var err1 = {
                             code: 401,
-                            message: 'the user is already a member of the channel'
+                            message: 'the user already has an invitation to the group'
                         };
                         return promise.done(err1, null);
                     } else {
