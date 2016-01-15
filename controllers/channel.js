@@ -72,7 +72,7 @@ exports.addusertochannel = function addusertochannel (request, response){
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                chatErrors.checkuserinchannel(request.params.channelid,request.params.userid1).then(function (error,result) {
+                chatErrors.checkuserinchanneladd(request.params.channelid,request.params.userid1).then(function (error,result) {
                     if (error){
                         response.status(error.code).json({message: error.message});
                     } else {

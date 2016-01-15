@@ -109,7 +109,7 @@ router.route('/:userid/chat/channels/:channelid').get(channel.getchannelinfo);
 router.route('/:userid/chat/channels/:channelid').put(channel.updatechannelinfo);
 
 /* DELETE el usuario logeado se va del canal */
-//router.route('/:userid/chat/channels/:channelid/unsuscribe').delete(channel.unsuscribefromchannel);
+router.route('/:userid/chat/channels/:channelid/unsuscribe').delete(channel.unsuscribefromchannel);
 
 
 /* POST crea un nuevo mensaje dentro del canal :channelid */
