@@ -333,7 +333,7 @@ exports.checkuserinvitedorgroup = function(groupid,userid) {
 exports.checkuserinchanneladd = function(channelid,userid) {
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel');
-    var query = {_id: userid};
+    var query = {_id: channelid};
     var limit = 1;
     Channel.search(query,limit).then(function (error, channel) {
         if (error) {
@@ -373,7 +373,7 @@ exports.checkuserinchanneladd = function(channelid,userid) {
 exports.checkuserinchannel = function(channelid,userid) {
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel');
-    var query = {_id: userid};
+    var query = {_id: channelid};
     var limit = 1;
     Channel.search(query,limit).then(function (error, channel) {
         if (error) {
