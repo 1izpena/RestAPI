@@ -172,6 +172,8 @@ exports.checkischanneladmin = function(channelid,userid) {
         else {
             if (channel){
                 if (userid == channel._admin){
+                    console.log("userid: " + userid);
+                    console.log("channel._admin: " + channel._admin);
                     return promise.done(null, channel);
                 }else {
                     var err = {
@@ -183,7 +185,7 @@ exports.checkischanneladmin = function(channelid,userid) {
             }else {
                 var err1 = {
                     code   : 401,
-                    message: 'channel found'
+                    message: 'channel not found'
                 };
                 return promise.done(err1, null);
             }
@@ -344,7 +346,7 @@ exports.checkuserinchanneladd = function(channelid,userid) {
                 var encontrado = false;
                 var j = 0;
                 while (encontrado == false && j<channel.users.length){
-                    if (channelid == channel.users[j]){
+                    if (userid == channel.users[j]){
                         encontrado = true;
                     }
                     j++;
@@ -384,14 +386,15 @@ exports.checkuserinchannel = function(channelid,userid) {
                 var encontrado = false;
                 var j = 0;
                 while (encontrado == false && j<channel.users.length){
-                    if (channelid == channel.users[j]){
+                    if (userid == channel.users[j]){
+                        console.log("userid: " + userid);
+                        console.log("channel.users[j]: " + channel.users[j]);
                         encontrado = true;
                     }
                     j++;
                 }
                 if (encontrado){
                     return promise.done(null, channel);
-
                 }else {
                     var err = {
                         code   : 401,
