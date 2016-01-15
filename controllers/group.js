@@ -118,15 +118,22 @@ exports.inviteusertogroup = function inviteusertogroup (request, response) {
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
-                        groupservice.inviteuser(request.params.groupid,request.params.userid1).then(function (error,result){
-                            if(error){
+                        chatErrors.checkuserinvitedorgroup(request.params.groupid,request.params.userid1).then(function (error,result) {
+                            if (error){
                                 response.status(error.code).json({message: error.message});
-                            }else{
-                                response.json(result);
+                            } else {
+                                groupservice.inviteuser(request.params.groupid,request.params.userid1).then(function (error,result){
+                                    if(error){
+                                        response.status(error.code).json({message: error.message});
+                                    }else{
+                                        response.json(result);
+                                    }
+                                });
                             }
                         });
                     }
                 });
+
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
 
@@ -162,13 +169,20 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                groupservice.subscribegroup(request.params.groupid,result).then(function (error,result){
-                    if(error){
+                chatErrors.checkuseringroup(request.params.groupid,request.params.userid1).then(function (error,result) {
+                    if (error){
                         response.status(error.code).json({message: error.message});
-                    }else{
-                        response.json(result);
+                    } else {
+                        groupservice.subscribegroup(request.params.groupid,result).then(function (error,result){
+                            if(error){
+                                response.status(error.code).json({message: error.message});
+                            }else{
+                                response.json(result);
+                            }
+                        });
                     }
                 });
+
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
 

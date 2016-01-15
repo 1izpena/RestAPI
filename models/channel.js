@@ -9,7 +9,8 @@ var channelSchema   = new Schema({
     channelName: { type: String, required: true },
     channelType: { type: String, required: true },
     users:  [ { type: Schema.ObjectId, ref: 'User' }],
-    group:  { type: Schema.ObjectId, ref: 'Group' }
+    group:  { type: Schema.ObjectId, ref: 'Group' },
+    _admin:  { type: Schema.ObjectId, ref: 'User' }
 });
 
 channelSchema.path('channelType').validate(function(channelType){

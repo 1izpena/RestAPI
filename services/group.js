@@ -251,25 +251,34 @@ exports.deleteinvitation = function deleteinvitation(groupid,user){
             return promise.done(error,null);
         }
         else{
-            var query = {_id: user._id};
-            var populate = 'invitations';
+            var query = { _id: user._id};
+            var populate = 'groups._group invitations';
             User.searchpopulated(query,populate).then(function (error, user) {
                 if (error){
                     return promise.done(error,null);
                 }
-                else{
+                else {
+                    var grupos = [];
                     var invitaciones = [];
-                    for (i=0;i<user.invitations.length;i++){
+                    for (i=0;i<user.groups.length;i++){
                         var elto = {
-                            groupid    : user.invitations[i]._id,
-                            groupname  : user.invitations[i].groupName
+                            id        : user.groups[i]._group._id,
+                            groupName  : user.groups[i]._group.groupName
                         };
-                        invitaciones.push(elto);
+                        grupos.push(elto);
+                    }
+                    for (j=0;j<user.invitations.length;j++){
+                        var elto2 = {
+                            groupid        : user.invitations[j]._id,
+                            groupname  : user.invitations[j].groupName
+                        };
+                        invitaciones.push(elto2);
                     }
                     var vuelta = {
                         id: user._id,
                         username: user.username,
-                        mail:user.mail,
+                        mail: user.mail,
+                        groups: grupos,
                         invitations: invitaciones
                     };
                     return promise.done(null,vuelta);
@@ -390,7 +399,39 @@ exports.subscribegroup = function subscribegroup(groupid,user){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    return promise.done(null,user);
+                                    var query = { _id: user._id};
+                                    var populate = 'groups._group invitations';
+                                    User.searchpopulated(query,populate).then(function (error, user) {
+                                        if (error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            var grupos = [];
+                                            var invitaciones = [];
+                                            for (i=0;i<user.groups.length;i++){
+                                                var elto = {
+                                                    id        : user.groups[i]._group._id,
+                                                    groupName  : user.groups[i]._group.groupName
+                                                };
+                                                grupos.push(elto);
+                                            }
+                                            for (j=0;j<user.invitations.length;j++){
+                                                var elto2 = {
+                                                    groupid        : user.invitations[j]._id,
+                                                    groupname  : user.invitations[j].groupName
+                                                };
+                                                invitaciones.push(elto2);
+                                            }
+                                            var vuelta = {
+                                                id: user._id,
+                                                username: user.username,
+                                                mail: user.mail,
+                                                groups: grupos,
+                                                invitations: invitaciones
+                                            };
+                                            return promise.done(null,vuelta);
+                                        }
+                                    });
                                 }
                             });
                         }
