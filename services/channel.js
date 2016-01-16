@@ -44,9 +44,9 @@ exports.updateuserchannellist = function updateuserchannellist(userid,groupid,ch
                 var encontrado1 = false;
                 var j = 0;
                 while (encontrado1 === false && j<user.groups.length){
-                    if (groupid == listaGrupos[j]._group._id){
+                    if (groupid == listaGrupos1[j]._group._id){
                         {
-                            listaGrupos[j].directMessageChannels.push(channelid);
+                            listaGrupos1[j].directMessageChannels.push(channelid);
                             encontrado1 = true;
                         }
                     }
@@ -83,7 +83,7 @@ exports.updatechanneluserlist = function updatechanneluserlist(userid,channelid)
     return promise;
 };
 
-exports.createnewchannel = function createnewchannel(userid,groupid,channelName,channelType){
+exports.createnewchannel = function createnewchannel(userid,groupid,channelName,channelType, userid2){
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
@@ -92,7 +92,14 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
         if (error){
             return promise.done(error,null);
         }else {
-            var users = [userid];
+            var users ;
+            if (channelType == 'DIRECT') {
+                users = [userid, userid2]
+            }
+            else {
+                users = [userid];
+            }
+
             var ats = {
                 channelName: channelName,
                 channelType: channelType,
@@ -120,6 +127,16 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
                                         return promise.done(error, channel);
                                     }
                                 });
+                                if (channelType == "DIRECT") {
+                                    channelservice.updateuserchannellist(userid2,groupid, result._id,channelType).then(function(error,result){
+                                        if (error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            return promise.done(error, channel);
+                                        }
+                                    });
+                                }
                             } else {
                                 return promise.done(error, channel);
                             }

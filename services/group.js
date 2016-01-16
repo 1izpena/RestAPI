@@ -154,18 +154,17 @@ exports.getinfo = function getinfo(groupid,userid){
                         j++;
                     }
                 }if (group.channels[i].channelType == "DIRECT"){
-                    var encontrado1 = false;
-                    var k = 0;
-                    while (encontrado1 == false && k<group.channels[i].users.length){
-                        if (userid == group.channels[i].users[k]){
+                    if (group.channels[i].users.length == 2) {
+                        if (group.channels[i].users[0] == userid ||
+                            group.channels[i].users[1] == userid) {
+
                             var elto3 = {
                                 id        : group.channels[i]._id,
-                                channelName  : group.channels[i].channelName
+                                channelName  : group.channels[i].channelName,
+                                users : [group.channels[i].users[0], group.channels[i].users[1]]
                             };
                             directos.push(elto3);
-                            encontrado = true;
                         }
-                        k++;
                     }
                 }
 

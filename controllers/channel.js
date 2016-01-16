@@ -4,6 +4,7 @@ var Auth  = require('../helpers/authentication');
 var channelservice  = require('../services/channel');
 var mongoose = require('mongoose');
 var chatErrors  = require('../helpers/chatErrorsHandler');
+var User = require('../models/user');
 
 
 exports.newchannel = function newchannel (request, response) {
@@ -20,13 +21,32 @@ exports.newchannel = function newchannel (request, response) {
                         response.status(401).json({message: 'You must enter a value in channelType'});
                     } else {
                         if (request.body.channelType == "PUBLIC" || request.body.channelType == "PRIVATE" || request.body.channelType == "DIRECT"){
-                            channelservice.createnewchannel(result._id,request.params.groupid,request.body.channelName,request.body.channelType).then(function (error,channel){
-                                if (error){
-                                    response.status(error.code).json({message: error.message});
-                                }else {
-                                    response.json(channel.parse());
-                                }
-                            });
+                            if (request.body.channelType == "DIRECT") {
+                                var userid2 = request.body.secondUserid;
+                                User.search({_id: userid2}, 1).then(function(error, user) {
+                                    if (user === null) {
+                                        response.status(401).json({message: 'SecondUserid not valid.'});
+
+                                    } else {
+                                        channelservice.createnewchannel(result._id, request.params.groupid, request.body.channelName, request.body.channelType, userid2).then(function (error, channel) {
+                                            if (error) {
+                                                response.status(error.code).json({message: error.message});
+                                            } else {
+                                                response.json(channel.parse());
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                            else {
+                                channelservice.createnewchannel(result._id,request.params.groupid,request.body.channelName,request.body.channelType).then(function (error,channel){
+                                    if (error){
+                                        response.status(error.code).json({message: error.message});
+                                    }else {
+                                        response.json(channel.parse());
+                                    }
+                                });
+                            }
                         } else {
                             console.log("You must enter a valid channelType");
                             response.status(401).json({message: 'You must enter a valid channelType'});
