@@ -3,7 +3,6 @@ var Group = require('../models/group');
 var Channel = require('../models/channel');
 var mongoose = require('mongoose');
 var Hope  = require('hope');
-var channelservice  = require('../services/channel');
 
 
 exports.getgrouplist = function getgrouplist(userid){
@@ -446,6 +445,7 @@ exports.subscribegroup = function subscribegroup(groupid,user){
 exports.deleteuser = function deleteuser(groupid,userid){
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group');
+    var Channel = mongoose.model('Channel');
     var query = {_id: groupid};
     var limit = 1;
     Group.search(query,limit).then(function (error, group) {
@@ -491,7 +491,29 @@ exports.deleteuser = function deleteuser(groupid,userid){
                                         return promise.done(error,null);
                                     }
                                     else{
-                                        promise.done(null, grupo);
+                                        var query3 = {_id:{$in:grupo.channels}};
+                                        var limit3 = 0;
+                                        Channel.search(query3, limit3).then(function (error, channels) {
+                                            if (error) {
+                                                return promise.done(error, null);
+                                            }
+                                            else {
+                                                for (i=0;i<channels.length;i++){
+                                                    var users = channels[i].users;
+                                                    var encontrado = false;
+                                                    var j = 0;
+                                                    while (encontrado === false && j<users.length){
+                                                        if (users[j] == userid){
+                                                            users.splice(j,1);
+                                                            encontrado = true;
+                                                        }
+                                                        j++;
+                                                    }
+                                                }
+                                                promise.done(null, grupo);
+                                            }
+                                        });
+
                                     }
                                 });
 
@@ -529,7 +551,8 @@ exports.createnewgroup = function createnewgroup(ats,userid){
                 channelName: channelName,
                 channelType: channelType,
                 users: users,
-                group: groupid
+                group: groupid,
+                _admin: userid
             };
             Channel.createchannel (ats).then(function (error, result){
                 if (error){
@@ -581,6 +604,84 @@ exports.updategroupname = function updategroupname(groupid,groupName){
         }
         else{
             return promise.done(null,group);
+        }
+    });
+    return promise;
+};
+
+exports.removegroup = function removegroup(userid,groupid){
+    var promise = new Hope.Promise();
+    var Channel = mongoose.model('Channel');
+    var User = mongoose.model('User');
+    var Group = mongoose.model('Group');
+    var query = {_id: groupid};
+    var limit = 1;
+    Group.search(query,limit).then(function (error, group) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            var groupchannels = group.channels;
+            var groupusers = group.users;
+            if (group){
+                Group.deletegroup (groupid).then(function(error,result){
+                    if (error){
+                        return promise.done(error,null);
+                    }
+                    else{
+                        //buscamos el groupid en user y eliminamos
+                        //eliminamos los canales del grupo
+                        var query3 = {_id:{$in:groupusers}};
+                        var populate = 'groups._group';
+                        User.searchpopulatedmany(query3,populate).then(function (error, users) {
+                            if (error){
+                                return promise.done(error,null);
+                            }
+                            else {
+                                for (i=0;i<users.length;i++){
+                                    var encontrado = false;
+                                    var listaGrupos = users[i].groups;
+                                    var j = 0;
+                                    while (encontrado == false && j<listaGrupos.length){
+                                        if (groupid == listaGrupos[j]._group._id){
+                                            listaGrupos.splice(j,1);
+                                            encontrado = true;
+                                        }
+                                        j++;
+                                    }
+                                    if (encontrado == true){
+                                        var update = {"groups":listaGrupos};
+                                        var options = {multi: true};
+                                        User.updateuser(users[i]._id,update,options).then(function (error,user){
+                                            if(error){
+                                                return promise.done(error,null);
+                                            }
+                                        });
+                                    }
+                                }
+                                for (l=0;l<groupchannels.length;l++){
+                                    Channel.deletechannel(groupchannels[l]).then(function (error,result){
+                                        if(error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            var message = 'group deleted correctly';
+                                            promise.done(null,message);
+                                        }
+                                    });
+                                }
+
+                            }
+                        });//hasta akiii
+                    }
+                });
+            } else {
+                var err = {
+                    code   : 403,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
         }
     });
     return promise;

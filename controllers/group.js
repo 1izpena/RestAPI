@@ -191,6 +191,38 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
     });
 };
 
+exports.deletegroupfromsystem = function deletegroupfromsystem (request, response){
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        } else {
+            if (request.params.userid == result._id){
+                chatErrors.checkuseringroup(request.params.groupid,request.params.userid).then(function (error,result){
+                    if(error){
+                        response.status(error.code).json({message: error.message});
+                    }else{
+                        chatErrors.checkisgroupadmin(request.params.groupid,request.params.userid).then(function (error,result){
+                            if(error){
+                                response.status(error.code).json({message: error.message});
+                            }else{
+                                groupservice.removegroup(request.params.userid,request.params.groupid).then(function (error,result){
+                                    if(error){
+                                        response.status(error.code).json({message: error.message});
+                                    }else{
+                                        response.json(result);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+            }
+        }
+    });
+};
+
 
 exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
     Auth(request, response).then(function(error, result) {
@@ -297,13 +329,24 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                groupservice.updategroupname(request.params.groupid,request.body.groupName).then(function (error,result){
-                                    if(error){
-                                        response.status(error.code).json({message: error.message});
-                                    }else{
-                                        response.json(result);
-                                    }
-                                });
+                                if (request.body.groupName == undefined || request.body.groupName == "" || request.body.groupName == null){
+                                    console.log("You must enter a valid groupName");
+                                    response.status(401).json({message: 'You must enter a valid groupName'});
+                                } else {
+                                    chatErrors.checkgroupnameunique(request.params.userid,request.body.groupName).then(function (error,result){
+                                        if (error){
+                                            response.status(error.code).json({message: error.message});
+                                        }else {
+                                            groupservice.updategroupname(request.params.groupid,request.body.groupName).then(function (error,result){
+                                                if(error){
+                                                    response.status(error.code).json({message: error.message});
+                                                }else{
+                                                    response.json(result);
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
                             }
                         });
                     }
@@ -323,25 +366,31 @@ exports.newgroup = function newgroup (request, response){
         } else {
             var userid = result._id;
             if (request.params.userid == result._id){
-                chatErrors.checkgroupnameunique(result._id,request.body.groupName).then(function (error,result){
-                    if (error){
-                        response.status(error.code).json({message: error.message});
-                    }else {
-                        var userslist = [result._id];
-                        var ats = {
-                            groupName: request.body.groupName,
-                            _admin: result._id,
-                            users: userslist
-                        };
-                        groupservice.createnewgroup(ats,userid).then(function (error, group){
-                            if (error){
-                                response.status(error.code).json({message: error.message});
-                            }else {
-                                response.json(group);
-                            }
-                        });
-                    }
-                });
+                if (request.body.groupName == undefined || request.body.groupName == "" || request.body.groupName == null){
+                    console.log("You must enter a valid groupName");
+                    response.status(401).json({message: 'You must enter a valid groupName'});
+                } else {
+                    chatErrors.checkgroupnameunique(result._id,request.body.groupName).then(function (error,result){
+                        if (error){
+                            response.status(error.code).json({message: error.message});
+                        }else {
+                            var userslist = [result._id];
+                            var ats = {
+                                groupName: request.body.groupName,
+                                _admin: result._id,
+                                users: userslist
+                            };
+                            groupservice.createnewgroup(ats,userid).then(function (error, group){
+                                if (error){
+                                    response.status(error.code).json({message: error.message});
+                                }else {
+                                    response.json(group);
+                                }
+                            });
+                        }
+                    });
+                }
+
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }

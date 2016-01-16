@@ -52,7 +52,7 @@ router.route('/:userid/chat/groups').post(group.newgroup);
 router.route('/:userid/chat/groups/:groupid').get(group.getgroupinfo);
 
 /* DELETE El usuario logeado, si es el administrador del grupo, elimina el grupo del sistema */
-//router.route('/:userid/chat/groups/:groupid').delete(group.deletegroupfromsystem);
+router.route('/:userid/chat/groups/:groupid').delete(group.deletegroupfromsystem);
 
 /* PUT El usuario logeado, si es el administrador del grupo, modifica el nombre del grupo */
 router.route('/:userid/chat/groups/:groupid').put(group.updategroupinfo);
@@ -94,7 +94,7 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/unsuscribe').del
 router.route('/:userid/chat/groups/:groupid/channels/:channelid').get(channel.getchannelinfo);
 
 /* DELETE el usuario logeado elimina el canal del grupo */
-//router.route('/:userid/chat/groups/:groupid/channels/:channelid').delete(channel.deletechannelfromgroup);
+router.route('/:userid/chat/groups/:groupid/channels/:channelid').delete(channel.deletechannelfromgroup);
 
 /* PUT El usuario logeado, modifica el nombre del canal */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid').put(channel.updatechannelinfo);

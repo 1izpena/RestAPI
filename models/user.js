@@ -80,7 +80,7 @@ userSchema.statics.signup = function signup (attributes) {
 
 
 	
-        return promise.done(error, result);
+        return promise.done(null, result);
       });
     }
   });
@@ -186,8 +186,26 @@ userSchema.statics.searchpopulated = function searchpopulated (query,populate) {
     return promise;
 };
 
-
-
+userSchema.statics.searchpopulatedmany = function searchpopulatedmany (query,populate) {
+    var promise = new Hope.Promise();
+    this.find(query).populate(populate).exec(function (error, users) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            if (users){
+                promise.done(null, users);
+            }else {
+                var err = {
+                    code   : 403,
+                    message: 'user not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
 
 /*CAMBIAR CONTRASEÑA*/
 userSchema.statics.reset = function reset(attributes){

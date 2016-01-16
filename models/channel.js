@@ -63,7 +63,7 @@ channelSchema.statics.search = function search (query, limit, page) {
             if (value.length === 0) {
                 error = {
                     code: 402,
-                    message: "Group not found."
+                    message: "Channel not found."
                 };
             }
             value = value[0];
@@ -145,7 +145,8 @@ channelSchema.methods.parse = function parse () {
         id         : channel._id,
         channelName: channel.channelName,
         channelType: channel.channelType,
-        users: channel.users
+        users: channel.users,
+        admin: channel._admin
     };
 };
 

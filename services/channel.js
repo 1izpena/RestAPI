@@ -40,21 +40,21 @@ exports.updateuserchannellist = function updateuserchannellist(userid,groupid,ch
                 });
             }
             if (channelType == "DIRECT"){
-                var listaGrupos = user.groups;
-                var encontrado = false;
-                var i = 0;
-                while (encontrado === false && i<user.groups.length){
-                    if (groupid == listaGrupos[i]._group._id){
+                var listaGrupos1 = user.groups;
+                var encontrado1 = false;
+                var j = 0;
+                while (encontrado1 === false && j<user.groups.length){
+                    if (groupid == listaGrupos[j]._group._id){
                         {
-                            listaGrupos[i].directMessageChannels.push(channelid);
-                            encontrado = true;
+                            listaGrupos[j].directMessageChannels.push(channelid);
+                            encontrado1 = true;
                         }
                     }
-                    i++;
+                    j++;
                 }
-                var update = {"groups":listaGrupos};
-                var options = {multi: true};
-                User.updateuser(userid,update,options).then(function (error,user){
+                var update1 = {"groups":listaGrupos1};
+                var options1 = {multi: true};
+                User.updateuser(userid,update1,options1).then(function (error,user){
                     if(error){
                         return promise.done(error,null);
                     }else{
@@ -88,7 +88,7 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
-    chatErrors.chechchannelnameunique(userid,groupid,channelName,channelType).then(function (error,result){
+    chatErrors.checkchannelnameunique(userid,groupid,channelName,channelType).then(function (error,result){
         if (error){
             return promise.done(error,null);
         }else {
@@ -262,6 +262,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
         }
         else {
             if (channel){
+                var canal = channel;
                 var channelType = channel.channelType;
                 var encontrado = false;
                 var i = 0;
@@ -272,55 +273,71 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                     }
                     i++;
                 }
-                var query = {users: channel.users};
-                var options = {new:true};
-                Channel.updatechannel(channelid,query,options).then(function (error, result){
-                    if (error){
-                        return promise.done(error,null);
+
+                if (channel.users.length >=1){
+                    var query = "";
+                    if (userid == channel.admin){
+                        query = {users: channel.users, _admin:channel.users[0]};
+                    } else {
+                        query = {users: channel.users};
                     }
-                    else{
-                        var channel = result;
-                        var query = { _id: userid};
-                        var populate = 'groups._group';
-                        User.searchpopulated(query,populate).then(function (error, user) {
-                            if (error){
-                                return promise.done(error,null);
-                            }
-                            else {
-                                var listaGrupos = user.groups;
-                                var encontrado = false;
-                                var j = 0;
-                                while (encontrado == false && j<j<listaGrupos.length){
-                                    if (groupid == listaGrupos[j]._group._id){
-                                        if (channelType == "PRIVATE"){
-                                            for (k=0;k<listaGrupos[j].privateChannels.length;k++){
-                                                if (channelid == listaGrupos[j].privateChannels[k]){
-                                                    listaGrupos[j].privateChannels.splice(k,1);
-                                                    encontrado = true;
+                    var options = {new:true};
+                    Channel.updatechannel(channelid,query,options).then(function (error, result){
+                        if (error){
+                            return promise.done(error,null);
+                        }
+                        else{
+                            var channel = result;
+                            var query = { _id: userid};
+                            var populate = 'groups._group';
+                            User.searchpopulated(query,populate).then(function (error, user) {
+                                if (error){
+                                    return promise.done(error,null);
+                                }
+                                else {
+                                    var listaGrupos = user.groups;
+                                    var encontrado = false;
+                                    var j = 0;
+                                    while (encontrado == false && j<listaGrupos.length){
+                                        if (groupid == listaGrupos[j]._group._id){
+                                            if (channelType == "PRIVATE"){
+                                                for (k=0;k<listaGrupos[j].privateChannels.length;k++){
+                                                    if (channelid == listaGrupos[j].privateChannels[k]){
+                                                        listaGrupos[j].privateChannels.splice(k,1);
+                                                        encontrado = true;
+                                                    }
                                                 }
                                             }
                                         }
-
+                                        j++;
                                     }
-                                    j++;
+                                    if (encontrado == true){
+                                        var update = {"groups":listaGrupos};
+                                        var options = {multi: true};
+                                        User.updateuser(userid,update,options).then(function (error,user){
+                                            if(error){
+                                                return promise.done(error,null);
+                                            }else{
+                                                return promise.done(null,user);
+                                            }
+                                        });
+                                    }
                                 }
-                                if (encontrado == true){
-                                    var update = {"groups":listaGrupos};
-                                    var options = {multi: true};
-                                    User.updateuser(userid,update,options).then(function updateuser (error){
-                                        if(error){
-                                            return promise.done(error,null);
-                                        }else{
-                                            promise.done(null,channel);
-                                        }
-                                    });
-                                }
-                            }
 
-                        });
-                    }
-                });
-
+                            });
+                        }
+                    });
+                } else {
+                    //eliminamos el canal
+                    removechannel(userid,groupid,channelid).then(function (error,result){
+                        if(error){
+                            return promise.done(error,null);
+                        }else{
+                            var message = 'channel deleted correctly';
+                            promise.done(null,message);
+                        }
+                    });
+                }
             }else {
                 var err = {
                     code   : 403,
@@ -333,17 +350,149 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
     return promise;
 };
 
-exports.updatechannelname = function updatechannelname(channelid,channelName){
+exports.updatechannelname = function updatechannelname(userid,groupid,channelid,channelName){
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel');
-    var options = {new: true};
-    var query = {"channelName": channelName};
-    Channel.updatechannel (channelid,query,options).then(function(error,channel){
+    var query1 = {_id: channelid};
+    var limit1 = 1;
+    Channel.search(query1,limit1).then(function (error, channel) {
         if (error){
             return promise.done(error,null);
         }
-        else{
-            return promise.done(null,channel);
+        else {
+            if (channel){
+                var channelType = channel.channelType;
+                chatErrors.checkchannelnameunique(userid,groupid,channelName,channelType).then(function (error,result){
+                    if (error){
+                        return promise.done(error,null);
+                    }else {
+                        var options = {new: true};
+                        var query = {"channelName": channelName};
+                        Channel.updatechannel (channelid,query,options).then(function(error,channel){
+                            if (error){
+                                return promise.done(error,null);
+                            }
+                            else{
+                                return promise.done(null,channel);
+                            }
+                        });
+                    }
+                });
+            } else {
+                var err = {
+                    code   : 403,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
+exports.removechannel = function removechannel(userid,groupid,channelid){
+    var promise = new Hope.Promise();
+    var Channel = mongoose.model('Channel');
+    var User = mongoose.model('User');
+    var Group = mongoose.model('Group');
+    var query = {_id: groupid};
+    var query1 = {_id: channelid};
+    var limit1 = 1;
+    Channel.search(query1,limit1).then(function (error, channel) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            var userschannel = channel.users;
+            if (channel){
+                Channel.deletechannel (channelid).then(function(error,result){
+                    if (error){
+                        return promise.done(error,null);
+                    }
+                    else{
+                        //buscamos el groupid en user y quitamos el channel de privatechannels
+                        //eliminamos el canal de grupo
+                        var query3 = {_id:{$in:userschannel}};
+                        var populate = 'groups._group';
+                        User.searchpopulatedmany(query3,populate).then(function (error, users) {
+                            if (error){
+                                return promise.done(error,null);
+                            }
+                            else {
+                                for (i=0;i<users.length;i++){
+                                    var listaGrupos = users[i].groups;
+                                    var encontrado = false;
+                                    var j = 0;
+                                    while (encontrado == false && j<listaGrupos.length){
+                                        if (groupid == listaGrupos[j]._group._id){
+                                            for (k=0;k<listaGrupos[j].privateChannels.length;k++){
+                                                if (channelid == listaGrupos[j].privateChannels[k]){
+                                                    listaGrupos[j].privateChannels.splice(k,1);
+                                                    encontrado = true;
+                                                }
+                                            }
+                                        }
+                                        j++;
+                                    }
+                                    if (encontrado == true){
+                                        var update = {"groups":listaGrupos};
+                                        var options = {multi: true};
+                                        User.updateuser(users[i]._id,update,options).then(function updateuser (error){
+                                            if(error){
+                                                return promise.done(error,null);
+                                            }
+                                        });
+                                    }
+                                }
+                                //quitamos canal de grupo
+                                Group.search(query,limit1).then(function (error, group) {
+                                    if (error){
+                                        return promise.done(error,null);
+                                    }
+                                    else {
+                                        if (group){
+                                            var encontrado1 = false;
+                                            var i = 0;
+                                            while (encontrado1 === false && i<group.channels.length){
+                                                if (group.channels[i] == channelid){
+                                                    group.channels.splice(i,1);
+                                                    encontrado1 = true;
+                                                }
+                                                i++;
+                                            }
+                                            if (encontrado1 == true){
+                                                var options = {new: true};
+                                                var updateQuery = {channels: group.channels};
+                                                Group.updategroup (groupid,updateQuery,options).then (function (error,group){
+                                                    if (error){
+                                                        return promise.done(error,null);
+                                                    }
+                                                    else {
+                                                        return promise.done(null, group);
+                                                    }
+                                                });
+                                            }
+                                        } else {
+                                            var err3 = {
+                                                code   : 403,
+                                                message: 'group not found'
+                                            };
+                                            return promise.done(err3, null);
+                                        }
+                                    }
+                                });
+
+                            }
+                        });//hasta akiii
+                    }
+                });
+            } else {
+                var err = {
+                    code   : 403,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
         }
     });
     return promise;

@@ -26,6 +26,7 @@ exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
                     code   : 401,
                     message: 'The user already has a group with that name'
                 };
+                console.log("Error 401 - the user already has a group with that name");
                 return promise.done(err, null);
             }else {
                 return promise.done(null, user);
@@ -35,7 +36,7 @@ exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
     return promise;
 };
 
-exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,channelname,channeltype){
+exports.checkchannelnameunique = function checkchannelnameunique(userid,groupid,channelname,channeltype){
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
     var Channel = mongoose.model('Channel');
@@ -60,6 +61,7 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                         code   : 401,
                         message: 'the group already has a public channel with that name'
                     };
+                    console.log("Error 401 - the user already has a public channel with that name");
                     return promise.done(err, null);
                 }else {
                     return promise.done(null, group);
@@ -82,11 +84,11 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                     i++;
                 }
                 if (encontrado === true){
-                    console.log ("si encontrado");
                     var err = {
                         code   : 403,
                         message: 'the group already has a private channel with that name'
                     };
+                    console.log("Error 401 - the user already has a private channel with that name");
                     return promise.done(err, null);
                 }else {
                     return promise.done(null, group);
@@ -109,11 +111,11 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
                     i++;
                 }
                 if (encontrado === true){
-                    console.log ("si encontrado");
                     var err = {
                         code   : 403,
                         message: 'the group already has a private channel with that name'
                     };
+                    console.log("Error 401 - the user already has a direct channel with that name");
                     return promise.done(err, null);
                 }else {
                     return promise.done(null, group);
@@ -122,6 +124,32 @@ exports.chechchannelnameunique = function chechchannelnameunique(userid,groupid,
         });
     }
 
+    return promise;
+};
+
+exports.checknewchannelparams = function checknewchannelparams(userid,groupid,channelname,channeltype){
+    var User = mongoose.model('User');
+    var Group = mongoose.model('Group');
+    var Channel = mongoose.model('Channel');
+    var promise = new Hope.Promise();
+    if (channelname == undefined || channelname == "" || channelname == null){
+        var err = {
+            code   : 401,
+            message: 'channelName must have a value'
+        };
+        return promise.done(err, null);
+    } if (channelname != undefined && channelname != "" && channelname != null) {
+        if (channeltype != "PUBLIC" && channeltype != "PRIVATE" && channeltype != "DIRECT") {
+            var err1 = {
+                code: 401,
+                message: 'channelType must be PUBLIC/PRIVATE/DIRECT'
+            };
+            return promise.done(err1, null);
+        } else {
+            var message = 'imput params correct';
+            return promise.done(null, message);
+        }
+    }
     return promise;
 };
 
@@ -136,16 +164,15 @@ exports.checkisgroupadmin = function(groupid,userid) {
         }
         else {
             if (group){
-
-
-
                 if (userid == group._admin){
+                    console.log("the user is the admin of the group");
                     return promise.done(null, group);
                 }else {
                     var err = {
                         code   : 401,
                         message: 'you are not the admin of the group'
                     };
+                    console.log("Error 401 - you are not the admin of the group");
                     return promise.done(err, null);
                 }
             }else {
@@ -153,6 +180,7 @@ exports.checkisgroupadmin = function(groupid,userid) {
                     code   : 401,
                     message: 'group not found'
                 };
+                console.log("Error 401 - group not found");
                 return promise.done(err1, null);
             }
         }
@@ -174,12 +202,14 @@ exports.checkischanneladmin = function(channelid,userid) {
                 if (userid == channel._admin){
                     console.log("userid: " + userid);
                     console.log("channel._admin: " + channel._admin);
+                    console.log("the user is the admin of the channel");
                     return promise.done(null, channel);
                 }else {
                     var err = {
                         code   : 401,
                         message: 'you are not the admin of the channel'
                     };
+                    console.log("Error 401 - the user is not the admin of the channel");
                     return promise.done(err, null);
                 }
             }else {
@@ -187,6 +217,7 @@ exports.checkischanneladmin = function(channelid,userid) {
                     code   : 401,
                     message: 'channel not found'
                 };
+                console.log("Error 401 - channel not found");
                 return promise.done(err1, null);
             }
         }
@@ -218,6 +249,7 @@ exports.checkuseringroupinvitation = function(groupid,userid) {
                         code   : 401,
                         message: 'the user is already a member of the group'
                     };
+                    console.log("Error 401 - the user already is a member of the group");
                     return promise.done(err, null);
                 }else {
                     return promise.done(null, user);
@@ -227,6 +259,7 @@ exports.checkuseringroupinvitation = function(groupid,userid) {
                     code   : 401,
                     message: 'group not found'
                 };
+                console.log("Error 401 - group not found");
                 return promise.done(err2, null);
             }
         }
@@ -255,6 +288,7 @@ exports.checkuseringroup = function(groupid,userid) {
                     j++;
                 }
                 if (encontrado){
+                    console.log("the user is a member of the group");
                     return promise.done(null, user);
 
                 }else {
@@ -262,6 +296,7 @@ exports.checkuseringroup = function(groupid,userid) {
                         code   : 401,
                         message: 'the user is not a member of the group'
                     };
+                    console.log("Error 401 - the user is not a member of the group");
                     return promise.done(err, null);
                 }
             }else {
@@ -269,6 +304,7 @@ exports.checkuseringroup = function(groupid,userid) {
                     code   : 401,
                     message: 'group not found'
                 };
+                console.log("Error 401 - group not found");
                 return promise.done(err2, null);
             }
         }
@@ -300,6 +336,7 @@ exports.checkuserinvitedorgroup = function(groupid,userid) {
                         code   : 401,
                         message: 'the user is already a member of the group'
                     };
+                    console.log("Error 401 - the user is already a member of the group");
                     return promise.done(err, null);
                 }else {
                     var encontrado1 = false;
@@ -315,6 +352,7 @@ exports.checkuserinvitedorgroup = function(groupid,userid) {
                             code: 401,
                             message: 'the user already has an invitation to the group'
                         };
+                        console.log("Error 401 - the user already has an invitation to the group");
                         return promise.done(err1, null);
                     } else {
                         return promise.done(null, user);
@@ -356,6 +394,7 @@ exports.checkuserinchanneladd = function(channelid,userid) {
                         code   : 401,
                         message: 'the user is already a member of the channel'
                     };
+                    console.log("Error 401 - the user already is already a member of the channel");
                     return promise.done(err, null);
                 }else {
                     return promise.done(null, channel);
@@ -394,12 +433,14 @@ exports.checkuserinchannel = function(channelid,userid) {
                     j++;
                 }
                 if (encontrado){
+                    console.log("the user is a member of the channel");
                     return promise.done(null, channel);
                 }else {
                     var err = {
                         code   : 401,
                         message: 'the user is not a member of the channel'
                     };
+                    console.log("Error 401 - the user is not a member of the channel");
                     return promise.done(err, null);
                 }
             }else {
