@@ -509,7 +509,25 @@ exports.deleteuser = function deleteuser(groupid,userid){
                                                         j++;
                                                     }
                                                 }
-                                                promise.done(null, grupo);
+                                                var query = {_id: groupid};
+                                                var populate = 'users';
+                                                Group.searchpopulated(query,populate).then(function (error, group) {
+                                                    if (error){
+                                                        return promise.done(error,null);
+                                                    }
+                                                    else{
+                                                        var vuelta = [];
+                                                        for (i=0;i<group.users.length;i++){
+                                                            var elto = {
+                                                                id        : group.users[i]._id,
+                                                                username  : group.users[i].username,
+                                                                mail      :group.users[i].mail
+                                                            };
+                                                            vuelta.push(elto);
+                                                        }
+                                                        promise.done(null,vuelta);
+                                                    }
+                                                });
                                             }
                                         });
 
