@@ -45,7 +45,7 @@ exports.newchannel = function newchannel (request, response) {
                                         response.status(error.code).json({message: error.message});
                                     }else {
                                         if (request.body.channelType == "PUBLIC"){
-                                            //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newPublicChannel', result);
+                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newPublicChannel', result);
                                         }
                                         response.json(channel.parse());
                                     }
@@ -127,7 +127,7 @@ exports.addusertochannel = function addusertochannel (request, response){
                                             if(error){
                                                 response.status(error.code).json({message: error.message});
                                             }else{
-                                                //socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('newUserInChannel', result);
+                                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('newUserInChannel', result);
                                                 response.json(result);
                                             }
                                         });
@@ -166,7 +166,7 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                             if(error){
                                                 response.status(error.code).json({message: error.message});
                                             }else{
-                                                //socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', request.params.userid1);
+                                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', request.params.userid1);
                                                 response.json(result);
                                             }
                                         });
@@ -197,7 +197,7 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                //socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemeberInChannel', request.params.userid);
+                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemeberInChannel', request.params.userid);
                                 response.json(result);
                             }
                         });
@@ -232,12 +232,12 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
                                         if(error){
                                             response.status(error.code).json({message: error.message});
                                         }else{
-                                            /*if (result.channelType === "PRIVATE"){
+                                            if (result.channelType === "PRIVATE"){
                                                 socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('editedPrivateChannel', result);
                                             }
                                             if (result.channelType == "PUBLIC"){
                                                 socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('editedPublicChannel', result);
-                                            }*/
+                                            }
                                             response.json(result);
                                         }
                                     });
@@ -271,12 +271,12 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        /*if (result.channelType === "PRIVATE"){
+                                        if (result.channelType === "PRIVATE"){
                                             socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPrivateChannel', request.params.channelid);
                                         }
                                         if (result.channelType == "PUBLIC"){
                                             socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPublicChannel', request.params.channelid);
-                                        }*/
+                                        }
                                         response.json(result);
                                     }
                                 });

@@ -125,7 +125,7 @@ exports.inviteusertogroup = function inviteusertogroup (request, response) {
                                         response.status(error.code).json({message: error.message});
                                     }else{
                                         //Notificamos al usuario que tiene una nueva invitacion
-                                        //socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroupInvitation', result);
+                                        socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroupInvitation', result);
                                         response.json(result);
                                     }
                                 });
@@ -182,7 +182,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                                     username: result.username,
                                     mail: result.mail
                                 };
-                                //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', vuelta);
+                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', vuelta);
                                 response.json(result);
                             }
                         });
@@ -215,7 +215,7 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedGroup', request.params.groupid);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedGroup', request.params.groupid);
                                         response.json(result);
                                     }
                                 });
@@ -249,7 +249,7 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid1);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid1);
                                         response.json(result);
                                     }
                                 });
@@ -279,7 +279,7 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid);
+                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid);
                                 response.json(result);
                             }
                         });
@@ -310,7 +310,7 @@ exports.addusertogroup = function addusertogroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                       // socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', request.params.userid1);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', request.params.userid1);
                                         response.json(result);
                                     }
                                 });
@@ -351,7 +351,7 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                                                 if(error){
                                                     response.status(error.code).json({message: error.message});
                                                 }else{
-                                                    //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('editedGroupName', result);
+                                                    socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('editedGroupName', result);
                                                     response.json(result);
                                                 }
                                             });
