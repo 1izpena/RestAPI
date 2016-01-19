@@ -4,7 +4,7 @@ var Auth  = require('../helpers/authentication');
 var groupservice  = require('../services/group');
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var mongoose = require('mongoose');
-
+var socketio  = require('../helpers/sockets');
 
 exports.getusergrouplist = function getusergrouplist (request, response) {
     Auth(request, response).then(function(error, result) {
@@ -20,7 +20,7 @@ exports.getusergrouplist = function getusergrouplist (request, response) {
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
         }
     });
@@ -40,7 +40,7 @@ exports.getgroupinfo = function getgroupinfo (request, response) {
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
         }
     });
@@ -60,7 +60,7 @@ exports.getuserchatinfo = function getuserchatinfo (request, response) {
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
         }
     });
@@ -80,8 +80,7 @@ exports.getgroupuserlist = function getgroupuserlist (request, response) {
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
         }
     });
@@ -101,8 +100,7 @@ exports.getinvitationslist = function getinvitationslist (request, response) {
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
         }
     });
@@ -126,6 +124,8 @@ exports.inviteusertogroup = function inviteusertogroup (request, response) {
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
+                                        //Notificamos al usuario que tiene una nueva invitacion
+                                        //socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroupInvitation', result);
                                         response.json(result);
                                     }
                                 });
@@ -133,9 +133,8 @@ exports.inviteusertogroup = function inviteusertogroup (request, response) {
                         });
                     }
                 });
-
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
 
             }
         }
@@ -156,7 +155,7 @@ exports.regretinvitation = function regretinvitation (request, response) {
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
 
             }
         }
@@ -177,6 +176,13 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
+                                //al grupo que hay nuevo usuario
+                                var vuelta = {
+                                    id: result.id,
+                                    username: result.username,
+                                    mail: result.mail
+                                };
+                                //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', vuelta);
                                 response.json(result);
                             }
                         });
@@ -184,7 +190,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                 });
 
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
 
             }
         }
@@ -209,6 +215,7 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
+                                        //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedGroup', request.params.groupid);
                                         response.json(result);
                                     }
                                 });
@@ -217,7 +224,7 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
         }
     });
@@ -242,6 +249,7 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
+                                        //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid1);
                                         response.json(result);
                                     }
                                 });
@@ -250,7 +258,7 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
 
             }
         }
@@ -271,13 +279,14 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
+                                //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid);
                                 response.json(result);
                             }
                         });
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
         }
     });
@@ -301,6 +310,7 @@ exports.addusertogroup = function addusertogroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
+                                       // socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', request.params.userid1);
                                         response.json(result);
                                     }
                                 });
@@ -309,7 +319,7 @@ exports.addusertogroup = function addusertogroup (request, response){
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
             }
         }
     });
@@ -331,7 +341,7 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                             }else{
                                 if (request.body.groupName == undefined || request.body.groupName == "" || request.body.groupName == null){
                                     console.log("You must enter a valid groupName");
-                                    response.status(401).json({message: 'You must enter a valid groupName'});
+                                    response.status(400).json({message: 'You must enter a valid groupName'});
                                 } else {
                                     chatErrors.checkgroupnameunique(request.params.userid,request.body.groupName).then(function (error,result){
                                         if (error){
@@ -341,6 +351,7 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                                                 if(error){
                                                     response.status(error.code).json({message: error.message});
                                                 }else{
+                                                    //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('editedGroupName', result);
                                                     response.json(result);
                                                 }
                                             });
@@ -352,7 +363,7 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                     }
                 });
             } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                response.status(400).json({message: 'Unauthorized. You are trying to access with a different userid'});
 
             }
         }

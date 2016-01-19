@@ -83,6 +83,42 @@ exports.updatechanneluserlist = function updatechanneluserlist(userid,channelid)
     return promise;
 };
 
+exports.updatechannelpublicuserlist = function updatechannelpublicuserlist(groupid,channelid){
+    var promise = new Hope.Promise();
+    var Channel = mongoose.model('Channel');
+    var Group = mongoose.model('Group');
+    var query = {_id: groupid};
+    var limit = 1;
+    Group.search(query,limit).then(function (error, group) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            if (group){
+                var users = group.users;
+                var options = {new: true};
+                var updateQuery = {"users": users};
+                Channel.updatechannel (channelid,updateQuery,options).then (function (error,channel) {
+                    if (error) {
+                        return promise.done(error, null);
+                    }
+                    else {
+                        return promise.done(null, channel);
+                    }
+                });
+            } else {
+                var err = {
+                    code   : 403,
+                    message: 'group not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+
+    return promise;
+};
+
 exports.createnewchannel = function createnewchannel(userid,groupid,channelName,channelType, userid2){
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel');
@@ -99,7 +135,6 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
             else {
                 users = [userid];
             }
-
             var ats = {
                 channelName: channelName,
                 channelType: channelType,
@@ -138,6 +173,7 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
                                     });
                                 }
                             } else {
+                                channelservice.updatechannelpublicuserlist(groupid,channel.id);
                                 return promise.done(error, channel);
                             }
                         }
@@ -290,7 +326,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                     }
                     i++;
                 }
-
+                console.log("tamaño de users de channel al eliminar usuario: " + channel.users.length);
                 if (channel.users.length >=1){
                     var query = "";
                     if (userid == channel.admin){
@@ -346,7 +382,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                     });
                 } else {
                     //eliminamos el canal
-                    removechannel(userid,groupid,channelid).then(function (error,result){
+                    channelservice.removechannel(userid,groupid,channelid).then(function (error,result){
                         if(error){
                             return promise.done(error,null);
                         }else{
@@ -422,7 +458,7 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
         else {
             var userschannel = channel.users;
             if (channel){
-                Channel.deletechannel (channelid).then(function(error,result){
+                Channel.deletechannel (channelid).then(function(error){
                     if (error){
                         return promise.done(error,null);
                     }

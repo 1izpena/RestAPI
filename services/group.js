@@ -307,6 +307,7 @@ exports.adduser = function adduser(groupid,userid){
                     return promise.done(error,null);
                 }
                 else {
+
                     var grupo = group;
                     var idpublicos = [];
                     for (i=0;i<grupo.channels.length;i++){
@@ -325,6 +326,11 @@ exports.adduser = function adduser(groupid,userid){
                             return promise.done(error,null);
                         }
                         else{
+                            var vuelta = {
+                                id: user._id,
+                                username: user.username,
+                                mail: user.mail
+                            };
                             var options2 = {new:true,multi:true};
                             var query3 = {_id:{$in:idpublicos}};
                             Channel.updatechannels(query3,updateQuery,options2).then(function (error,result){
@@ -332,7 +338,7 @@ exports.adduser = function adduser(groupid,userid){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    return promise.done(null,grupo);
+                                    return promise.done(null,vuelta);
                                 }
                             });
                         }
@@ -641,7 +647,7 @@ exports.removegroup = function removegroup(userid,groupid){
             var groupchannels = group.channels;
             var groupusers = group.users;
             if (group){
-                Group.deletegroup (groupid).then(function(error,result){
+                Group.deletegroup (groupid).then(function(error){
                     if (error){
                         return promise.done(error,null);
                     }

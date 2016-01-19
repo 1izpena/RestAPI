@@ -19,6 +19,19 @@ module.exports = {
                     }
                 });
 
+                // Hacemos join al namespace asociado al usuario
+                socket.on('newChatConnection', function (data) {
+                    if (data && data.channelid) {
+                        // Salimos del namespace asociado al usuario
+                        var roomName = 'US_'+data.userid;
+                        for (var room in socket.adapter.rooms) {
+                            if ((room.indexOf('US') == 0) && (room != roomName))
+                                socket.leave(room);
+                        }
+                        socket.join(roomName);
+                    }
+                });
+
                 socket.on('selectGroup', function (data) {
                     if (data && data.groupid && data.userid) {
                         // Salimos del namespace asociado al grupo si ya esta incluido en alguno
@@ -32,7 +45,7 @@ module.exports = {
                         }
                         // Notificamos a los conectados al grupo la nueva conexion al grupo
                         socket.join(roomName);
-                        socket.userid = data.userid
+                        socket.userid = data.userid;
                         socket.broadcast.to(roomName).emit('newUserConnect', {userid: data.userid});
 
                         // Notificamos al usuario que se conecta, los usuarios ya conectados
@@ -68,7 +81,7 @@ module.exports = {
     getIO: function () {
       return io;
     }
-}
+};
 
 
 

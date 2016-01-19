@@ -47,7 +47,7 @@ groupSchema.statics.search = function search (query, limit, page) {
         if (limit === 1 && !error) {
             if (value.length === 0) {
                 error = {
-                    code: 402,
+                    code: 400,
                     message: "Group not found."
                 };
             }
@@ -75,7 +75,7 @@ groupSchema.statics.searchpopulated = function searchpopulated (query,populate) 
                 promise.done(null, group);
             }else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'group not found'
                 };
                 return promise.done(err, null);
@@ -92,16 +92,24 @@ groupSchema.statics.updategroup = function updategroup (id, update, options) {
         if (error) {
             return promise.done(error, null);
         }else {
-            return promise.done(null, group);
+            if (group){
+                promise.done(null, group);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'group not found'
+                };
+                return promise.done(err, null);
+            }
         }
     });
     return promise;
 };
 
 /* ELIMINAR */
-groupSchema.statics.deletegroup = function deletegroup (id, options) {
+groupSchema.statics.deletegroup = function deletegroup (id) {
     var promise = new Hope.Promise();
-    this.remove(id,function(error) {
+    this.remove({_id:id},function(error) {
         if (error) {
             return promise.done(error, null);
         }else {
