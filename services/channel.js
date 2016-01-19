@@ -329,7 +329,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                 console.log("tamaño de users de channel al eliminar usuario: " + channel.users.length);
                 if (channel.users.length >=1){
                     var query = "";
-                    if (userid == channel.admin){
+                    if (userid == channel._admin){
                         query = {users: channel.users, _admin:channel.users[0]};
                     } else {
                         query = {users: channel.users};
@@ -386,8 +386,14 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                         if(error){
                             return promise.done(error,null);
                         }else{
-                            var message = 'channel deleted correctly';
-                            promise.done(null,message);
+                            console.log("channel succesfully deleted");
+                            /*if (result.channelType === "PRIVATE"){
+                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPrivateChannel', request.params.channelid);
+                            }
+                            if (result.channelType == "PUBLIC"){
+                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPublicChannel', request.params.channelid);
+                            }*/
+                            promise.done(null,result);
                         }
                     });
                 }
