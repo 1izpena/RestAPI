@@ -228,10 +228,13 @@ exports.checkischanneladmin = function(channelid,userid) {
 exports.checkuseringroupinvitation = function(groupid,userid) {
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
+    console.log("esto vale userid");
+    console.log(userid);
     var query = {_id: userid};
     var populate = 'groups._group';
     User.searchpopulated(query,populate).then(function (error, user) {
         if (error) {
+
             return promise.done(error, null);
         }
         else {

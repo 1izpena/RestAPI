@@ -164,19 +164,25 @@ exports.regretinvitation = function regretinvitation (request, response) {
 
 exports.acceptinvitation = function acceptinvitation (request, response) {
     Auth(request, response).then(function(error, result) {
+        
         if (error) {
+            
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                chatErrors.checkuseringroupinvitation(request.params.groupid,request.params.userid1).then(function (error,result) {
+                
+                chatErrors.checkuseringroupinvitation(request.params.groupid,request.params.userid).then(function (error,result) {
                     if (error){
+                        
                         response.status(error.code).json({message: error.message});
                     } else {
                         groupservice.subscribegroup(request.params.groupid,result).then(function (error,result){
                             if(error){
+                                
                                 response.status(error.code).json({message: error.message});
                             }else{
                                 //al grupo que hay nuevo usuario
+                                
                                 var vuelta = {
                                     id: result.id,
                                     username: result.username,
