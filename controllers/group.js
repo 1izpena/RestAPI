@@ -125,7 +125,7 @@ exports.inviteusertogroup = function inviteusertogroup (request, response) {
                                         response.status(error.code).json({message: error.message});
                                     }else{
                                         //Notificamos al usuario que tiene una nueva invitacion
-                                        socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroupInvitation', result);
+                                        socketio.getIO().sockets.to('US_'+request.params.userid).emit('newGroupInvitation', result);
                                         response.json(result);
                                     }
                                 });
