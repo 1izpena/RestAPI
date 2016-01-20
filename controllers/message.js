@@ -4,7 +4,7 @@ var Auth  = require('../helpers/authentication');
 var Message  = require('../models/message');
 var socketio  = require('../helpers/sockets');
 var chatErrors  = require('../helpers/chatErrorsHandler');
-
+var groupservice  = require('../services/group');
 
 exports.newmessage = function newmessage (request, response) {
 
@@ -88,6 +88,63 @@ exports.getmessages = function getmessages (request, response) {
     });
 };
 
+exports.getfiles = function getfiles (request, response) {
+
+    // Verificamos si el token es valido y corresponde a un usuario
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        }
+
+        if (request.params.userid == result._id) {
+            chatErrors.checkuseringroup(request.params.groupid,request.params.userid)
+                .then(function (error,result) {
+                    if (error) {
+                        response.status(401).json({message: 'Group not found for user'});
+                    }
+                    else {
+                        // Buscamos los canales a los que tiene acceso dentro del grupo
+                        groupservice.getinfo(request.params.groupid,request.params.userid)
+                            .then(function (error,result) {
+                                if (error) {
+
+                                }
+                                else {
+                                    var data = request.body;
+                                    data.userid = request.params.userid;
+                                    data.channelsList = [];
+                                    result.publicChannels.map (function(channel) {
+                                        data.channelsList.push(channel.id);
+                                    });
+                                    result.privateChannels.map (function(channel) {
+                                        data.channelsList.push(channel.id);
+                                    });
+                                    result.directMessageChannels.map (function(channel) {
+                                        data.channelsList.push(channel.id);
+                                    });
+                                    data.limit = request.query.limit;
+                                    data.page = request.query.page;
+                                    Message.getFiles(data).then(function (error, result) {
+                                        if (error) {
+                                            response.status(error.code).json({message: error.message});
+                                        }
+                                        else {
+                                            response.json(result);
+                                        }
+                                    });
+                                }
+                            });
+                    }
+
+                });
+
+
+        }
+        else {
+            response.status(401).json({message: 'Not authorized to get files from another user'});
+        }
+    });
+};
 
 function checkNewMessageInput (data)
 {

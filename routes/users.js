@@ -118,4 +118,7 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').post(
 /* POST crea un nuevo mensaje dentro del canal :channelid */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').get(message.getmessages);
 
+/* GET devuelve los ficheros del grupo a los que puede acceder el usuario */
+router.route('/:userid/chat/groups/:groupid/files').get(message.getfiles);
+
 module.exports = router;
