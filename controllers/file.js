@@ -1,8 +1,9 @@
 'use strict';
 
-var aws = require('aws-sdk');
-var config = require('../config');
+
+
 var Auth  = require('../helpers/authentication');
+var fileservice = require('../services/file');
 
 
 exports.getSignedUrl = function getSignedUrl (request, response) {
@@ -22,34 +23,14 @@ exports.getSignedUrl = function getSignedUrl (request, response) {
             else if (!data.channelid) {
                 response.status(400).json({message: "channelid required"});
             }
+            else if (!data.userid) {
+                response.status(400).json({message: "userid required"});
+            }
             else if (!data.operation) {
                 response.status(400).json({message: "operation required"});
             }
             else {
-                var filename = 'GR'+data.groupid+'/CH'+data.channelid+'/'+data.filename;
-                aws.config.update({
-                    accessKeyId: config.accessKeyId,
-                    secretAccessKey: config.secretAccessKey,
-                    signatureVersion: 'v4',
-                    region: config.region
-                });
-
-                var s3 = new aws.S3();
-                var s3_params = {
-                    Bucket: config.bucketName,
-                    Key: filename,
-                    Expires: 60
-                };
-
-                var op;
-                if (data.operation == 'PUT') {
-                    op = 'putObject';
-                }
-                else {
-                    op = 'getObject';
-                    s3_params.ResponseContentDisposition = 'attachment';
-                }
-                var url = s3.getSignedUrl(op, s3_params);
+                var url=fileservice.getSignedUrl(data);
 
                 response.json({url: url});
             }
