@@ -176,7 +176,8 @@ exports.forget = function forget(request, response){
     /*Envio de mail y token*/
     var token = Token(result);
     result.token=token;
-    
+
+    if(result.active==true){
    result.action=1;
     mail.check(result,function(res){
       if(res.message=="ok"){
@@ -184,7 +185,20 @@ exports.forget = function forget(request, response){
        }else{
       response.json(res.message);
        }
-      });      
+      });
+
+    }else{
+
+   result.action=3;
+    mail.check(result,function(res){
+      if(res.message=="ok"){
+      response.json(token);         
+       }else{
+      response.json(res.message);
+       }
+      }); 
+    }  
+     
     }});
   };
 
