@@ -52,9 +52,11 @@ module.exports = {
                         var users = [];
                         var userid;
                         for (socketid in io.sockets.adapter.rooms[roomName]) {
-                            userid = io.sockets.connected[socketid].userid;
-                            if (userid != data.userid) {
-                                users.push(io.sockets.connected[socketid].userid);
+                            if ( io.sockets.connected[socketid]) {
+                                userid = io.sockets.connected[socketid].userid;
+                                if (userid && userid != data.userid) {
+                                    users.push(io.sockets.connected[socketid].userid);
+                                }
                             }
                         }
                         if (users.length > 0) {
