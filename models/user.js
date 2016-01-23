@@ -3,6 +3,7 @@
 var Hope      	= require('hope');
 var mongoose 	= require('mongoose');
 var mongoosastic = require('mongoosastic');
+var elasticsearch = require('elasticsearch');
 var Schema 	= mongoose.Schema;
 var bcrypt    	= require('bcrypt');
 var validators 	= require('mongoose-validators');
@@ -13,7 +14,7 @@ var config 	= require('../config');
 // Añadir campos para ser indexados
 var userSchema = new Schema({
   username  : { type: String, required: true, es_indexed:true},
-  password  : { type: String, required: true },
+  password  : { type: String, required: true, es_boost:2.0},
   mail      : {
     type  : String,
     unique: true, 
@@ -27,59 +28,47 @@ var userSchema = new Schema({
                     }],
   active  : { type: Boolean, default: false },
   id_social  : { type: Number, required: false },
-  invitations:  [ { type: Schema.ObjectId, ref: 'Group' }]
+//  invitations:  [ { type: Schema.ObjectId, ref: 'Group' }]
   
 });
 
-//Añadir plugin al userSchema
+
+
+
 userSchema.plugin(mongoosastic);
-/* Configurar si la instancia no esta en localhost:9200
-
-userSchema.plugin(mongoosastic,{
-hosts: [
-    'http://127.0.0.1:9200'
- ]
-});*/
-var User = mongoose.model('User', userSchema);
-
-//crear mapeo entre campos mongo y elastic.Ejecutar solo 1 vez
-
-User.createMapping(function(err, mapping){  
-  if(err){
-    console.log('error creating mapping (you can safely ignore this)');
-    console.log(err);
-  }else{
-    console.log('mapping created!');
-    console.log(mapping);
-  }
-});
 
 
-//copiar documentos existentes,solo 1 vez
-var stream = User.synchronize();
-var count = 0;
 
-stream.on('data', function(err, doc) {
+//Copiar coleccion,solo una vez
+/*
+var User = mongoose.model('User', userSchema)
+  , stream = User.synchronize()
+  , count = 0;
+ 
+stream.on('data', function(err, doc){
   count++;
 });
-
-stream.on('close', function() {
-  console.log('Indexados ' + count + ' documentos!');
+stream.on('close', function(){
+  console.log('indexed ' + count + ' documents!');
 });
-
-stream.on('error', function(err) {
-  console.log(err);
+stream.on('error', function(err){
+  //console.log(err);
 });
+*/
+/*
+//Crear mapeado,solo ejecutar la primera vez
 
-//busqueda
-User.search({ query: 'asier' }, function(err, results) {
- if(results){
-  console.log(results);
- }else{
-  console.log(err);
- }
-});
+User.createMapping(function(err, mapping){ 
+   if(err){ 
+     console.log('error creating mapping (you can safely ignore this)'); 
+     console.log(err); 
+   }else{ 
+     console.log('mapping created!'); 
+     console.log(mapping); 
+   } 
+ }); 
 
+*/
 
 userSchema.pre('save', function (next) {
   var user = this;
@@ -387,5 +376,9 @@ userSchema.methods.parse = function parse () {
 };
 
 
+
 /* exportamos el schema con nombre User */
 module.exports = mongoose.model('User', userSchema);
+
+
+

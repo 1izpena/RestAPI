@@ -80,11 +80,14 @@ var users = require('./routes/users');
 var authusers = require('./routes/authusers');
 //enrutador para egstion de ficheros subidos a s3
 var file = require('./routes/file');
+//Elastic
+var elasticsearch = require('./routes/elasticsearch');
 
 /******* RUTAS DEL API *******/
 app.use('/api/v1/auth', authusers);
 app.use('/api/v1/file', file);
 app.use('/api/v1/users', users);
+app.use('/api/v1', elasticsearch);
 
 
 // Si no encuentra la ruta, envia un 404
