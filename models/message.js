@@ -119,6 +119,23 @@ messageSchema.statics.getMessages = function (data) {
     return promise;
 };
 
+messageSchema.statics.getFiles = function (data) {
+    var promise = new Hope.Promise();
+
+    var query = { $and: [ { _channel: { $in: data.channelsList } }, { messageType: 'FILE' } ] };
+    var Message = mongoose.model('Message', messageSchema);
+    Message.search(query, data.limit, data.page).then(function (error, result) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            return promise.done(null, result);
+        }
+    });
+
+    return promise;
+};
+
 /* BUSCAR */
 messageSchema.statics.search = function search (query, limit, page) {
     var promise = new Hope.Promise();

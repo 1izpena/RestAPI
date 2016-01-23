@@ -3,7 +3,6 @@ var Group = require('../models/group');
 var Channel = require('../models/channel');
 var mongoose = require('mongoose');
 var Hope  = require('hope');
-var channelservice  = require('../services/channel');
 
 
 exports.getgrouplist = function getgrouplist(userid){
@@ -155,18 +154,17 @@ exports.getinfo = function getinfo(groupid,userid){
                         j++;
                     }
                 }if (group.channels[i].channelType == "DIRECT"){
-                    var encontrado1 = false;
-                    var k = 0;
-                    while (encontrado1 == false && k<group.channels[i].users.length){
-                        if (userid == group.channels[i].users[k]){
+                    if (group.channels[i].users.length == 2) {
+                        if (group.channels[i].users[0] == userid ||
+                            group.channels[i].users[1] == userid) {
+
                             var elto3 = {
                                 id        : group.channels[i]._id,
-                                channelName  : group.channels[i].channelName
+                                channelName  : group.channels[i].channelName,
+                                users : [group.channels[i].users[0], group.channels[i].users[1]]
                             };
                             directos.push(elto3);
-                            encontrado = true;
                         }
-                        k++;
                     }
                 }
 
@@ -309,6 +307,7 @@ exports.adduser = function adduser(groupid,userid){
                     return promise.done(error,null);
                 }
                 else {
+
                     var grupo = group;
                     var idpublicos = [];
                     for (i=0;i<grupo.channels.length;i++){
@@ -327,6 +326,11 @@ exports.adduser = function adduser(groupid,userid){
                             return promise.done(error,null);
                         }
                         else{
+                            var vuelta = {
+                                id: user._id,
+                                username: user.username,
+                                mail: user.mail
+                            };
                             var options2 = {new:true,multi:true};
                             var query3 = {_id:{$in:idpublicos}};
                             Channel.updatechannels(query3,updateQuery,options2).then(function (error,result){
@@ -334,7 +338,7 @@ exports.adduser = function adduser(groupid,userid){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    return promise.done(null,grupo);
+                                    return promise.done(null,vuelta);
                                 }
                             });
                         }
@@ -446,6 +450,7 @@ exports.subscribegroup = function subscribegroup(groupid,user){
 exports.deleteuser = function deleteuser(groupid,userid){
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group');
+    var Channel = mongoose.model('Channel');
     var query = {_id: groupid};
     var limit = 1;
     Group.search(query,limit).then(function (error, group) {
@@ -491,7 +496,47 @@ exports.deleteuser = function deleteuser(groupid,userid){
                                         return promise.done(error,null);
                                     }
                                     else{
-                                        promise.done(null, grupo);
+                                        var query3 = {_id:{$in:grupo.channels}};
+                                        var limit3 = 0;
+                                        Channel.search(query3, limit3).then(function (error, channels) {
+                                            if (error) {
+                                                return promise.done(error, null);
+                                            }
+                                            else {
+                                                for (i=0;i<channels.length;i++){
+                                                    var users = channels[i].users;
+                                                    var encontrado = false;
+                                                    var j = 0;
+                                                    while (encontrado === false && j<users.length){
+                                                        if (users[j] == userid){
+                                                            users.splice(j,1);
+                                                            encontrado = true;
+                                                        }
+                                                        j++;
+                                                    }
+                                                }
+                                                var query = {_id: groupid};
+                                                var populate = 'users';
+                                                Group.searchpopulated(query,populate).then(function (error, group) {
+                                                    if (error){
+                                                        return promise.done(error,null);
+                                                    }
+                                                    else{
+                                                        var vuelta = [];
+                                                        for (i=0;i<group.users.length;i++){
+                                                            var elto = {
+                                                                id        : group.users[i]._id,
+                                                                username  : group.users[i].username,
+                                                                mail      :group.users[i].mail
+                                                            };
+                                                            vuelta.push(elto);
+                                                        }
+                                                        promise.done(null,vuelta);
+                                                    }
+                                                });
+                                            }
+                                        });
+
                                     }
                                 });
 
@@ -529,7 +574,8 @@ exports.createnewgroup = function createnewgroup(ats,userid){
                 channelName: channelName,
                 channelType: channelType,
                 users: users,
-                group: groupid
+                group: groupid,
+                _admin: userid
             };
             Channel.createchannel (ats).then(function (error, result){
                 if (error){
@@ -581,6 +627,84 @@ exports.updategroupname = function updategroupname(groupid,groupName){
         }
         else{
             return promise.done(null,group);
+        }
+    });
+    return promise;
+};
+
+exports.removegroup = function removegroup(userid,groupid){
+    var promise = new Hope.Promise();
+    var Channel = mongoose.model('Channel');
+    var User = mongoose.model('User');
+    var Group = mongoose.model('Group');
+    var query = {_id: groupid};
+    var limit = 1;
+    Group.search(query,limit).then(function (error, group) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            var groupchannels = group.channels;
+            var groupusers = group.users;
+            if (group){
+                Group.deletegroup (groupid).then(function(error){
+                    if (error){
+                        return promise.done(error,null);
+                    }
+                    else{
+                        //buscamos el groupid en user y eliminamos
+                        //eliminamos los canales del grupo
+                        var query3 = {_id:{$in:groupusers}};
+                        var populate = 'groups._group';
+                        User.searchpopulatedmany(query3,populate).then(function (error, users) {
+                            if (error){
+                                return promise.done(error,null);
+                            }
+                            else {
+                                for (i=0;i<users.length;i++){
+                                    var encontrado = false;
+                                    var listaGrupos = users[i].groups;
+                                    var j = 0;
+                                    while (encontrado == false && j<listaGrupos.length){
+                                        if (groupid == listaGrupos[j]._group._id){
+                                            listaGrupos.splice(j,1);
+                                            encontrado = true;
+                                        }
+                                        j++;
+                                    }
+                                    if (encontrado == true){
+                                        var update = {"groups":listaGrupos};
+                                        var options = {multi: true};
+                                        User.updateuser(users[i]._id,update,options).then(function (error,user){
+                                            if(error){
+                                                return promise.done(error,null);
+                                            }
+                                        });
+                                    }
+                                }
+                                for (l=0;l<groupchannels.length;l++){
+                                    Channel.deletechannel(groupchannels[l]).then(function (error,result){
+                                        if(error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            var message = 'group deleted correctly';
+                                            promise.done(null,message);
+                                        }
+                                    });
+                                }
+
+                            }
+                        });//hasta akiii
+                    }
+                });
+            } else {
+                var err = {
+                    code   : 403,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
         }
     });
     return promise;

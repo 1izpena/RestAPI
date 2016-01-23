@@ -27,7 +27,6 @@ exports.getSignedUrl = function getSignedUrl (request, response) {
             }
             else {
                 var filename = 'GR'+data.groupid+'/CH'+data.channelid+'/'+data.filename;
-                console.log("Filename: "+filename);
                 aws.config.update({
                     accessKeyId: config.accessKeyId,
                     secretAccessKey: config.secretAccessKey,
@@ -51,8 +50,6 @@ exports.getSignedUrl = function getSignedUrl (request, response) {
                     s3_params.ResponseContentDisposition = 'attachment';
                 }
                 var url = s3.getSignedUrl(op, s3_params);
-
-                console.log ("URL: "+url);
 
                 response.json({url: url});
             }

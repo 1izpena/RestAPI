@@ -31,6 +31,7 @@ channelSchema.statics.createchannel = function createchannel (attributes) {
     var Channel = mongoose.model('Channel', channelSchema);
     console.log("ha entrado a crear canal");
     Channel = new Channel(attributes).save(function (error, result) {
+
         if(error){
             var messageError = '';
             if (error.errors.channelName != undefined)
@@ -40,7 +41,12 @@ channelSchema.statics.createchannel = function createchannel (attributes) {
             error = { code: 400, message: messageError };
             return promise.done(error, null);
         }else {
-            return promise.done (null,result);
+            if (result === null) {
+                error = { code: 400, message: 'Channel not found.' };
+                return promise.done(error, null);
+            }else {
+                return promise.done (null,result);
+            }
         }
     });
     return promise;
@@ -62,8 +68,8 @@ channelSchema.statics.search = function search (query, limit, page) {
         if (limit === 1 && !error) {
             if (value.length === 0) {
                 error = {
-                    code: 402,
-                    message: "Group not found."
+                    code: 400,
+                    message: "Channel not found."
                 };
             }
             value = value[0];
@@ -91,7 +97,7 @@ channelSchema.statics.searchpopulated = function searchpopulated (query,populate
                 promise.done(null, channel);
             }else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'channel not found'
                 };
                 return promise.done(err, null);
@@ -108,7 +114,15 @@ channelSchema.statics.updatechannel = function updatechannel (id, update, option
         if (error) {
             return promise.done(error, null);
         }else {
-            return promise.done(null, channel);
+            if (channel){
+                promise.done(null, channel);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
         }
     });
     return promise;
@@ -120,7 +134,15 @@ channelSchema.statics.updatechannels = function updatechannels (query, update, o
         if (error) {
             return promise.done(error, null);
         }else {
-            return promise.done(null, channel);
+            if (channel){
+                promise.done(null, channel);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
         }
     });
     return promise;
@@ -129,10 +151,12 @@ channelSchema.statics.updatechannels = function updatechannels (query, update, o
 /* ELIMINAR */
 channelSchema.statics.deletechannel = function deletechannel (id) {
     var promise = new Hope.Promise();
-    this.remove(id,function(error) {
+    //console.log("query: " + query);
+    this.remove({_id:id},function(error) {
         if (error) {
             return promise.done(error, null);
         }else {
+            console.log("channel deleted successfully");
             return promise.done(null, {message: 'channel deleted successfully'});
         }
     });
@@ -145,7 +169,8 @@ channelSchema.methods.parse = function parse () {
         id         : channel._id,
         channelName: channel.channelName,
         channelType: channel.channelType,
-        users: channel.users
+        users: channel.users,
+        admin: channel._admin
     };
 };
 

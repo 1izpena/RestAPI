@@ -19,6 +19,7 @@ var userSchema = new Schema({
     required: true,
     validate: validators.isEmail({message: 'Mail format is invalid'}) 
   },
+  social: [],
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
                       privateChannels: [{type: Schema.ObjectId, ref: 'Channel'}],
                       directMessageChannels: [{type: Schema.ObjectId, ref: 'Channel'}]
@@ -51,42 +52,53 @@ userSchema.pre('save', function (next) {
 userSchema.statics.signup = function signup (attributes) {
   var promise = new Hope.Promise();
   this.findOne({
-    mail: attributes.mail
+    mail: attributes.mail, 
   }, function (error, user) {
     if (user) {
+     if(user.social === []){ // si solo se ha registrado por mail
       error = { code: 409, message: 'Mail already registered.' };
       return promise.done(error, null);
+     }else{ // si se ha registrado por red social
+      console.log("solo red social");
+    user.password=attributes.password;
+      user.save(function (err){
+        if(err) return promise.done(error,null);
+        else
+        {
+          return promise.done(null,user);
+        }
+      });
+     }
+    return promise.done(error, user);
     } else {
-
       var User = mongoose.model('User', userSchema);
       return new User(attributes).save(function (error, result) {
 
-	if(error){
+  if(error){
 
-		var messageError = '';
-		if (error.errors.username != undefined)
-			messageError = error.errors.username.message;
-	
-		else if(error.errors.password != undefined)
-			messageError = error.errors.password.message;
+    var messageError = '';
+    if (error.errors.username != undefined)
+      messageError = error.errors.username.message;
+  
+    else if(error.errors.password != undefined)
+      messageError = error.errors.password.message;
 
-		else if(error.errors.mail != undefined)
-			messageError = error.errors.mail.message;
-	
+    else if(error.errors.mail != undefined)
+      messageError = error.errors.mail.message;
+  
 
-		error = { code: 400, message: messageError };
-		return promise.done(error, null);
-	 }	
+    error = { code: 400, message: messageError };
+    return promise.done(error, null);
+   }  
 
 
-	
+  
         return promise.done(error, result);
       });
     }
   });
   return promise;
 };
-
 
 
 /* LOGGEARSE */
@@ -167,6 +179,7 @@ userSchema.statics.search = function search (query, limit, page) {
 
 userSchema.statics.searchpopulated = function searchpopulated (query,populate) {
     var promise = new Hope.Promise();
+   
     this.findOne(query).populate(populate).exec(function (error, user) {
         if (error){
             return promise.done(error,null);
@@ -186,8 +199,26 @@ userSchema.statics.searchpopulated = function searchpopulated (query,populate) {
     return promise;
 };
 
-
-
+userSchema.statics.searchpopulatedmany = function searchpopulatedmany (query,populate) {
+    var promise = new Hope.Promise();
+    this.find(query).populate(populate).exec(function (error, users) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            if (users){
+                promise.done(null, users);
+            }else {
+                var err = {
+                    code   : 403,
+                    message: 'user not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
 
 /*CAMBIAR CONTRASEÑA*/
 userSchema.statics.reset = function reset(attributes){
@@ -271,23 +302,24 @@ userSchema.statics.remove = function remove(attributes){
 //login redes sociales
 userSchema.statics.social = function social (attributes) {
 
-  var promise = new Hope.Promise();
-  this.findOne({
-    id_social: attributes.id_social
-  }, function (error, user) {
-    if (user) {
-      return promise.done(error, user);
-    } else {
-
-      var User = mongoose.model('User', userSchema);
-      return new User(attributes).save(function (error, result) {
-  
-        return promise.done(error, result);
-      });
+   var promise = new Hope.Promise(); 
+   this.findOneAndUpdate({mail: attributes.mail}, {$addToSet: {social:{'network': attributes.network, 'uid': attributes.uid }}}, {}, function(err,user) { 
+     if(user){ 
+      return  promise.done(null,user);  
     }
-  });
-  return promise;
-};
+    else{
+    attributes.social={'network': attributes.network, 'uid': attributes.uid };
+    attributes.username=attributes.uid;
+    var User = mongoose.model('User', userSchema);
+    User = new User(attributes);
+
+      User.save(function (err){     
+        if(err) return promise.done(err,null);
+      });
+    }; 
+   });
+   return promise;
+    };
 
 
 

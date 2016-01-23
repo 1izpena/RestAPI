@@ -52,7 +52,7 @@ router.route('/:userid/chat/groups').post(group.newgroup);
 router.route('/:userid/chat/groups/:groupid').get(group.getgroupinfo);
 
 /* DELETE El usuario logeado, si es el administrador del grupo, elimina el grupo del sistema */
-//router.route('/:userid/chat/groups/:groupid').delete(group.deletegroupfromsystem);
+router.route('/:userid/chat/groups/:groupid').delete(group.deletegroupfromsystem);
 
 /* PUT El usuario logeado, si es el administrador del grupo, modifica el nombre del grupo */
 router.route('/:userid/chat/groups/:groupid').put(group.updategroupinfo);
@@ -94,7 +94,7 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/unsuscribe').del
 router.route('/:userid/chat/groups/:groupid/channels/:channelid').get(channel.getchannelinfo);
 
 /* DELETE el usuario logeado elimina el canal del grupo */
-//router.route('/:userid/chat/groups/:groupid/channels/:channelid').delete(channel.deletechannelfromgroup);
+router.route('/:userid/chat/groups/:groupid/channels/:channelid').delete(channel.deletechannelfromgroup);
 
 /* PUT El usuario logeado, modifica el nombre del canal */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid').put(channel.updatechannelinfo);
@@ -109,7 +109,7 @@ router.route('/:userid/chat/channels/:channelid').get(channel.getchannelinfo);
 router.route('/:userid/chat/channels/:channelid').put(channel.updatechannelinfo);
 
 /* DELETE el usuario logeado se va del canal */
-//router.route('/:userid/chat/channels/:channelid/unsuscribe').delete(channel.unsuscribefromchannel);
+router.route('/:userid/chat/channels/:channelid/unsuscribe').delete(channel.unsuscribefromchannel);
 
 
 /* POST crea un nuevo mensaje dentro del canal :channelid */
@@ -117,5 +117,8 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').post(
 
 /* POST crea un nuevo mensaje dentro del canal :channelid */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').get(message.getmessages);
+
+/* GET devuelve los ficheros del grupo a los que puede acceder el usuario */
+router.route('/:userid/chat/groups/:groupid/files').get(message.getfiles);
 
 module.exports = router;

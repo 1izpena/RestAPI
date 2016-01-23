@@ -235,9 +235,8 @@ exports.remove = function remove(request, response){
 };
 
 exports.social = function social (request, response) {
-
-          request.body.mail = request.body.id_social+"@localhost.com";
-          request.body.password = "0000000";
+          
+          request.body.password = "0000000"; //temporal
 
     User.social(request.body).then(function social (error, result) {
     if (error) {
@@ -245,11 +244,10 @@ exports.social = function social (request, response) {
     } else {
       var token = Token(result);
       response.json({token: token,
-                    id_social: result.id_social,
+                    mail: result.mail,
                     username: result.username,
                     id: result.id
                   });      
     }
-  });  
+  }); 
 };
-
