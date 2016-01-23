@@ -151,7 +151,6 @@ channelSchema.statics.updatechannels = function updatechannels (query, update, o
 /* ELIMINAR */
 channelSchema.statics.deletechannel = function deletechannel (id) {
     var promise = new Hope.Promise();
-    //console.log("query: " + query);
     this.remove({_id:id},function(error) {
         if (error) {
             return promise.done(error, null);
