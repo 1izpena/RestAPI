@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var question = require('../controllers/question');
+var answer = require('../controllers/answer');
 
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
@@ -22,13 +23,16 @@ router.route('/questions').get(question.getquestions);
 /*GET Obtiene la pregunta por identificador*/
 router.route('/question/:questionid').get(question.getquestionbyid);
 
-/*POST Votar positivo a la pregunta*/
-router.route('/question/:questionid/upvote').post(question.upvote);
+/*PUT Votar positivo a la pregunta*/
+router.route('/question/:questionid/upvote').put(question.upvote);
 
-/*POST Votar negativo a la pregunta*/
-router.route('/question/:questionid/downvote').post(question.downvote);
+/*PUT Votar negativo a la pregunta*/
+router.route('/question/:questionid/downvote').put(question.downvote);
 
-/*POST Comentar una pregunta*/
-router.route('/question/:questionid/comment').post(question.commentquestion);
+/*PUT Comentar una pregunta*/
+router.route('/question/:questionid/comment').put(question.commentquestion);
+
+/*POST Nueva respuesta a una pregunta por id*/
+router.route('/question/:questionid/answer').post(answer.newanswer);
 
 module.exports = router;
