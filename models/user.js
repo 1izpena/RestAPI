@@ -33,42 +33,8 @@ var userSchema = new Schema({
 });
 
 
-
-
 userSchema.plugin(mongoosastic);
 
-
-
-//Copiar coleccion,solo una vez
-/*
-var User = mongoose.model('User', userSchema)
-  , stream = User.synchronize()
-  , count = 0;
- 
-stream.on('data', function(err, doc){
-  count++;
-});
-stream.on('close', function(){
-  console.log('indexed ' + count + ' documents!');
-});
-stream.on('error', function(err){
-  //console.log(err);
-});
-*/
-/*
-//Crear mapeado,solo ejecutar la primera vez
-
-User.createMapping(function(err, mapping){ 
-   if(err){ 
-     console.log('error creating mapping (you can safely ignore this)'); 
-     console.log(err); 
-   }else{ 
-     console.log('mapping created!'); 
-     console.log(mapping); 
-   } 
- }); 
-
-*/
 
 userSchema.pre('save', function (next) {
   var user = this;
@@ -374,6 +340,45 @@ userSchema.methods.parse = function parse () {
     mail      : user.mail
   };
 };
+
+
+
+
+
+/*
+Crear mapeado elastic,solo ejecutar la primera vez
+
+User.createMapping(function(err, mapping){ 
+   if(err){ 
+     console.log('error creating mapping (you can safely ignore this)'); 
+     console.log(err); 
+   }else{ 
+     console.log('mapping created!'); 
+     console.log(mapping); 
+   } 
+ }); 
+*/
+
+/*
+Copiar coleccion elastic,solo una vez
+
+var User = mongoose.model('User', userSchema)
+  , stream = User.synchronize()
+  , count = 0;
+ 
+stream.on('data', function(err, doc){
+  count++;
+});
+stream.on('close', function(){
+  console.log('indexed ' + count + ' documents!');
+});
+stream.on('error', function(err){
+  //console.log(err);
+});
+*/
+
+
+
 
 
 
