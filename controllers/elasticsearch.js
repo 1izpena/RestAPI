@@ -8,8 +8,10 @@ var client = new elasticsearch.Client({
 });
 
 
+
 exports.search = function search (request, response) {
     
+console.log(request);
 client.search({
   index: 'users',
   body: {
@@ -21,11 +23,9 @@ client.search({
 
   }
 }).then(function (resp) {
-    var hits = resp.hits.hits;
-    console.log(resp);
+    response.json(resp);
 }, function (err) {
-    console.trace(err.message);
-});
-     
+    response.json(err.message);
+});     
     };
 
