@@ -40,6 +40,15 @@ switch(request.action){
 
 		break;
 
+        case 3:
+
+    var html = "<img src='http://www.investrade.com/gunnallen/images/activate.png' style='width:200px;height:128px;'><br/>"+
+      "<p>Para recuperar tu contraseña tienes que activar tu cuenta <a href='http://localhost:9000/#/activate/"+request.token+"'>activar</a></p>";
+      var subject = "Activa tu cuenta";
+
+      break;
+
+
 		default:
 			console.log("error template email");
 
