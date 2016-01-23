@@ -21,7 +21,7 @@ module.exports = {
 
                 // Hacemos join al namespace asociado al usuario
                 socket.on('newChatConnection', function (data) {
-                    if (data && data.channelid) {
+                    if (data && data.userid) {
                         // Salimos del namespace asociado al usuario
                         var roomName = 'US_'+data.userid;
                         for (var room in socket.adapter.rooms) {
