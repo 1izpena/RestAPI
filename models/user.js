@@ -179,6 +179,7 @@ userSchema.statics.search = function search (query, limit, page) {
 
 userSchema.statics.searchpopulated = function searchpopulated (query,populate) {
     var promise = new Hope.Promise();
+   
     this.findOne(query).populate(populate).exec(function (error, user) {
         if (error){
             return promise.done(error,null);

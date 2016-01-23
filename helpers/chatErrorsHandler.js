@@ -23,7 +23,7 @@ exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
             }
             if (encontrado === true){
                 var err = {
-                    code   : 401,
+                    code   : 400,
                     message: 'The user already has a group with that name'
                 };
                 console.log("Error 401 - the user already has a group with that name");
@@ -58,7 +58,7 @@ exports.checkchannelnameunique = function checkchannelnameunique(userid,groupid,
                 }
                 if (encontrado === true){
                     var err = {
-                        code   : 401,
+                        code   : 400,
                         message: 'the group already has a public channel with that name'
                     };
                     console.log("Error 401 - the user already has a public channel with that name");
@@ -85,7 +85,7 @@ exports.checkchannelnameunique = function checkchannelnameunique(userid,groupid,
                 }
                 if (encontrado === true){
                     var err = {
-                        code   : 403,
+                        code   : 400,
                         message: 'the group already has a private channel with that name'
                     };
                     console.log("Error 401 - the user already has a private channel with that name");
@@ -112,7 +112,7 @@ exports.checkchannelnameunique = function checkchannelnameunique(userid,groupid,
                 }
                 if (encontrado === true){
                     var err = {
-                        code   : 403,
+                        code   : 400,
                         message: 'the group already has a private channel with that name'
                     };
                     console.log("Error 401 - the user already has a direct channel with that name");
@@ -134,14 +134,14 @@ exports.checknewchannelparams = function checknewchannelparams(userid,groupid,ch
     var promise = new Hope.Promise();
     if (channelname == undefined || channelname == "" || channelname == null){
         var err = {
-            code   : 401,
+            code   : 400,
             message: 'channelName must have a value'
         };
         return promise.done(err, null);
     } if (channelname != undefined && channelname != "" && channelname != null) {
         if (channeltype != "PUBLIC" && channeltype != "PRIVATE" && channeltype != "DIRECT") {
             var err1 = {
-                code: 401,
+                code: 400,
                 message: 'channelType must be PUBLIC/PRIVATE/DIRECT'
             };
             return promise.done(err1, null);
@@ -169,7 +169,7 @@ exports.checkisgroupadmin = function(groupid,userid) {
                     return promise.done(null, group);
                 }else {
                     var err = {
-                        code   : 401,
+                        code   : 400,
                         message: 'you are not the admin of the group'
                     };
                     console.log("Error 401 - you are not the admin of the group");
@@ -177,7 +177,7 @@ exports.checkisgroupadmin = function(groupid,userid) {
                 }
             }else {
                 var err1 = {
-                    code   : 401,
+                    code   : 400,
                     message: 'group not found'
                 };
                 console.log("Error 401 - group not found");
@@ -206,7 +206,7 @@ exports.checkischanneladmin = function(channelid,userid) {
                     return promise.done(null, channel);
                 }else {
                     var err = {
-                        code   : 401,
+                        code   : 400,
                         message: 'you are not the admin of the channel'
                     };
                     console.log("Error 401 - the user is not the admin of the channel");
@@ -214,7 +214,7 @@ exports.checkischanneladmin = function(channelid,userid) {
                 }
             }else {
                 var err1 = {
-                    code   : 401,
+                    code   : 400,
                     message: 'channel not found'
                 };
                 console.log("Error 401 - channel not found");
@@ -232,6 +232,7 @@ exports.checkuseringroupinvitation = function(groupid,userid) {
     var populate = 'groups._group';
     User.searchpopulated(query,populate).then(function (error, user) {
         if (error) {
+
             return promise.done(error, null);
         }
         else {
@@ -246,7 +247,7 @@ exports.checkuseringroupinvitation = function(groupid,userid) {
                 }
                 if (encontrado){
                     var err = {
-                        code   : 401,
+                        code   : 400,
                         message: 'the user is already a member of the group'
                     };
                     console.log("Error 401 - the user already is a member of the group");
@@ -256,7 +257,7 @@ exports.checkuseringroupinvitation = function(groupid,userid) {
                 }
             }else {
                 var err2 = {
-                    code   : 401,
+                    code   : 400,
                     message: 'group not found'
                 };
                 console.log("Error 401 - group not found");
@@ -293,15 +294,15 @@ exports.checkuseringroup = function(groupid,userid) {
 
                 }else {
                     var err = {
-                        code   : 401,
+                        code   : 400,
                         message: 'the user is not a member of the group'
                     };
-                    console.log("Error 401 - the user is not a member of the group");
+                    console.log("Error 400 - the user is not a member of the group");
                     return promise.done(err, null);
                 }
             }else {
                 var err2 = {
-                    code   : 401,
+                    code   : 400,
                     message: 'group not found'
                 };
                 console.log("Error 401 - group not found");
@@ -333,7 +334,7 @@ exports.checkuserinvitedorgroup = function(groupid,userid) {
                 }
                 if (encontrado){
                     var err = {
-                        code   : 401,
+                        code   : 400,
                         message: 'the user is already a member of the group'
                     };
                     console.log("Error 401 - the user is already a member of the group");
@@ -349,7 +350,7 @@ exports.checkuserinvitedorgroup = function(groupid,userid) {
                     }
                     if (encontrado1) {
                         var err1 = {
-                            code: 401,
+                            code: 400,
                             message: 'the user already has an invitation to the group'
                         };
                         console.log("Error 401 - the user already has an invitation to the group");
@@ -360,7 +361,7 @@ exports.checkuserinvitedorgroup = function(groupid,userid) {
                 }
             }else {
                 var err2 = {
-                    code   : 401,
+                    code   : 400,
                     message: 'group not found'
                 };
                 return promise.done(err2, null);
@@ -391,7 +392,7 @@ exports.checkuserinchanneladd = function(channelid,userid) {
                 }
                 if (encontrado){
                     var err = {
-                        code   : 401,
+                        code   : 400,
                         message: 'the user is already a member of the channel'
                     };
                     console.log("Error 401 - the user already is already a member of the channel");
@@ -401,7 +402,7 @@ exports.checkuserinchanneladd = function(channelid,userid) {
                 }
             }else {
                 var err1 = {
-                    code   : 401,
+                    code   : 400,
                     message: 'channel not found'
                 };
                 return promise.done(err1, null);
@@ -437,7 +438,7 @@ exports.checkuserinchannel = function(channelid,userid) {
                     return promise.done(null, channel);
                 }else {
                     var err = {
-                        code   : 401,
+                        code   : 400,
                         message: 'the user is not a member of the channel'
                     };
                     console.log("Error 401 - the user is not a member of the channel");
@@ -445,7 +446,7 @@ exports.checkuserinchannel = function(channelid,userid) {
                 }
             }else {
                 var err1 = {
-                    code   : 401,
+                    code   : 400,
                     message: 'channel not found'
                 };
                 return promise.done(err1, null);

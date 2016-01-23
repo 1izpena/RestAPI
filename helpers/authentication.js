@@ -26,7 +26,7 @@ module.exports = function(request, response) {
 			}
 		      });
 		} else {
-		      response.status(401).json({message:'Session expired. Please log in again.'});
+		      response.status(419).json({message:'Session expired. Please log in again.'});
 		}
 
 	}

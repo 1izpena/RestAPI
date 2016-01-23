@@ -125,7 +125,7 @@ exports.inviteusertogroup = function inviteusertogroup (request, response) {
                                         response.status(error.code).json({message: error.message});
                                     }else{
                                         //Notificamos al usuario que tiene una nueva invitacion
-                                        socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroupInvitation', result);
+                                        socketio.getIO().sockets.to('US_'+request.params.userid).emit('newGroupInvitation', result);
                                         response.json(result);
                                     }
                                 });
@@ -164,19 +164,25 @@ exports.regretinvitation = function regretinvitation (request, response) {
 
 exports.acceptinvitation = function acceptinvitation (request, response) {
     Auth(request, response).then(function(error, result) {
+        
         if (error) {
+            
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                chatErrors.checkuseringroupinvitation(request.params.groupid,request.params.userid1).then(function (error,result) {
+                
+                chatErrors.checkuseringroupinvitation(request.params.groupid,request.params.userid).then(function (error,result) {
                     if (error){
+                        
                         response.status(error.code).json({message: error.message});
                     } else {
                         groupservice.subscribegroup(request.params.groupid,result).then(function (error,result){
                             if(error){
+                                
                                 response.status(error.code).json({message: error.message});
                             }else{
                                 //al grupo que hay nuevo usuario
+                                
                                 var vuelta = {
                                     id: result.id,
                                     username: result.username,
