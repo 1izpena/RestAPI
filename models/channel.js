@@ -173,6 +173,52 @@ channelSchema.methods.parse = function parse () {
     };
 };
 
+channelSchema.methods.parsepopulated = function parsepopulated (userid,channelid) {
+    var query = { _id: channelid};
+    var populate = 'group users _admin';
+    var promise = new Hope.Promise();
+    this.findOne(query).populate(populate).exec(function (error, channel) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            if (channel){
+                var usuarios = [];
+                for (k=0;k<channel.users.length;k++){
+                    var elto4 = {
+                        id        : channel.users[k]._id,
+                        username  : channel.users[k].username,
+                        mail      : channel.users[k].mail
+                    };
+                    usuarios.push(elto4);
+                }
+                var elto5 = {
+                    id        : channel._admin._id,
+                    username  : channel._admin.username,
+                    mail      : channel._admin.mail
+                };
+                var vuelta = {
+                    id: channel._id,
+                    channelName: channel.channelName,
+                    channelType: channel.channelType,
+                    admin: elto5,
+                    users: usuarios
+                };
+                promise.done(null, vuelta);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+
+};
+
+
 module.exports = mongoose.model('Channel', channelSchema);
 
 
