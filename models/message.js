@@ -12,6 +12,7 @@ var messageSchema   = new Schema({
     messageType: { type: String, required: true },
     content: {
         text: String,
+        filename: String,
         answers: [{ text: String }]
     }
 });
@@ -52,7 +53,10 @@ messageSchema.statics.newMessage = function (data) {
                 error = { code: 400, message: 'filename required.' };
                 return promise.done(error, null);
             }
-            data.content = { text: data.filename}
+            data.content = { filename: data.filename}
+            if (data.comment) {
+                data.content.text = data.comment;
+            }
         }
         else if (data.messageType === 'TEXT') {
             if (!data.text) {
@@ -195,6 +199,10 @@ messageSchema.methods.parse = function parse () {
         text        : message.content.text
 
     };
+
+    if (message.messageType == 'FILE') {
+        parseMessage.filename = message.content.filename;
+    }
 
     if (message.messageType == 'QUESTION') {
         parseMessage.answers = message.content.answers;
