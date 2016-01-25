@@ -130,81 +130,92 @@ groupSchema.methods.parse = function parse () {
     };
 };
 
-groupSchema.methods.parsepopulated = function parsepopulated (userid,groupid) {
-    var Group = this;
+groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
     var query = { _id: groupid};
     var populate = 'channels users _admin';
-    Group.searchpopulated(query,populate).then(function (error, group) {
+    var promise = new Hope.Promise();
+    this.findOne(query).populate(populate).exec(function (error, group) {
         if (error){
-            return error;
+            return promise.done(error,null);
         }
         else {
-            var publicos = [];
-            var privados = [];
-            var directos = [];
-            var usuarios = [];
-            for (i=0;i<group.channels.length;i++){
-                if (group.channels[i].channelType == "PUBLIC"){
-                    var elto = {
-                        id        : group.channels[i]._id,
-                        channelName  : group.channels[i].channelName
-                    };
-                    publicos.push(elto);
-                }if (group.channels[i].channelType == "PRIVATE"){
-                    var encontrado = false;
-                    var j = 0;
-                    while (encontrado == false && j<group.channels[i].users.length){
-                        if (userid == group.channels[i].users[j]){
-                            var elto2 = {
-                                id        : group.channels[i]._id,
-                                channelName  : group.channels[i].channelName
-                            };
-                            privados.push(elto2);
-                            encontrado = true;
+            if (group){
+                var publicos = [];
+                var privados = [];
+                var directos = [];
+                var usuarios = [];
+                var i;
+                for (i=0;i<group.channels.length;i++){
+                    if (group.channels[i].channelType == "PUBLIC"){
+                        var elto = {
+                            id        : group.channels[i]._id,
+                            channelName  : group.channels[i].channelName
+                        };
+                        publicos.push(elto);
+                    }if (group.channels[i].channelType == "PRIVATE"){
+                        var encontrado = false;
+                        var j = 0;
+                        while (encontrado == false && j<group.channels[i].users.length){
+                            if (userid == group.channels[i].users[j]){
+                                var elto2 = {
+                                    id        : group.channels[i]._id,
+                                    channelName  : group.channels[i].channelName
+                                };
+                                privados.push(elto2);
+                                encontrado = true;
+                            }
+                            j++;
                         }
-                        j++;
-                    }
-                }if (group.channels[i].channelType == "DIRECT"){
-                    if (group.channels[i].users.length == 2) {
-                        if (group.channels[i].users[0] == userid ||
-                            group.channels[i].users[1] == userid) {
+                    }if (group.channels[i].channelType == "DIRECT"){
+                        if (group.channels[i].users.length == 2) {
+                            if (group.channels[i].users[0] == userid ||
+                                group.channels[i].users[1] == userid) {
 
-                            var elto3 = {
-                                id        : group.channels[i]._id,
-                                channelName  : group.channels[i].channelName,
-                                users : [group.channels[i].users[0], group.channels[i].users[1]]
-                            };
-                            directos.push(elto3);
+                                var elto3 = {
+                                    id        : group.channels[i]._id,
+                                    channelName  : group.channels[i].channelName,
+                                    users : [group.channels[i].users[0], group.channels[i].users[1]]
+                                };
+                                directos.push(elto3);
+                            }
                         }
                     }
+
                 }
-
-            }
-            for (k=0;k<group.users.length;k++){
-                var elto4 = {
-                    id        : group.users[k]._id,
-                    username  : group.users[k].username,
-                    mail      : group.users[k].mail
+                var k;
+                for (k=0;k<group.users.length;k++){
+                    var elto4 = {
+                        id        : group.users[k]._id,
+                        username  : group.users[k].username,
+                        mail      : group.users[k].mail
+                    };
+                    usuarios.push(elto4);
+                }
+                var elto5 = {
+                    id        : group._admin._id,
+                    username  : group._admin.username,
+                    mail      : group._admin.mail
                 };
-                usuarios.push(elto4);
+                var vuelta = {
+                    id: group._id,
+                    groupName: group.groupName,
+                    admin: elto5,
+                    users: usuarios,
+                    publicChannels: publicos,
+                    privateChannels: privados,
+                    directMessageChannels: directos
+                };
+                return promise.done(null,vuelta);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'group not found'
+                };
+                return promise.done(err, null);
             }
-            var elto5 = {
-                id        : group._admin._id,
-                username  : group._admin.username,
-                mail      : group._admin.mail
-            };
-            var vuelta = {
-                id: group._id,
-                groupName: group.groupName,
-                admin: elto5,
-                users: usuarios,
-                publicChannels: publicos,
-                privateChannels: privados,
-                directMessageChannels: directos
-            };
-            return vuelta;
         }
     });
+    return promise;
 };
 
 module.exports = mongoose.model('Group', groupSchema);

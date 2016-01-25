@@ -33,7 +33,7 @@ exports.newchannel = function newchannel (request, response) {
                                             if (error) {
                                                 response.status(error.code).json({message: error.message});
                                             } else {
-                                                response.json(channel.parse());
+                                                response.json(channel);
                                             }
                                         });
                                     }
@@ -45,9 +45,9 @@ exports.newchannel = function newchannel (request, response) {
                                         response.status(error.code).json({message: error.message});
                                     }else {
                                         if (request.body.channelType == "PUBLIC"){
-                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newPublicChannel', result);
+                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newPublicChannel', channel);
                                         }
-                                        response.json(channel.parse());
+                                        response.json(channel);
                                     }
                                 });
                             }
@@ -166,7 +166,7 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                             if(error){
                                                 response.status(error.code).json({message: error.message});
                                             }else{
-                                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', request.params.userid1);
+                                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', result);
                                                 response.json(result);
                                             }
                                         });
@@ -197,7 +197,7 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemeberInChannel', request.params.userid);
+                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemeberInChannel', result);
                                 response.json(result);
                             }
                         });
@@ -272,10 +272,10 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
                                         response.status(error.code).json({message: error.message});
                                     }else{
                                         if (result.channelType === "PRIVATE"){
-                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPrivateChannel', request.params.channelid);
+                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPrivateChannel', result);
                                         }
                                         if (result.channelType == "PUBLIC"){
-                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPublicChannel', request.params.channelid);
+                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPublicChannel', result);
                                         }
                                         response.json(result);
                                     }

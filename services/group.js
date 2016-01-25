@@ -241,11 +241,6 @@ exports.adduser = function adduser(groupid,userid){
                             return promise.done(error,null);
                         }
                         else{
-                            var vuelta = {
-                                id: user._id,
-                                username: user.username,
-                                mail: user.mail
-                            };
                             var options2 = {new:true,multi:true};
                             var query3 = {_id:{$in:idpublicos}};
                             Channel.updatechannels(query3,updateQuery,options2).then(function (error,result){
@@ -253,7 +248,15 @@ exports.adduser = function adduser(groupid,userid){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    return promise.done(null,vuelta);
+                                    var Group = mongoose.model('Group');
+                                    Group.parsepopulated(userid,groupid).then(function (error, group) {
+                                        if (error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            return promise.done(null, group);
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -344,6 +347,7 @@ exports.deleteuser = function deleteuser(groupid,userid){
     var Channel = mongoose.model('Channel');
     var query = {_id: groupid};
     var limit = 1;
+
     Group.search(query,limit).then(function (error, group) {
         if (error){
             return promise.done(error,null);
@@ -405,24 +409,27 @@ exports.deleteuser = function deleteuser(groupid,userid){
                                                         }
                                                         j++;
                                                     }
+                                                    if (encontrado === true){
+                                                        var updateQuery2 = {users: users};
+                                                        var options2 = {new: true};
+                                                        Channel.updatechannel(channels[i],updateQuery2,options2).then(function (error,result){
+                                                            if (error){
+                                                                return promise.done(error,null);
+                                                            }
+                                                            else {
+                                                                console.log("user removed from channel: " + result._id + " channelName: " + result.channelName);
+                                                            }
+                                                        });
+                                                    }
                                                 }
-                                                var query = {_id: groupid};
-                                                var populate = 'users';
-                                                Group.searchpopulated(query,populate).then(function (error, group) {
+
+                                                var Group = mongoose.model('Group');
+                                                Group.parsepopulated(userid,groupid).then(function (error, group) {
                                                     if (error){
                                                         return promise.done(error,null);
                                                     }
-                                                    else{
-                                                        var vuelta = [];
-                                                        for (i=0;i<group.users.length;i++){
-                                                            var elto = {
-                                                                id        : group.users[i]._id,
-                                                                username  : group.users[i].username,
-                                                                mail      :group.users[i].mail
-                                                            };
-                                                            vuelta.push(elto);
-                                                        }
-                                                        promise.done(null,vuelta);
+                                                    else {
+                                                        return promise.done(null, group);
                                                     }
                                                 });
                                             }
@@ -490,7 +497,6 @@ exports.createnewgroup = function createnewgroup(ats,userid){
                                 if(error){
                                     return promise.done(error,null);
                                 }else{
-                                    var Group = mongoose.model('Group');
                                     Group.parsepopulated(userid,groupid).then(function (error, group) {
                                         if (error){
                                             return promise.done(error,null);
@@ -540,34 +546,20 @@ exports.removegroup = function removegroup(userid,groupid){
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
-    var query = {_id: groupid};
-    var limit = 1;
-
     Group.parsepopulated(userid,groupid).then(function (error, group) {
         if (error){
             return promise.done(error,null);
         }
         else {
-            var grupo = group;
-
-        }
-    });
-
-    Group.search(query,limit).then(function (error, group) {
-        if (error){
-            return promise.done(error,null);
-        }
-        else {
-            var groupchannels = group.channels;
-            var groupusers = group.users;
             if (group){
+                var grupo = group;
+                var groupchannels = group.channels;
+                var groupusers = group.users;
                 Group.deletegroup (groupid).then(function(error){
                     if (error){
                         return promise.done(error,null);
                     }
                     else{
-                        //buscamos el groupid en user y eliminamos
-                        //eliminamos los canales del grupo
                         var query3 = {_id:{$in:groupusers}};
                         var populate = 'groups._group';
                         User.searchpopulatedmany(query3,populate).then(function (error, users) {
@@ -597,7 +589,8 @@ exports.removegroup = function removegroup(userid,groupid){
                                     }
                                 }
                                 for (l=0;l<groupchannels.length;l++){
-                                    Channel.deletechannel(groupchannels[l]).then(function (error,result){
+                                    var query3 = {_id:{$in:groupchannels}};
+                                    Channel.deletechannels(query3).then(function (error,result){
                                         if(error){
                                             return promise.done(error,null);
                                         }
@@ -606,7 +599,6 @@ exports.removegroup = function removegroup(userid,groupid){
                                         }
                                     });
                                 }
-
                             }
                         });//hasta akiii
                     }

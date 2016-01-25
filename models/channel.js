@@ -162,6 +162,19 @@ channelSchema.statics.deletechannel = function deletechannel (id) {
     return promise;
 };
 
+channelSchema.statics.deletechannels = function deletechannels (query) {
+    var promise = new Hope.Promise();
+    this.remove(query,function(error) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            console.log("channel deleted successfully");
+            return promise.done(null, {message: 'channel deleted successfully'});
+        }
+    });
+    return promise;
+};
+
 channelSchema.methods.parse = function parse () {
     var channel = this;
     return {
@@ -173,7 +186,7 @@ channelSchema.methods.parse = function parse () {
     };
 };
 
-channelSchema.methods.parsepopulated = function parsepopulated (userid,channelid) {
+channelSchema.statics.parsepopulated = function parsepopulated (userid,channelid) {
     var query = { _id: channelid};
     var populate = 'group users _admin';
     var promise = new Hope.Promise();
@@ -184,6 +197,7 @@ channelSchema.methods.parsepopulated = function parsepopulated (userid,channelid
         else {
             if (channel){
                 var usuarios = [];
+                var k;
                 for (k=0;k<channel.users.length;k++){
                     var elto4 = {
                         id        : channel.users[k]._id,
