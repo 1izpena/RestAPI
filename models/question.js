@@ -27,7 +27,7 @@ questionSchema.statics.createQuestion = function createQuestion (attributes) {
 var promise = new Hope.Promise();
 var Question = mongoose.model('Question', questionSchema);
 Question = new Question(attributes);
-Question.save(function (error){
+Question.save(function (error, question){
 	if(error)
 	{
 		var messageError = '';
@@ -52,8 +52,8 @@ Question.save(function (error){
 	}
 	else
 	{
-		var result = { code: 200, message: "Question successfully created" }
-		return promise.done(error,result);
+		
+		return promise.done(error,question);
 	}
 
 });
@@ -66,8 +66,6 @@ questionSchema.statics.updateQuestion = function updatequestion (id, update, opt
     var promise = new Hope.Promise();
     this.findByIdAndUpdate(id, update, options,function(error, question) {
         if (error) {
-
-        	console.log(error);
             return promise.done(error, null);
         }else {
             return promise.done(error, question);
@@ -84,19 +82,19 @@ questionSchema.statics.voteQuestion = function votequestion (id , attributes)
 	if(id === null)
 	{
 		messageError = "question ID is required";
-		error = { code: 400, messageError };
+		error = { code: 400, message: messageError };
         return promise.done(error, null);
 	}
 	else if(attributes._user === null)
 	{
 		messageError = "User is required";
-		error = { code: 400, messageError };
+		error = { code: 400, message: messageError };
         return promise.done(error, null);
 	}
 	else if(attributes.vote === null)
 	{
 		messageError = "Vote is required";
-		error = { code: 400, messageError };
+		error = { code: 400, message: messageError };
         return promise.done(error, null);
 	}
 	else
@@ -106,25 +104,49 @@ questionSchema.statics.voteQuestion = function votequestion (id , attributes)
 		var query = { $and: [ {_id: id }, { userVotes: { $ne: attributes._user }}]};
 		var update = { $inc: {votes: attributes.vote}, $push: {userVotes:  attributes._user}};
 		var options = { new: true};
-		Question.findOneAndUpdate(query, update, options,function(error,result) {
+		Question.findOne({_id: id},function(error,result) {
 			if(error)
 			{
-				console.log(error.errors);
 				return promise.done(error,null);
-				
 			}
-			else 
+			else
 			{
-				console.log(result);
-				return promise.done(error,result);
-			}
+				if(result == null)
+				{
+					error = {code: 402, message:"Question not found"}
+
+					return promise.done(error,null);
+				}
+				else
+				{
+					Question.findOneAndUpdate(query, update, options,function(error,result) {
+						if(error)
+						{
+							return promise.done(error,null);			
+						}
+						else 
+						{
+							if(result == null)
+							{
+								error = {code : 402, message:"You have already voted"}
+								return promise.done(error,null);
+							}
+							else
+							{
+								result = {code:"200", message:"Vote successfully"}
+								return promise.done(error,result);
+							}	
+						}
+					});
+				}
+			}	
 		});
 	}
 	return promise;
 }
 
 /* static methods */
-/* Obtener últimas preguntas*/
+/* Obtener Todas las preguntas disponibles*/
 questionSchema.statics.getQuestions = function getQuestions(){
 	var promise = new Hope.Promise();
 	var Question = mongoose.model('Question', questionSchema);
@@ -136,6 +158,7 @@ questionSchema.statics.getQuestions = function getQuestions(){
 		}
 		else
 		{
+
 			return promise.done(error,result);
 		}
 	});
@@ -143,12 +166,12 @@ questionSchema.statics.getQuestions = function getQuestions(){
 }
 
 /* static methods*/
-/* obtener la pregunta*/
+/* obtener la pregunta por identificador*/
 questionSchema.statics.getQuestion = function getQuestion(attributes)
 {
 	var promise = new Hope.Promise();
 	var Question = mongoose.model('Question', questionSchema);
-	Question.findOne({_id: attributes}).populate('_user comments._user').exec(function(error,value){
+	Question.findOne({_id: attributes}).populate('_user comments._user answers').exec(function(error,value){
 		if(error)
 		{
 			return promise.done(error,null);
@@ -162,12 +185,17 @@ questionSchema.statics.getQuestion = function getQuestion(attributes)
                 return promise.done(error,null);
             }
             else{
-            	return promise.done(error,value.parse());
+            	
+            	return promise.done(error,value);
             }	
 		}
 	});
 	return promise;
 }
+
+/* Static methods*/
+/* Obtener las preguntas por tag*/
+
 
 /*Parser de una*/
 questionSchema.methods.parse = function parse () {
