@@ -1,13 +1,14 @@
 'use strict';
 var mongoose = require('mongoose');
+var mongoosastic = require('mongoosastic');
 var User  = require('./user');
 var Hope      	= require('hope');
 var Schema = mongoose.Schema;
 
 var questionSchema = new Schema({
-	title:{ type: String, required: true },
-	body:{ type: String, required: true },
-	_user : { type: Schema.ObjectId, ref: 'User', required: true},
+	title:{ type: String, required: true,  es_indexed:true },
+	body:{ type: String, required: true,  es_indexed:true },
+	_user : { type: Schema.ObjectId, ref: 'User'},
 	created:{ type: Date, required: true },
 	modified:{ type: Date },
 	answercount: Number,
@@ -18,6 +19,8 @@ var questionSchema = new Schema({
 	answers:[{type: Schema.ObjectId, ref: 'Answer'}],
 	userVotes:[{type: Schema.ObjectId, ref: 'User'}]
 });
+
+questionSchema.plugin(mongoosastic);
 
 
 /* static methods */
@@ -222,4 +225,40 @@ questionSchema.methods.parse = function parse () {
 		}*/
     };  
 };
+
+
+
+//Crear mapeado y copiar coleccion elastic,solo ejecutar la primera vez
+/*
+var Question = mongoose.model('Question', questionSchema);
+Question.createMapping(function(err, mapping){ 
+   if(err){ 
+     console.log('error creating mapping (you can safely ignore this)'); 
+     console.log(err); 
+   }else{ 
+     console.log('mapping created!'); 
+     console.log(mapping); 
+   } 
+ }); 
+
+
+
+var Question = mongoose.model('Question', questionSchema)
+  , stream = Question.synchronize()
+  , count = 0;
+ 
+stream.on('data', function(err, doc){
+  count++;
+});
+stream.on('close', function(){
+  console.log('indexed ' + count + ' documents!');
+});
+stream.on('error', function(err){
+  console.log(err);
+});
+*/
+
+
+
+
 module.exports = mongoose.model('Question', questionSchema);

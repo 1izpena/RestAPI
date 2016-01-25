@@ -25,7 +25,6 @@ var userSchema = new Schema({
                       directMessageChannels: [{type: Schema.ObjectId, ref: 'Channel'}]
                     }],
   active  : { type: Boolean, default: false },
-  id_social  : { type: Number, required: false },
   invitations:  [ { type: Schema.ObjectId, ref: 'Group' }]
   
 });
