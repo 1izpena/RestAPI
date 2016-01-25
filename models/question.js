@@ -201,7 +201,7 @@ questionSchema.methods.parse = function parse () {
 
 
 //Crear mapeado y copiar coleccion elastic,solo ejecutar la primera vez
-
+/*
 var Question = mongoose.model('Question', questionSchema);
 Question.createMapping(function(err, mapping){ 
    if(err){ 
@@ -228,7 +228,7 @@ stream.on('close', function(){
 stream.on('error', function(err){
   console.log(err);
 });
-
+*/
 
 
 
