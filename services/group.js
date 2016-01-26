@@ -185,7 +185,7 @@ exports.getinfo = function getinfo(groupid,userid){
                 privateChannels: privados,
                 directMessageChannels: directos
             };
-            promise.done(null, vuelta);
+            return promise.done(null, vuelta);
         }
     });
     return promise;

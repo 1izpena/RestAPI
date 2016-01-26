@@ -35,4 +35,14 @@ router.route('/question/:questionid/comment').put(question.commentquestion);
 /*POST Nueva respuesta a una pregunta por id*/
 router.route('/question/:questionid/answer').post(answer.newanswer);
 
+/*PUT comentar la respuesta*/
+router.route('/question/:questionid/answer/:answerid/comment').put(answer.commentanswer);
+
+/*Put votar positivo la respuesta*/
+router.route('/question/:questionid/answer/:answerid/upvote').put(answer.upvote);
+
+/*Put votar negativo la respuesta*/
+router.route('/question/:questionid/answer/:answerid/downvote').put(answer.downvote);
+
+
 module.exports = router;
