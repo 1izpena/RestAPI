@@ -99,6 +99,19 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid').delete(channel
 /* PUT El usuario logeado, modifica el nombre del canal */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid').put(channel.updatechannelinfo);
 
+/* POST crea un nuevo mensaje dentro del canal :channelid */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').post(message.newmessage);
+/* GET devuelve los mensajes del canal :channelid */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').get(message.getmessages);
+/* DELETE elimina todos los mensajes del canal :channelid */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').delete(message.deletechannelmessagges);
+
+/* GET devuelve los ficheros del grupo a los que puede acceder el usuario */
+router.route('/:userid/chat/groups/:groupid/files').get(message.getfiles);
+
+/* DELETE elimina el mensaje :messageid dentro del canal :channelid */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages/:messageid').delete(message.deletechannelmessagge);
+
 /* GET devuelve la lista de usuarios del canal :channelid */
 router.route('/:userid/chat/channels/:channelid/users').get(channel.getchanneluserlist);
 
@@ -110,22 +123,5 @@ router.route('/:userid/chat/channels/:channelid').put(channel.updatechannelinfo)
 
 /* DELETE el usuario logeado se va del canal */
 router.route('/:userid/chat/channels/:channelid/unsuscribe').delete(channel.unsuscribefromchannel);
-
-
-/* POST crea un nuevo mensaje dentro del canal :channelid */
-router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').post(message.newmessage);
-
-/* POST crea un nuevo mensaje dentro del canal :channelid */
-router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').get(message.getmessages);
-
-/* GET devuelve los ficheros del grupo a los que puede acceder el usuario */
-router.route('/:userid/chat/groups/:groupid/files').get(message.getfiles);
-
-//para eliminar un mensaje o todos los mensajes
-/* POST crea un nuevo mensaje dentro del canal :channelid */
-router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages/:messageid').delete(message.deletechannelmessagge);
-
-/* POST crea un nuevo mensaje dentro del canal :channelid */
-router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').delete(message.deletechannelmessagges);
 
 module.exports = router;

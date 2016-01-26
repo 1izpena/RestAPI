@@ -9,39 +9,99 @@
   "tags": [
     {
       "name": "Tag1",
-      "description": "/users/{userid}/chat/invitations/{groupid}/"
+      "description": "/users/"
     },
     {
       "name": "Tag2",
-      "description": "/users/{userid}/chat/groups/"
+      "description": "/users/{userid}/"
     },
     {
       "name": "Tag3",
-      "description": "/users/{userid}/chat/groups/{groupid}/"
+      "description": "/users/{userid}/profile/"
     },
     {
       "name": "Tag4",
-      "description": "/users/{userid}/chat/groups/{groupid}/users/{userid1}/"
+      "description": "/users/{userid}/privateprofile/"
     },
     {
       "name": "Tag5",
-      "description": "/users/{userid}/chat/groups/{groupid}/channels/"
+      "description": "/users/{userid}/chat/"
     },
     {
       "name": "Tag6",
-      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/users/{userid1}/"
+      "description": "/users/{userid}/chat/invitations/"
     },
     {
       "name": "Tag7",
-      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/"
+      "description": "/users/{userid}/chat/invitations/{groupid}/"
     },
     {
       "name": "Tag8",
-      "description": "/users/{userid}/chat/channels/{channelid}/"
+      "description": "/users/{userid}/chat/groups/"
     },
     {
       "name": "Tag9",
-      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/{messages}/"
+      "description": "/users/{userid}/chat/groups/{groupid}/"
+    },
+    {
+      "name": "Tag10",
+      "description": "/users/{userid}/chat/groups/{groupid}/unsuscribe/"
+    },
+    {
+      "name": "Tag11",
+      "description": "/users/{userid}/chat/groups/{groupid}/users/"
+    },
+    {
+      "name": "Tag12",
+      "description": "/users/{userid}/chat/groups/{groupid}/users/{userid1}/"
+    },
+    {
+      "name": "Tag13",
+      "description": "/users/{userid}/chat/groups/{groupid}/users/{userid1}/invite/"
+    },
+    {
+      "name": "Tag14",
+      "description": "/users/{userid}/chat/groups/{groupid}/channels/"
+    },
+    {
+      "name": "Tag15",
+      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/users/"
+    },
+    {
+      "name": "Tag16",
+      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/users/{userid1}/"
+    },
+    {
+      "name": "Tag17",
+      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/"
+    },
+    {
+      "name": "Tag18",
+      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/unsuscribe/"
+    },
+    {
+      "name": "Tag19",
+      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/messages/"
+    },
+    {
+      "name": "Tag20",
+      "description": "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/messages/{messageid}"
+    },
+    {
+      "name": "Tag21",
+      "description": "/users/{userid}/chat/channels/{channelid}/"
+    },
+    {
+      "name": "Tag22",
+      "description": "/users/{userid}/chat/channels/{channelid}/users/"
+    },
+    {
+      "name": "Tag23",
+      "description": "/users/{userid}/chat/channels/{channelid}/unsuscribe/"
+    },
+    {
+      "name": "Tag24",
+      "description": "/users/{userid}/chat/groups/{groupid}/files/"
     }
   ],
   "schemes": [
@@ -50,6 +110,9 @@
   "paths": {
     "/users/": {
       "get": {
+        "tags": [
+          "Tag1"
+        ],
         "description": "Gets list of users of the chat.",
         "responses": {
           "200": {
@@ -124,6 +187,9 @@
     },
     "/users/{userid}/": {
       "get": {
+        "tags": [
+          "Tag2"
+        ],
         "description": "Gets {userid} User´s info.",
         "parameters": [
           {
@@ -204,6 +270,9 @@
     },
     "/users/{userid}/profile/": {
       "get": {
+        "tags": [
+          "Tag3"
+        ],
         "description": "Gets logged user's public profile info.",
         "parameters": [
           {
@@ -284,6 +353,9 @@
     },
     "/users/{userid}/privateprofile/": {
       "get": {
+        "tags": [
+          "Tag4"
+        ],
         "description": "Gets logged user's private profile info.",
         "parameters": [
           {
@@ -364,6 +436,9 @@
     },
     "/users/{userid}/chat/": {
       "get": {
+        "tags": [
+          "Tag5"
+        ],
         "description": "Gets logged user's chat info.",
         "parameters": [
           {
@@ -444,6 +519,9 @@
     },
     "/users/{userid}/chat/invitations/": {
       "get": {
+        "tags": [
+          "Tag6"
+        ],
         "description": "Gets the invitations list of logged user",
         "parameters": [
           {
@@ -526,7 +604,7 @@
     "/users/{userid}/chat/invitations/{groupid}/": {
       "post": {
         "tags": [
-          "Tag1"
+          "Tag7"
         ],
         "description": "Logged User accepts invitation to join group",
         "parameters": [
@@ -685,7 +763,7 @@
       },
       "delete": {
         "tags": [
-          "Tag1"
+          "Tag7"
         ],
         "description": "Logged User regrets invitation to join group",
         "parameters": [
@@ -773,7 +851,7 @@
     "/users/{userid}/chat/groups/": {
       "get": {
         "tags": [
-          "Tag2"
+          "Tag8"
         ],
         "description": "Gets a list of groups of the logged user",
         "parameters": [
@@ -854,7 +932,7 @@
       },
       "post": {
         "tags": [
-          "Tag2"
+          "Tag8"
         ],
         "description": "Logged User creates new group",
         "parameters": [
@@ -1015,7 +1093,7 @@
     "/users/{userid}/chat/groups/{groupid}/": {
       "get": {
         "tags": [
-          "Tag3"
+          "Tag9"
         ],
         "description": "Gets info of selected group",
         "parameters": [
@@ -1104,7 +1182,7 @@
       },
       "put": {
         "tags": [
-          "Tag3"
+          "Tag9"
         ],
         "description": "Logged User edits groupName",
         "parameters": [
@@ -1271,7 +1349,7 @@
       },
       "delete": {
         "tags": [
-          "Tag3"
+          "Tag9"
         ],
         "description": "Logged User deletes the group",
         "parameters": [
@@ -1376,6 +1454,569 @@
                         "type": "string"
                       }
                     }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/unsuscribe/": {
+      "delete": {
+        "tags": [
+          "Tag10"
+        ],
+        "description": "Logged User unsuscribes from group",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Group",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "groupName": {
+                  "type": "string"
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/users/": {
+      "get": {
+        "tags": [
+          "Tag11"
+        ],
+        "description": "Gets the user list of the group.",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "ArrayOfUsers",
+              "type": "array",
+              "items": {
+                "title": "User",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "mail": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/users/{userid1}/": {
+      "post": {
+        "tags": [
+          "Tag12"
+        ],
+        "description": "Adds the user :userid1 to the group if logged user is the admin of the group.",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "userid1",
+            "in": "path",
+            "description": "id of user to add",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "ArrayOfUsers",
+              "type": "array",
+              "items": {
+                "title": "User",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "mail": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tag12"
+        ],
+        "description": "Deletes the user :userid1 from the group if logged user is the admin of the group.",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "userid1",
+            "in": "path",
+            "description": "id of user to delete",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "ArrayOfUsers",
+              "type": "array",
+              "items": {
+                "title": "User",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "mail": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/users/{userid1}/invite/": {
+      "post": {
+        "tags": [
+          "Tag13"
+        ],
+        "description": "Invites the user :userid1 to the group if logged user is the admin of the group and if user :userid1 is not a member of the group and does not have an invitation pending for the group.",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "userid1",
+            "in": "path",
+            "description": "id of user to invite",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "ArrayOfUsers",
+              "type": "array",
+              "items": {
+                "title": "User",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "mail": {
+                    "type": "string"
                   }
                 }
               }
