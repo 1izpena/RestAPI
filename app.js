@@ -6,25 +6,18 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-
-
-
 var app = express();
-
 var User   = require('./models/user'); // Modelo user
 var config = require('./config'); // archivo de configuración
-
-
-
-
-
+//swagger - inicio
+var argv = require('minimist')(process.argv.slice(2));
+var swagger = require("swagger-node-express");
+//swagger - fin
 //MongoDB
 var mongoose = require("mongoose");
 var uriUtil = require('mongodb-uri');
 
 //mongoose.connect("mongodb://dessiuser:dessi2015@ds063134.mongolab.com:63134/dessi");
-
-
 
 var port = process.env.PORT || config.port; //3200
 app.set('superSecret', config.phrase); // setear frase secreta
@@ -35,7 +28,13 @@ var options = { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000
 
 var mongooseUri = uriUtil.formatMongoose(config.database);
 mongoose.connect(mongooseUri, options);
-
+//swagger - inicio
+var subpath = express();
+app.use("/v1", subpath);
+swagger.setAppHandler(subpath);
+app.use(express.static('dist'));
+//app.use(express.static(path.join(__dirname, 'dist')));
+//swagger - fin
 
 // view engine setup: Solo para errores
 app.set('views', path.join(__dirname, 'views'));
@@ -81,6 +80,46 @@ app.use('/api/v1/auth', authusers);
 app.use('/api/v1/file', file);
 app.use('/api/v1/users', users);
 
+
+//swagger - inicio
+swagger.setApiInfo({
+    title: "example API",
+    description: "API to do something, manage something...",
+    termsOfServiceUrl: "",
+    contact: "yourname@something.com",
+    license: "",
+    licenseUrl: ""
+});
+
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/dist/index.html');
+});
+
+// Set api-doc path
+swagger.configureSwaggerPaths('', 'api-docs', '');
+
+// Configure the API domain
+var domain = 'localhost';
+if(argv.domain !== undefined)
+    domain = argv.domain;
+else
+    console.log('No --domain=xxx specified, taking default hostname "localhost".')
+
+// Configure the API port
+/*var port = 8080;
+if(argv.port !== undefined)
+    port = argv.port;
+else
+    console.log('No --port=xxx specified, taking default port ' + port + '.');*/
+
+// Set and display the application URL
+var applicationUrl = 'http://' + domain + ':' + port;
+console.log('snapJob API running on ' + applicationUrl);
+
+swagger.configure(applicationUrl, '1.0.0');
+// Start the web server
+//app.listen(port);
+//swagger - fin
 
 // Si no encuentra la ruta, envia un 404
 app.use(function(req, res, next) {
