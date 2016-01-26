@@ -520,6 +520,7 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
+    var Message = mongoose.model('Message');
     var query = {_id: groupid};
     var query1 = {_id: channelid};
     var limit1 = 1;
@@ -532,12 +533,12 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
             var userschannel = channel.users;
             if (channel){
                 var Channel = mongoose.model('Channel');
-                var vuelta = channel;
                 Channel.parsepopulated(userid,channelid).then(function (error, result) {
                     if (error){
                         return promise.done(error,null);
                     }
                     else {
+                        var vuelta = result;
                         Channel.deletechannel (channelid).then(function(error){
                             if (error){
                                 return promise.done(error,null);
@@ -601,7 +602,19 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                                                                 return promise.done(error,null);
                                                             }
                                                             else {
-                                                                return promise.done(null, vuelta);
+                                                                var query3 = {_channel:channelid};
+                                                                Message.deletemessages(query3).then(function (error,result){
+                                                                    if(error){
+                                                                        return promise.done(error,null);
+                                                                    }
+                                                                    else {
+                                                                        // Notificamos al canal se ha eliminado mensaje
+                                                                        //socketio.getIO().sockets.to('CH_' + data.channelid).emit('messageDeleted', result);
+                                                                        console.log("Message deleted successfully");
+                                                                        return promise.done(null, vuelta);
+                                                                    }
+                                                                });
+
                                                             }
                                                         });
                                                     }

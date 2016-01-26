@@ -121,4 +121,11 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').get(m
 /* GET devuelve los ficheros del grupo a los que puede acceder el usuario */
 router.route('/:userid/chat/groups/:groupid/files').get(message.getfiles);
 
+//para eliminar un mensaje o todos los mensajes
+/* POST crea un nuevo mensaje dentro del canal :channelid */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages/:messageid').delete(message.deletechannelmessagge);
+
+/* POST crea un nuevo mensaje dentro del canal :channelid */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').delete(message.deletechannelmessagges);
+
 module.exports = router;
