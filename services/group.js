@@ -445,7 +445,7 @@ exports.deleteuser = function deleteuser(groupid,userid){
 
             }else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'group not found'
                 };
                 return promise.done(err, null);
@@ -605,7 +605,7 @@ exports.removegroup = function removegroup(userid,groupid){
                 });
             } else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'channel not found'
                 };
                 return promise.done(err, null);

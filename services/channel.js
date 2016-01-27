@@ -109,7 +109,7 @@ exports.updatechannelpublicuserlist = function updatechannelpublicuserlist(group
                 });
             } else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'group not found'
                 };
                 return promise.done(err, null);
@@ -332,7 +332,7 @@ exports.adduser = function adduser(groupid,userid,channelid){
 
             }else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'channel not found'
                 };
                 return promise.done(err, null);
@@ -620,7 +620,7 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                                                     }
                                                 } else {
                                                     var err3 = {
-                                                        code   : 403,
+                                                        code   : 400,
                                                         message: 'group not found'
                                                     };
                                                     return promise.done(err3, null);
@@ -647,44 +647,15 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
     return promise;
 };
 
-exports.getinfo = function getinfo(channelid){
-    var User = mongoose.model('User');
+exports.getinfo = function getinfo(userid,channelid){
     var Channel = mongoose.model('Channel');
     var promise = new Hope.Promise();
-    var query = {_id: channelid};
-    var populate = 'users group _admin';
-    Channel.searchpopulated(query,populate).then(function (error, channel) {
+    Channel.parsepopulated(userid,channelid).then(function (error, channel) {
         if (error){
             return promise.done(error,null);
         }
-        else{
-            var usuarios = [];
-            for (i=0;i<channel.users.length;i++){
-                var elto = {
-                    id        : channel.users[i]._id,
-                    username  : channel.users[i].username,
-                    mail      : channel.users[i].mail
-                };
-                usuarios.push(elto);
-            }
-            var grupo = {
-                groupid: channel.group._id,
-                groupName: channel.group.groupName
-            };
-            var elto5 = {
-                id        : channel._admin._id,
-                username  : channel._admin.username,
-                mail      : channel._admin.mail
-            };
-            var vuelta = {
-                id: channel._id,
-                channelName: channel.channelName,
-                channelType: channel.channelType,
-                users: usuarios,
-                admin: elto5,
-                group: grupo
-            };
-            promise.done(null,vuelta);
+        else {
+            return promise.done(null, channel);
         }
     });
     return promise;
