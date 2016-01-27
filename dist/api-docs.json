@@ -102,6 +102,10 @@
     {
       "name": "Tag24",
       "description": "/users/{userid}/chat/groups/{groupid}/files/"
+    },
+    {
+      "name": "Tag25",
+      "description": "/auth/login"
     }
   ],
   "schemes": [
@@ -114,6 +118,16 @@
           "Tag1"
         ],
         "description": "Gets list of users of the chat.",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
@@ -192,6 +206,14 @@
         ],
         "description": "Gets {userid} User´s info.",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -276,6 +298,14 @@
         "description": "Gets logged user's public profile info.",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -358,6 +388,14 @@
         ],
         "description": "Gets logged user's private profile info.",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -442,6 +480,14 @@
         "description": "Gets logged user's chat info.",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -524,6 +570,14 @@
         ],
         "description": "Gets the invitations list of logged user",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -608,6 +662,14 @@
         ],
         "description": "Logged User accepts invitation to join group",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -768,6 +830,14 @@
         "description": "Logged User regrets invitation to join group",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -856,6 +926,14 @@
         "description": "Gets a list of groups of the logged user",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -937,6 +1015,14 @@
         "description": "Logged User creates new group",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -945,12 +1031,13 @@
             "format": "ObjectID"
           },
           {
-            "name": "groupName",
-            "in": "query",
-            "description": "name of new group to create",
+            "name": "newGroupData",
+            "in": "body",
+            "description": "task object",
             "required": true,
-            "type": "string",
-            "format": "string"
+            "schema": {
+              "$ref": "#/definitions/newGroupTask"
+            }
           }
         ],
         "responses": {
@@ -1098,6 +1185,14 @@
         "description": "Gets info of selected group",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -1187,6 +1282,14 @@
         "description": "Logged User edits groupName",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -1203,12 +1306,13 @@
             "format": "ObjectID"
           },
           {
-            "name": "groupName",
-            "in": "query",
-            "description": "New group name",
+            "name": "editGroupData",
+            "in": "body",
+            "description": "task object",
             "required": true,
-            "type": "string",
-            "format": "string"
+            "schema": {
+              "$ref": "#/definitions/editGroupTask"
+            }
           }
         ],
         "responses": {
@@ -1353,6 +1457,14 @@
         ],
         "description": "Logged User deletes the group",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -1515,6 +1627,14 @@
         "description": "Logged User unsuscribes from group",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -1676,6 +1796,14 @@
         "description": "Gets the user list of the group.",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -1770,6 +1898,14 @@
         ],
         "description": "Adds the user :userid1 to the group if logged user is the admin of the group.",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -1871,6 +2007,14 @@
         ],
         "description": "Deletes the user :userid1 from the group if logged user is the admin of the group.",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -1975,6 +2119,14 @@
         "description": "Invites the user :userid1 to the group if logged user is the admin of the group and if user :userid1 is not a member of the group and does not have an invitation pending for the group.",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -2077,6 +2229,14 @@
         ],
         "description": "Gets a list of channels of the groupid group",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -2203,6 +2363,14 @@
         "description": "Logged User creates a new channel in the group",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -2219,20 +2387,13 @@
             "format": "ObjectID"
           },
           {
-            "name": "channelName",
-            "in": "query",
-            "description": "name of new channel to create",
+            "name": "newChannelData",
+            "in": "body",
+            "description": "task object",
             "required": true,
-            "type": "string",
-            "format": "string"
-          },
-          {
-            "name": "channelType",
-            "in": "query",
-            "description": "Type of channel to create (PUBLIC/PRIVATE/DIRECT",
-            "required": true,
-            "type": "string",
-            "format": "string"
+            "schema": {
+              "$ref": "#/definitions/newChannelTask"
+            }
           }
         ],
         "responses": {
@@ -2394,6 +2555,14 @@
         "description": "Gets the user list of the channel.",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -2496,6 +2665,14 @@
         ],
         "description": "Deletes user :userid1 from the channel",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -2688,6 +2865,14 @@
         "description": "Gets :channelid channels info",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -2710,6 +2895,15 @@
             "required": true,
             "type": "string",
             "format": "ObjectID"
+          },
+          {
+            "name": "editChannelData",
+            "in": "body",
+            "description": "task object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/editChannelTask"
+            }
           }
         ],
         "responses": {
@@ -2869,6 +3063,14 @@
         "description": "Edits :channelid channel Name",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -2891,14 +3093,6 @@
             "required": true,
             "type": "string",
             "format": "ObjectID"
-          },
-          {
-            "name": "channelName",
-            "in": "query",
-            "description": "New channel name",
-            "required": true,
-            "type": "string",
-            "format": "string"
           }
         ],
         "responses": {
@@ -3057,6 +3251,14 @@
         ],
         "description": "Deletes :channelid from group",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
           {
             "name": "userid",
             "in": "path",
@@ -3241,6 +3443,14 @@
         "description": "Logged user leaves :channelid channel",
         "parameters": [
           {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
             "name": "userid",
             "in": "path",
             "description": "id of logged user",
@@ -3413,6 +3623,177 @@
               }
             }
           }
+        }
+      }
+    },
+    "/auth/login/": {
+      "post": {
+        "tags": [
+          "Tag25"
+        ],
+        "description": "Log in on the system",
+        "parameters": [
+          {
+            "name": "userLoginData",
+            "in": "body",
+            "description": "task object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userLoginTask"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Channel",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "mail": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "userLoginTask": {
+      "type": "object",
+      "description": "Task object",
+      "required": [
+        "mail",
+        "password"
+      ],
+      "properties": {
+        "mail": {
+          "description": "mail to log",
+          "type": "string",
+          "format": "email"
+        },
+        "password": {
+          "description": "password to log",
+          "type": "string",
+          "format": "password"
+        }
+      }
+    },
+    "newChannelTask": {
+      "type": "object",
+      "description": "Task object",
+      "required": [
+        "channelName",
+        "channelType"
+      ],
+      "properties": {
+        "channelName": {
+          "description": "new channel name",
+          "type": "string",
+          "format": "string"
+        },
+        "channelType": {
+          "description": "new channel type",
+          "type": "string",
+          "format": "string"
+        }
+      }
+    },
+    "newGroupTask": {
+      "type": "object",
+      "description": "Task object",
+      "required": [
+        "groupName"
+      ],
+      "properties": {
+        "groupName": {
+          "description": "new group name",
+          "type": "string",
+          "format": "string"
+        }
+      }
+    },
+    "editChannelTask": {
+      "type": "object",
+      "description": "Task object",
+      "required": [
+        "channelName"
+      ],
+      "properties": {
+        "channelName": {
+          "description": "new channel name",
+          "type": "string",
+          "format": "string"
+        }
+      }
+    },
+    "editGroupTask": {
+      "type": "object",
+      "description": "Task object",
+      "required": [
+        "groupName"
+      ],
+      "properties": {
+        "groupName": {
+          "description": "new group name",
+          "type": "string",
+          "format": "string"
         }
       }
     }
