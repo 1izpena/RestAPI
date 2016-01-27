@@ -2069,6 +2069,1352 @@
           }
         }
       }
+    },
+    "/users/{userid}/chat/groups/{groupid}/channels/": {
+      "get": {
+        "tags": [
+          "Tag14"
+        ],
+        "description": "Gets a list of channels of the groupid group",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "ArrayOfChannels",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "publicChannels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "channelName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "privateChannels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "channelName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "directMessageChannels": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "channelName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tag14"
+        ],
+        "description": "Logged User creates a new channel in the group",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "groupid on which to create a channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelName",
+            "in": "query",
+            "description": "name of new channel to create",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "name": "channelType",
+            "in": "query",
+            "description": "Type of channel to create (PUBLIC/PRIVATE/DIRECT",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Channel",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "channelName": {
+                  "type": "string"
+                },
+                "channelType": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "object",
+                  "properties": {
+                    "groupId": {
+                      "type": "string"
+                    },
+                    "groupName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/users/": {
+      "get": {
+        "tags": [
+          "Tag15"
+        ],
+        "description": "Gets the user list of the channel.",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelid",
+            "in": "path",
+            "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "ArrayOfUsers",
+              "type": "array",
+              "items": {
+                "title": "User",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "mail": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/users/{userid1}/": {
+      "post": {
+        "tags": [
+          "Tag16"
+        ],
+        "description": "Deletes user :userid1 from the channel",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelid",
+            "in": "path",
+            "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "userid1",
+            "in": "path",
+            "description": "id of user to delete from channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Channel",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "channelName": {
+                  "type": "string"
+                },
+                "channelType": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "object",
+                  "properties": {
+                    "groupId": {
+                      "type": "string"
+                    },
+                    "groupName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/channels/{channelid}": {
+      "get": {
+        "tags": [
+          "Tag17"
+        ],
+        "description": "Gets :channelid channels info",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelid",
+            "in": "path",
+            "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Channel",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "channelName": {
+                  "type": "string"
+                },
+                "channelType": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "object",
+                  "properties": {
+                    "groupId": {
+                      "type": "string"
+                    },
+                    "groupName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tag17"
+        ],
+        "description": "Edits :channelid channel Name",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelid",
+            "in": "path",
+            "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelName",
+            "in": "query",
+            "description": "New channel name",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Channel",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "channelName": {
+                  "type": "string"
+                },
+                "channelType": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "object",
+                  "properties": {
+                    "groupId": {
+                      "type": "string"
+                    },
+                    "groupName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tag17"
+        ],
+        "description": "Deletes :channelid from group",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelid",
+            "in": "path",
+            "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Channel",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "channelName": {
+                  "type": "string"
+                },
+                "channelType": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "object",
+                  "properties": {
+                    "groupId": {
+                      "type": "string"
+                    },
+                    "groupName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/unsuscribe/": {
+      "delete": {
+        "tags": [
+          "Tag18"
+        ],
+        "description": "Logged user leaves :channelid channel",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelid",
+            "in": "path",
+            "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Channel",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "channelName": {
+                  "type": "string"
+                },
+                "channelType": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "object",
+                  "properties": {
+                    "groupId": {
+                      "type": "string"
+                    },
+                    "groupName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
