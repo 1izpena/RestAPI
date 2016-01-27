@@ -211,10 +211,15 @@ channelSchema.statics.parsepopulated = function parsepopulated (userid,channelid
                     username  : channel._admin.username,
                     mail      : channel._admin.mail
                 };
+                var eltoGroup = {
+                    groupId: channel.group._id,
+                    groupName: channel.group.groupName
+                };
                 var vuelta = {
                     id: channel._id,
                     channelName: channel.channelName,
                     channelType: channel.channelType,
+                    group: eltoGroup,
                     admin: elto5,
                     users: usuarios
                 };
