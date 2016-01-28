@@ -69,7 +69,7 @@
         "tags": [
           "User"
         ],
-        "description": "Gets list of users of the chat.",
+        "description": "Returns an array with all the users of the chat.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -87,7 +87,6 @@
               "title": "ArrayOfUsers",
               "type": "array",
               "items": {
-                "title": "User",
                 "type": "object",
                 "properties": {
                   "id": {
@@ -156,7 +155,7 @@
         "tags": [
           "User"
         ],
-        "description": "Gets {userid} User´s info.",
+        "description": "returns logged user's info",
         "parameters": [
           {
             "name": "x-access-token",
@@ -247,7 +246,7 @@
         "tags": [
           "User"
         ],
-        "description": "Gets logged user's public profile info.",
+        "description": "returns logged user's public profile info",
         "parameters": [
           {
             "name": "x-access-token",
@@ -338,7 +337,7 @@
         "tags": [
           "User"
         ],
-        "description": "Gets logged user's private profile info.",
+        "description": "returns logged user's private profile info.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -429,7 +428,7 @@
         "tags": [
           "Chat"
         ],
-        "description": "Gets logged user's chat info.",
+        "description": "returns logged user's chat info - an array with the groups",
         "parameters": [
           {
             "name": "x-access-token",
@@ -463,6 +462,34 @@
                 },
                 "mail": {
                   "type": "string"
+                },
+                "groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "groupName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "invitations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "groupid": {
+                        "type": "string"
+                      },
+                      "groupname": {
+                        "type": "string"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -546,7 +573,6 @@
               "title": "ArrayOfInvitations",
               "type": "array",
               "items": {
-                "title": "Invitation",
                 "type": "object",
                 "properties": {
                   "groupid": {
@@ -810,7 +836,7 @@
           "200": {
             "description": "Successful response",
             "schema": {
-              "title": "User",
+              "title": "Invitation",
               "type": "object",
               "properties": {
                 "groupid": {
@@ -1165,16 +1191,86 @@
           "200": {
             "description": "Successful response",
             "schema": {
-              "title": "ArrayOfGroups",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "groupName": {
-                    "type": "string"
+              "title": "Group",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "groupName": {
+                  "type": "string"
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
                   }
                 }
               }
@@ -1779,7 +1875,6 @@
               "title": "ArrayOfUsers",
               "type": "array",
               "items": {
-                "title": "User",
                 "type": "object",
                 "properties": {
                   "id": {
@@ -1887,20 +1982,86 @@
           "200": {
             "description": "Successful response",
             "schema": {
-              "title": "ArrayOfUsers",
-              "type": "array",
-              "items": {
-                "title": "User",
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "username": {
-                    "type": "string"
-                  },
-                  "mail": {
-                    "type": "string"
+              "title": "Group",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "groupName": {
+                  "type": "string"
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
                   }
                 }
               }
@@ -1996,20 +2157,86 @@
           "200": {
             "description": "Successful response",
             "schema": {
-              "title": "ArrayOfUsers",
-              "type": "array",
-              "items": {
-                "title": "User",
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "username": {
-                    "type": "string"
-                  },
-                  "mail": {
-                    "type": "string"
+              "title": "Group",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "groupName": {
+                  "type": "string"
+                },
+                "admin": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "mail": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "mail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "publicChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "privateChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "directMessageChannels": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "channelName": {
+                        "type": "string"
+                      }
+                    }
                   }
                 }
               }
@@ -2097,7 +2324,7 @@
           {
             "name": "userid1",
             "in": "path",
-            "description": "id of user to invite",
+            "description": "id of user to invite to group {groupid}",
             "required": true,
             "type": "string",
             "format": "ObjectID"
@@ -2107,21 +2334,14 @@
           "200": {
             "description": "Successful response",
             "schema": {
-              "title": "ArrayOfUsers",
-              "type": "array",
-              "items": {
-                "title": "User",
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "username": {
-                    "type": "string"
-                  },
-                  "mail": {
-                    "type": "string"
-                  }
+              "title": "Invitation",
+              "type": "object",
+              "properties": {
+                "groupid": {
+                  "type": "string"
+                },
+                "groupname": {
+                  "type": "string"
                 }
               }
             }
@@ -2504,7 +2724,6 @@
               "title": "ArrayOfUsers",
               "type": "array",
               "items": {
-                "title": "User",
                 "type": "object",
                 "properties": {
                   "id": {
@@ -2573,7 +2792,7 @@
         "tags": [
           "Channel"
         ],
-        "description": "Deletes user :userid1 from the channel",
+        "description": "Deletes user {userid1} from the channel {channelid}",
         "parameters": [
           {
             "name": "x-access-token",
@@ -3956,9 +4175,131 @@
           }
         }
       }
+    },
+    "/auth/signup/": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "Log in on the system",
+        "parameters": [
+          {
+            "name": "userSignupData",
+            "in": "body",
+            "description": "task object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userSignupTask"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "Channel",
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Bad Request - Mail already registered",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
+    "userSignupTask": {
+      "type": "object",
+      "description": "Task object",
+      "required": [
+        "mail",
+        "username",
+        "password"
+      ],
+      "properties": {
+        "mail": {
+          "description": "mail of new user",
+          "type": "string",
+          "format": "email"
+        },
+        "username": {
+          "description": "username of new user",
+          "type": "string",
+          "format": "string"
+        },
+        "password": {
+          "description": "password of new user",
+          "type": "string",
+          "format": "password"
+        }
+      }
+    },
     "userLoginTask": {
       "type": "object",
       "description": "Task object",
