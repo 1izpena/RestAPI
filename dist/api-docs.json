@@ -81,7 +81,7 @@
     },
     {
       "name": "Tag19",
-      "description": "/users/{userid}/chat/groups/:groupid/channels/:channelid/messages/"
+      "description": "/users/:userid/chat/groups/:groupid/channels/:channelid/messages/"
     },
     {
       "name": "Tag20",
@@ -3931,6 +3931,138 @@
         "tags": [
           "Tag19"
         ],
+        "description": "Deletes all messages from the channel",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelid",
+            "in": "path",
+            "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "channel",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "channel": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "channelName": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "date": {
+                  "type": "string"
+                },
+                "messageType": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/messages/{messageid}": {
+      "delete": {
+        "tags": [
+          "Tag20"
+        ],
         "description": "Deletes a message from the channel",
         "parameters": [
           {
@@ -3961,6 +4093,14 @@
             "name": "channelid",
             "in": "path",
             "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "messageid",
+            "in": "path",
+            "description": "id of message",
             "required": true,
             "type": "string",
             "format": "ObjectID"
