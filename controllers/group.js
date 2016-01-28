@@ -316,7 +316,7 @@ exports.addusertogroup = function addusertogroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', request.params.userid1);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', result);
                                         response.json(result);
                                     }
                                 });
