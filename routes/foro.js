@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var question = require('../controllers/question');
 var answer = require('../controllers/answer');
+var tag = require('../controllers/tag');
 
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
@@ -32,6 +33,13 @@ router.route('/question/:questionid/downvote').put(question.downvote);
 /*PUT Comentar una pregunta*/
 router.route('/question/:questionid/comment').put(question.commentquestion);
 
+/*DELETE Eliminar una pregunta*/
+router.route('/question/:questionid/delete').delete(question.deletequestion);
+
+/*PUT Editar una pregunta*/
+router.route('/question/:questionid/edit').put(question.deletequestion);
+
+
 /*POST Nueva respuesta a una pregunta por id*/
 router.route('/question/:questionid/answer').post(answer.newanswer);
 
@@ -43,6 +51,19 @@ router.route('/question/:questionid/answer/:answerid/upvote').put(answer.upvote)
 
 /*Put votar negativo la respuesta*/
 router.route('/question/:questionid/answer/:answerid/downvote').put(answer.downvote);
+
+/*Delete eliminar respuesta*/
+router.route('/question/:questionid/answer/:answerid/delete').delete(answer.deleteanswer);
+
+/*Put editar respuesta*/
+router.route('/question/:questionid/answer/:answerid/edit').put(answer.editanswer);
+
+
+/*Get obtener los tags*/
+router.route('/tags').get(tag.gettags);
+
+/*Post crear tag*/
+router.route('/tag/newtag').post(tag.newtag);
 
 
 module.exports = router;
