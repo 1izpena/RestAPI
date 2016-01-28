@@ -176,7 +176,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                         
                         response.status(error.code).json({message: error.message});
                     } else {
-                        groupservice.subscribegroup(request.params.groupid,result).then(function (error,result){
+                        groupservice.subscribegroup(request.params.groupid,result,request.params.userid).then(function (error,result){
                             if(error){
                                 
                                 response.status(error.code).json({message: error.message});

@@ -268,7 +268,7 @@ exports.adduser = function adduser(groupid,userid){
     return promise;
 };
 
-exports.subscribegroup = function subscribegroup(groupid,user){
+exports.subscribegroup = function subscribegroup(groupid,user,userid){
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
     var Channel = mongoose.model('Channel');
