@@ -13,9 +13,11 @@ module.exports = {
                         for (var room in socket.adapter.rooms) {
                             if ((room.indexOf('CH_') == 0) && (room != roomName))
                                 socket.leave(room);
+                                console.log("ha dejado socket de select channel");
                         }
-
+                        console.log("se ha unido a socket de select channel");
                         socket.join(roomName);
+                        socket.userid = data.userid;
                     }
                 });
 
@@ -26,9 +28,12 @@ module.exports = {
                         var roomName = 'US_'+data.userid;
                         for (var room in socket.adapter.rooms) {
                             if ((room.indexOf('US') == 0) && (room != roomName))
+                                console.log("ha dejado socket de new chat conection");
                                 socket.leave(room);
                         }
+                        console.log("ha dejado socket de select channel");
                         socket.join(roomName);
+                        socket.userid = data.userid;
                     }
                 });
 
