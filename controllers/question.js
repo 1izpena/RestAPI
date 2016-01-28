@@ -1,5 +1,6 @@
 'use strict';
 var Question  = require('../models/question');
+var Tag  = require('../models/tag');
 var Auth  = require('../helpers/authentication');
 var User  = require('../models/user');
 var mongoose = require('mongoose');
@@ -22,13 +23,39 @@ exports.newquestion = function newquestion (request, response){
 				}
 				else
 				{
-					response.json(result.message);
+					response.status("200").json(result);
 				}
 			});
 		}
 	});
 }
 
+exports.deletequestion = function deletequestion(request, response){
+	Auth(request, response).then(function(error, result) {
+		if(error)
+		{
+			response.status(error.code).json({message: error.message});
+		}
+		else
+		{	
+			
+		}
+	});
+}
+
+exports.editquestion = function editquestion(request, response)
+{
+	Auth(request, response).then(function(error, result) {
+		if(error)
+		{
+			response.status(error.code).json({message: error.message});
+		}
+		else
+		{	
+			
+		}
+	});
+}
 
 
 exports.getquestions = function getquestions(request, response)
@@ -37,12 +64,11 @@ exports.getquestions = function getquestions(request, response)
 
 		if (error)
 		{
-			console.log("ERROR");
 			response.status(error.code).json({message: error.message});
 		}
 		else
 		{
-			response.json(result);
+			response.status("200").json(result);
 		}
 	});
 }
@@ -62,6 +88,12 @@ exports.getquestionbyid = function getquestionbyid(request, response)
 	
 }
 
+exports.getquestionbytag = function getquestionbytag(request, response)
+{
+
+}
+
+
 exports.upvote = function upvote (request , response){
 	Auth(request, response).then(function(error, result) {
 		if(error)
@@ -79,7 +111,7 @@ exports.upvote = function upvote (request , response){
 				}
 				else
 				{
-					response.json(result);
+					response.status(result.code).json(result.message);
 				}
 			});
 		}
@@ -104,7 +136,7 @@ exports.downvote = function downvote (request , response){
 				}
 				else
 				{
-					response.json(result.message);
+					response.status(result.code).json(result.message);
 				}
 			});
 		}
@@ -122,15 +154,16 @@ exports.commentquestion = function commentquestion(request, response)
 		{
 			var query = {_id: request.params.questionid};
 			var update = { $push: { comments: { "comment":request.body.comment, "created":request.body.created, _user:{"_id": result.id}}}};
-			var options = {};
+			var options = {new : true};
 			Question.updateQuestion(query,update, options).then(function(error,result){
 				if(error)
 				{
-					response.status(error.code).json({message: error.message});
+					response.status(error.code).json({message: error.messageError});
 				}
 				else
 				{
-					response.status("200").json("Comment created");
+					console.log(result);
+					response.status("200").json(result);
 				}
 			});
 		}

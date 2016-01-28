@@ -6,8 +6,8 @@ var Hope      	= require('hope');
 var Schema = mongoose.Schema;
 
 var questionSchema = new Schema({
-	title:{ type: String, required: true },
-	body:{ type: String, required: true },
+	title:{ type: String, required: true,  es_indexed:true },
+	body:{ type: String, required: true,  es_indexed:true },
 	_user : { type: Schema.ObjectId, ref: 'User'},
 	created:{ type: Date, required: true },
 	modified:{ type: Date },
@@ -157,6 +157,7 @@ questionSchema.statics.getQuestions = function getQuestions(){
 		if(error)
 		{
 			var messageError = '';
+			error = {code:"400", message:'Questions not found'};
 			return promise.done(error,null);
 		}
 		else
@@ -177,6 +178,7 @@ questionSchema.statics.getQuestion = function getQuestion(attributes)
 	Question.findOne({_id: attributes}).populate('_user comments._user answers').exec(function(error,value){
 		if(error)
 		{
+			error = {code:'400', message:'Undefined id'};
 			return promise.done(error,null);
 		}
 		else
@@ -195,6 +197,21 @@ questionSchema.statics.getQuestion = function getQuestion(attributes)
 	});
 	return promise;
 }
+
+
+
+/*questionSchema.statics.deleteQuestion = function deleteQuestion(id)
+{
+	var promise = new Hope.Promise();
+    this.remove({_id:id},function(error) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            return promise.done(null, {message: 'Question deleted successfully'});
+        }
+    });
+    return promise;
+}*/
 
 /* Static methods*/
 /* Obtener las preguntas por tag*/
@@ -256,9 +273,9 @@ stream.on('close', function(){
 stream.on('error', function(err){
   console.log(err);
 });
-
-
 */
+
+
 
 
 module.exports = mongoose.model('Question', questionSchema);
