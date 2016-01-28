@@ -103,7 +103,7 @@ var domain = 'localhost';
 if(argv.domain !== undefined)
     domain = argv.domain;
 else
-    console.log('No --domain=xxx specified, taking default hostname "localhost".')
+    console.log('No --domain=xxx specified, taking default hostname "localhost".');
 
 // Configure the API port
 /*var port = 8080;

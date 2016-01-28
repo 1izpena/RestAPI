@@ -2481,48 +2481,6 @@
                       }
                     }
                   }
-                },
-                "publicChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "privateChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "directMessageChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -2791,48 +2749,6 @@
                       }
                     }
                   }
-                },
-                "publicChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "privateChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "directMessageChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -2991,48 +2907,6 @@
                       }
                     }
                   }
-                },
-                "publicChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "privateChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "directMessageChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -3176,48 +3050,6 @@
                         "type": "string"
                       },
                       "mail": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "publicChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "privateChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "directMessageChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
                         "type": "string"
                       }
                     }
@@ -3369,48 +3201,6 @@
                       }
                     }
                   }
-                },
-                "publicChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "privateChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "directMessageChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -3556,48 +3346,6 @@
                         "type": "string"
                       },
                       "mail": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "publicChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "privateChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "directMessageChannels": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "channelName": {
                         "type": "string"
                       }
                     }
