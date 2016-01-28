@@ -221,7 +221,7 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedGroup', request.params.groupid);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedGroup', result);
                                         response.json(result);
                                     }
                                 });
@@ -255,7 +255,7 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid1);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', result);
                                         response.json(result);
                                     }
                                 });
@@ -285,7 +285,7 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid);
+                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', result);
                                 response.json(result);
                             }
                         });
