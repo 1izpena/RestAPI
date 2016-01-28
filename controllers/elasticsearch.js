@@ -16,6 +16,7 @@ client.search({
   body: {
     query: {
                 query_string:{
+                   "fields" : ["title", "body"],
                    query:request.body.key
                 }
             }

@@ -6,8 +6,8 @@ var Hope      	= require('hope');
 var Schema = mongoose.Schema;
 
 var questionSchema = new Schema({
-	title:{ type: String, required: true,  es_indexed:true },
-	body:{ type: String, required: true,  es_indexed:true },
+	title:{ type: String, required: true },
+	body:{ type: String, required: true },
 	_user : { type: Schema.ObjectId, ref: 'User'},
 	created:{ type: Date, required: true },
 	modified:{ type: Date },
@@ -256,9 +256,9 @@ stream.on('close', function(){
 stream.on('error', function(err){
   console.log(err);
 });
+
+
 */
-
-
 
 
 module.exports = mongoose.model('Question', questionSchema);
