@@ -121,71 +121,12 @@ exports.getinvitations = function getinvitations(userid){
 exports.getinfo = function getinfo(groupid,userid){
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group');
-    var query = { _id: groupid};
-    var populate = 'channels users';
-    Group.searchpopulated(query,populate).then(function (error, group) {
+    Group.parsepopulated(userid,groupid).then(function (error, group) {
         if (error){
             return promise.done(error,null);
         }
         else {
-            var publicos = [];
-            var privados = [];
-            var directos = [];
-            var usuarios = [];
-            for (i=0;i<group.channels.length;i++){
-                if (group.channels[i].channelType == "PUBLIC"){
-                    var elto = {
-                        id        : group.channels[i]._id,
-                        channelName  : group.channels[i].channelName
-                    };
-                    publicos.push(elto);
-                }if (group.channels[i].channelType == "PRIVATE"){
-                    var encontrado = false;
-                    var j = 0;
-                    while (encontrado == false && j<group.channels[i].users.length){
-                        if (userid == group.channels[i].users[j]){
-                            var elto2 = {
-                                id        : group.channels[i]._id,
-                                channelName  : group.channels[i].channelName
-                            };
-                            privados.push(elto2);
-                            encontrado = true;
-                        }
-                        j++;
-                    }
-                }if (group.channels[i].channelType == "DIRECT"){
-                    if (group.channels[i].users.length == 2) {
-                        if (group.channels[i].users[0] == userid ||
-                            group.channels[i].users[1] == userid) {
-
-                            var elto3 = {
-                                id        : group.channels[i]._id,
-                                channelName  : group.channels[i].channelName,
-                                users : [group.channels[i].users[0], group.channels[i].users[1]]
-                            };
-                            directos.push(elto3);
-                        }
-                    }
-                }
-
-            }
-            for (l=0;l<group.users.length;l++){
-                var elto4 = {
-                    id        : group.users[l]._id,
-                    username  : group.users[l].username,
-                    mail      :group.users[l].mail
-                };
-                usuarios.push(elto4);
-            }
-            var vuelta = {
-                id: group._id,
-                groupName: group.groupName,
-                users: usuarios,
-                publicChannels: publicos,
-                privateChannels: privados,
-                directMessageChannels: directos
-            };
-            return promise.done(null, vuelta);
+            return promise.done(null, group);
         }
     });
     return promise;
@@ -194,6 +135,7 @@ exports.getinfo = function getinfo(groupid,userid){
 exports.inviteuser = function inviteuser(groupid,userid){
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
+    var Group = mongoose.model('Group');
     var options = { new: true};
     var query = { $push: { "invitations": groupid} };
     User.updateuser (userid,query,options).then (function (error,user){
@@ -201,26 +143,17 @@ exports.inviteuser = function inviteuser(groupid,userid){
             return promise.done(error,null);
         }
         else{
-            var query = {_id: user._id};
-            var populate = 'invitations';
-            User.searchpopulated(query,populate).then(function (error, user) {
+            var query = {_id: groupid};
+            var limit = 1;
+            Group.search(query,limit).then(function (error, group) {
                 if (error){
                     return promise.done(error,null);
                 }
                 else{
-                    var invitaciones = [];
-                    for (i=0;i<user.invitations.length;i++){
-                        var elto = {
-                            groupid    : user.invitations[i]._id,
-                            groupname  : user.invitations[i].groupName
-                        };
-                        invitaciones.push(elto);
-                    }
+
                     var vuelta = {
-                        id: user._id,
-                        username: user.username,
-                        mail:user.mail,
-                        invitations: invitaciones
+                        groupid    : group._id,
+                        groupName  : group.groupName
                     };
                     return promise.done(null,vuelta);
                 }
@@ -233,6 +166,7 @@ exports.inviteuser = function inviteuser(groupid,userid){
 exports.deleteinvitation = function deleteinvitation(groupid,user){
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
+    var Group = mongoose.model('Group');
     var encontrado = false;
     var i = 0;
     while (encontrado === false && i<user.invitations.length){
@@ -249,35 +183,16 @@ exports.deleteinvitation = function deleteinvitation(groupid,user){
             return promise.done(error,null);
         }
         else{
-            var query = { _id: user._id};
-            var populate = 'groups._group invitations';
-            User.searchpopulated(query,populate).then(function (error, user) {
+            var query = {_id: groupid};
+            var limit = 1;
+            Group.search(query,limit).then(function (error, group) {
                 if (error){
                     return promise.done(error,null);
                 }
-                else {
-                    var grupos = [];
-                    var invitaciones = [];
-                    for (i=0;i<user.groups.length;i++){
-                        var elto = {
-                            id        : user.groups[i]._group._id,
-                            groupName  : user.groups[i]._group.groupName
-                        };
-                        grupos.push(elto);
-                    }
-                    for (j=0;j<user.invitations.length;j++){
-                        var elto2 = {
-                            groupid        : user.invitations[j]._id,
-                            groupname  : user.invitations[j].groupName
-                        };
-                        invitaciones.push(elto2);
-                    }
+                else{
                     var vuelta = {
-                        id: user._id,
-                        username: user.username,
-                        mail: user.mail,
-                        groups: grupos,
-                        invitations: invitaciones
+                        groupid    : group._id,
+                        groupName  : group.groupName
                     };
                     return promise.done(null,vuelta);
                 }
@@ -326,11 +241,6 @@ exports.adduser = function adduser(groupid,userid){
                             return promise.done(error,null);
                         }
                         else{
-                            var vuelta = {
-                                id: user._id,
-                                username: user.username,
-                                mail: user.mail
-                            };
                             var options2 = {new:true,multi:true};
                             var query3 = {_id:{$in:idpublicos}};
                             Channel.updatechannels(query3,updateQuery,options2).then(function (error,result){
@@ -338,7 +248,15 @@ exports.adduser = function adduser(groupid,userid){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    return promise.done(null,vuelta);
+                                    var Group = mongoose.model('Group');
+                                    Group.parsepopulated(userid,groupid).then(function (error, group) {
+                                        if (error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            return promise.done(null, group);
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -403,37 +321,13 @@ exports.subscribegroup = function subscribegroup(groupid,user){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    var query = { _id: user._id};
-                                    var populate = 'groups._group invitations';
-                                    User.searchpopulated(query,populate).then(function (error, user) {
+                                    var Group = mongoose.model('Group');
+                                    Group.parsepopulated(userid,groupid).then(function (error, group) {
                                         if (error){
                                             return promise.done(error,null);
                                         }
                                         else {
-                                            var grupos = [];
-                                            var invitaciones = [];
-                                            for (i=0;i<user.groups.length;i++){
-                                                var elto = {
-                                                    id        : user.groups[i]._group._id,
-                                                    groupName  : user.groups[i]._group.groupName
-                                                };
-                                                grupos.push(elto);
-                                            }
-                                            for (j=0;j<user.invitations.length;j++){
-                                                var elto2 = {
-                                                    groupid        : user.invitations[j]._id,
-                                                    groupname  : user.invitations[j].groupName
-                                                };
-                                                invitaciones.push(elto2);
-                                            }
-                                            var vuelta = {
-                                                id: user._id,
-                                                username: user.username,
-                                                mail: user.mail,
-                                                groups: grupos,
-                                                invitations: invitaciones
-                                            };
-                                            return promise.done(null,vuelta);
+                                            return promise.done(null, group);
                                         }
                                     });
                                 }
@@ -453,6 +347,7 @@ exports.deleteuser = function deleteuser(groupid,userid){
     var Channel = mongoose.model('Channel');
     var query = {_id: groupid};
     var limit = 1;
+
     Group.search(query,limit).then(function (error, group) {
         if (error){
             return promise.done(error,null);
@@ -514,24 +409,27 @@ exports.deleteuser = function deleteuser(groupid,userid){
                                                         }
                                                         j++;
                                                     }
+                                                    if (encontrado === true){
+                                                        var updateQuery2 = {users: users};
+                                                        var options2 = {new: true};
+                                                        Channel.updatechannel(channels[i],updateQuery2,options2).then(function (error,result){
+                                                            if (error){
+                                                                return promise.done(error,null);
+                                                            }
+                                                            else {
+                                                                console.log("user removed from channel: " + result._id + " channelName: " + result.channelName);
+                                                            }
+                                                        });
+                                                    }
                                                 }
-                                                var query = {_id: groupid};
-                                                var populate = 'users';
-                                                Group.searchpopulated(query,populate).then(function (error, group) {
+
+                                                var Group = mongoose.model('Group');
+                                                Group.parsepopulated(userid,groupid).then(function (error, group) {
                                                     if (error){
                                                         return promise.done(error,null);
                                                     }
-                                                    else{
-                                                        var vuelta = [];
-                                                        for (i=0;i<group.users.length;i++){
-                                                            var elto = {
-                                                                id        : group.users[i]._id,
-                                                                username  : group.users[i].username,
-                                                                mail      :group.users[i].mail
-                                                            };
-                                                            vuelta.push(elto);
-                                                        }
-                                                        promise.done(null,vuelta);
+                                                    else {
+                                                        return promise.done(null, group);
                                                     }
                                                 });
                                             }
@@ -547,7 +445,7 @@ exports.deleteuser = function deleteuser(groupid,userid){
 
             }else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'group not found'
                 };
                 return promise.done(err, null);
@@ -599,11 +497,14 @@ exports.createnewgroup = function createnewgroup(ats,userid){
                                 if(error){
                                     return promise.done(error,null);
                                 }else{
-                                    var vuelta = {
-                                        id: group._id,
-                                        groupName: group.groupName
-                                    };
-                                    return promise.done(null,vuelta);
+                                    Group.parsepopulated(userid,groupid).then(function (error, group) {
+                                        if (error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            return promise.done(null, group);
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -616,7 +517,7 @@ exports.createnewgroup = function createnewgroup(ats,userid){
     return promise;
 };
 
-exports.updategroupname = function updategroupname(groupid,groupName){
+exports.updategroupname = function updategroupname(userid,groupid,groupName){
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group');
     var options = {new: true};
@@ -626,7 +527,15 @@ exports.updategroupname = function updategroupname(groupid,groupName){
             return promise.done(error,null);
         }
         else{
-            return promise.done(null,group);
+            var Group = mongoose.model('Group');
+            Group.parsepopulated(userid,groupid).then(function (error, group) {
+                if (error){
+                    return promise.done(error,null);
+                }
+                else {
+                    return promise.done(null, group);
+                }
+            });
         }
     });
     return promise;
@@ -637,23 +546,20 @@ exports.removegroup = function removegroup(userid,groupid){
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
-    var query = {_id: groupid};
-    var limit = 1;
-    Group.search(query,limit).then(function (error, group) {
+    Group.parsepopulated(userid,groupid).then(function (error, group) {
         if (error){
             return promise.done(error,null);
         }
         else {
-            var groupchannels = group.channels;
-            var groupusers = group.users;
             if (group){
+                var grupo = group;
+                var groupchannels = group.channels;
+                var groupusers = group.users;
                 Group.deletegroup (groupid).then(function(error){
                     if (error){
                         return promise.done(error,null);
                     }
                     else{
-                        //buscamos el groupid en user y eliminamos
-                        //eliminamos los canales del grupo
                         var query3 = {_id:{$in:groupusers}};
                         var populate = 'groups._group';
                         User.searchpopulatedmany(query3,populate).then(function (error, users) {
@@ -683,24 +589,23 @@ exports.removegroup = function removegroup(userid,groupid){
                                     }
                                 }
                                 for (l=0;l<groupchannels.length;l++){
-                                    Channel.deletechannel(groupchannels[l]).then(function (error,result){
+                                    var query3 = {_id:{$in:groupchannels}};
+                                    Channel.deletechannels(query3).then(function (error,result){
                                         if(error){
                                             return promise.done(error,null);
                                         }
                                         else {
-                                            var message = 'group deleted correctly';
-                                            promise.done(null,message);
+                                            return promise.done(null,grupo);
                                         }
                                     });
                                 }
-
                             }
                         });//hasta akiii
                     }
                 });
             } else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'channel not found'
                 };
                 return promise.done(err, null);

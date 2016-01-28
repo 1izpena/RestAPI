@@ -130,7 +130,7 @@ groupSchema.methods.parse = function parse () {
     };
 };
 
-groupSchema.methods.parsepopulated = function parsepopulated (userid,groupid) {
+groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
     var query = { _id: groupid};
     var populate = 'channels users _admin';
     var promise = new Hope.Promise();
@@ -144,6 +144,7 @@ groupSchema.methods.parsepopulated = function parsepopulated (userid,groupid) {
                 var privados = [];
                 var directos = [];
                 var usuarios = [];
+                var i;
                 for (i=0;i<group.channels.length;i++){
                     if (group.channels[i].channelType == "PUBLIC"){
                         var elto = {
@@ -181,6 +182,7 @@ groupSchema.methods.parsepopulated = function parsepopulated (userid,groupid) {
                     }
 
                 }
+                var k;
                 for (k=0;k<group.users.length;k++){
                     var elto4 = {
                         id        : group.users[k]._id,
@@ -203,7 +205,7 @@ groupSchema.methods.parsepopulated = function parsepopulated (userid,groupid) {
                     privateChannels: privados,
                     directMessageChannels: directos
                 };
-                promise.done(null, vuelta);
+                return promise.done(null,vuelta);
             }else {
                 var err = {
                     code   : 400,
@@ -214,7 +216,6 @@ groupSchema.methods.parsepopulated = function parsepopulated (userid,groupid) {
         }
     });
     return promise;
-
 };
 
 module.exports = mongoose.model('Group', groupSchema);

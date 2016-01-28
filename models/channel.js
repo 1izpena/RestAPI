@@ -162,6 +162,19 @@ channelSchema.statics.deletechannel = function deletechannel (id) {
     return promise;
 };
 
+channelSchema.statics.deletechannels = function deletechannels (query) {
+    var promise = new Hope.Promise();
+    this.remove(query,function(error) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            console.log("channel deleted successfully");
+            return promise.done(null, {message: 'channel deleted successfully'});
+        }
+    });
+    return promise;
+};
+
 channelSchema.methods.parse = function parse () {
     var channel = this;
     return {
@@ -172,6 +185,58 @@ channelSchema.methods.parse = function parse () {
         admin: channel._admin
     };
 };
+
+channelSchema.statics.parsepopulated = function parsepopulated (userid,channelid) {
+    var query = { _id: channelid};
+    var populate = 'group users _admin';
+    var promise = new Hope.Promise();
+    this.findOne(query).populate(populate).exec(function (error, channel) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            if (channel){
+                var usuarios = [];
+                var k;
+                for (k=0;k<channel.users.length;k++){
+                    var elto4 = {
+                        id        : channel.users[k]._id,
+                        username  : channel.users[k].username,
+                        mail      : channel.users[k].mail
+                    };
+                    usuarios.push(elto4);
+                }
+                var elto5 = {
+                    id        : channel._admin._id,
+                    username  : channel._admin.username,
+                    mail      : channel._admin.mail
+                };
+                var eltoGroup = {
+                    groupId: channel.group._id,
+                    groupName: channel.group.groupName
+                };
+                var vuelta = {
+                    id: channel._id,
+                    channelName: channel.channelName,
+                    channelType: channel.channelType,
+                    group: eltoGroup,
+                    admin: elto5,
+                    users: usuarios
+                };
+                promise.done(null, vuelta);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'channel not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+
+};
+
 
 module.exports = mongoose.model('Channel', channelSchema);
 

@@ -189,3 +189,75 @@ function checkNewMessageInput (data)
 
 }
 
+exports.deletechannelmessagges = function deletechannelmessagges (request, response) {
+
+    // Verificamos si el token es valido y corresponde a un usuario
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        }
+
+        if (request.params.userid == result._id) {
+            chatErrors.checkuserinchannel(request.params.channelid,request.params.userid)
+                .then (function (error,result) {
+                    if (error) {
+                        response.status(401).json({message: 'User not included in requested channel'});
+                    }
+                    else {
+                        var query3 = {_channel:request.params.channelid};
+                        Message.deletemessages(query3).then(function (error,result){
+                            if(error){
+                                response.status(error.code).json({message: error.message});
+                            }
+                            else {
+                                // Notificamos al canal se ha eliminado mensaje
+                                //socketio.getIO().sockets.to('CH_' + data.channelid).emit('messageDeleted', result);
+                                console.log("Message deleted successfully");
+                                response.json(result);
+                            }
+                        });
+                    }
+                });
+        }
+        else {
+            response.status(401).json({message: 'Not authorized to post messages from another user'});
+        }
+    });
+};
+
+exports.deletechannelmessagge = function deletechannelmessagge (request, response) {
+
+    // Verificamos si el token es valido y corresponde a un usuario
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        }
+
+        if (request.params.userid == result._id) {
+            chatErrors.checkuserinchannel(request.params.channelid,request.params.userid)
+                .then (function (error,result) {
+                    if (error) {
+                        response.status(401).json({message: 'User not included in requested channel'});
+                    }
+                    else {
+                        //var query3 = {_id:{$in:groupchannels}};
+                        Message.deletemessage(request.params.messageid).then(function (error,result){
+                            if(error){
+                                response.status(error.code).json({message: error.message});
+                            }
+                            else {
+                                // Notificamos al canal se ha eliminado mensaje
+                                //socketio.getIO().sockets.to('CH_' + data.channelid).emit('messageDeleted', result);
+                                console.log("Message deleted successfully: " + request.params.messageid);
+                                response.json(result);
+                            }
+                        });
+                    }
+                });
+        }
+        else {
+            response.status(401).json({message: 'Not authorized to post messages from another user'});
+        }
+    });
+};
+

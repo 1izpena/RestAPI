@@ -21,7 +21,7 @@ messageSchema.path('messageType').validate(function(messageType){
     var validTypes = ['FILE', 'TEXT', 'QUESTION'];
     var strValidTypes = "";
 
-    var numTypes = validTypes.length
+    var numTypes = validTypes.length;
     for (var i = 0; i < numTypes; i++) {
         if (strValidTypes !== "")
             strValidTypes+=", ";
@@ -53,7 +53,7 @@ messageSchema.statics.newMessage = function (data) {
                 error = { code: 400, message: 'filename required.' };
                 return promise.done(error, null);
             }
-            data.content = { filename: data.filename}
+            data.content = { filename: data.filename};
             if (data.comment) {
                 data.content.text = data.comment;
             }
@@ -179,6 +179,32 @@ messageSchema.statics.search = function search (query, limit, page) {
     return promise;
 };
 
+/* ELIMINAR */
+messageSchema.statics.deletemessage = function deletemessage (id) {
+    var promise = new Hope.Promise();
+    this.remove({_id:id},function(error) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            console.log("message deleted successfully");
+            return promise.done(null, {message: 'message deleted successfully'});
+        }
+    });
+    return promise;
+};
+
+messageSchema.statics.deletemessages = function deletemessages (query) {
+    var promise = new Hope.Promise();
+    this.remove(query,function(error) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            console.log("message deleted successfully");
+            return promise.done(null, {message: 'message deleted successfully'});
+        }
+    });
+    return promise;
+};
 
 messageSchema.methods.parse = function parse () {
     var message = this;

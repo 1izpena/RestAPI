@@ -336,5 +336,7 @@ userSchema.methods.parse = function parse () {
 };
 
 
+
+
 /* exportamos el schema con nombre User */
 module.exports = mongoose.model('User', userSchema);
