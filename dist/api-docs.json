@@ -8,104 +8,28 @@
   "basePath": "/api/v1",
   "tags": [
     {
-      "name": "Tag1",
-      "description": "/users/"
+      "name": "User",
+      "description": "Operations with users"
     },
     {
-      "name": "Tag2",
-      "description": "/users/:userid/"
+      "name": "Chat",
+      "description": "Chat info and invitations"
     },
     {
-      "name": "Tag3",
-      "description": "/users/:userid/profile/"
+      "name": "Group",
+      "description": "Operations with groups"
     },
     {
-      "name": "Tag4",
-      "description": "/users/:userid/privateprofile/"
+      "name": "Channel",
+      "description": "Operations with channels"
     },
     {
-      "name": "Tag5",
-      "description": "/users/:userid/chat/"
+      "name": "Message",
+      "description": "Operations with messages"
     },
     {
-      "name": "Tag6",
-      "description": "/users/:userid/chat/invitations/"
-    },
-    {
-      "name": "Tag7",
-      "description": "/users/:userid/chat/invitations/:groupid/"
-    },
-    {
-      "name": "Tag8",
-      "description": "/users/:userid/chat/groups/"
-    },
-    {
-      "name": "Tag9",
-      "description": "/users/:userid/chat/groups/:groupid/"
-    },
-    {
-      "name": "Tag10",
-      "description": "/users/:userid/chat/groups/:groupid/unsuscribe/"
-    },
-    {
-      "name": "Tag11",
-      "description": "/users/:userid/chat/groups/:groupid/users/"
-    },
-    {
-      "name": "Tag12",
-      "description": "/users/:userid/chat/groups/:groupid/users/:userid1/"
-    },
-    {
-      "name": "Tag13",
-      "description": "/users/:userid/chat/groups/:groupid/users/:userid1/invite/"
-    },
-    {
-      "name": "Tag14",
-      "description": "/users/:userid/chat/groups/:groupid/channels/"
-    },
-    {
-      "name": "Tag15",
-      "description": "/users/:userid/chat/groups/:groupid/channels/:channelid/users/"
-    },
-    {
-      "name": "Tag16",
-      "description": "/users/:userid/chat/groups/:groupid/channels/:channelid/users/:userid1/"
-    },
-    {
-      "name": "Tag17",
-      "description": "/users/:userid/chat/groups/:groupid/channels/:channelid/"
-    },
-    {
-      "name": "Tag18",
-      "description": "/users/:userid/chat/groups/:groupid/channels/:channelid/unsuscribe/"
-    },
-    {
-      "name": "Tag19",
-      "description": "/users/:userid/chat/groups/:groupid/channels/:channelid/messages/"
-    },
-    {
-      "name": "Tag20",
-      "description": "/users/:userid/chat/groups/:groupid/channels/:channelid/messages/:messageid/"
-    },
-    {
-      "name": "Tag21",
-      "description": "/users/:userid/chat/channels/:channelid/"
-    },
-    {
-      "name": "Tag22",
-      "description": "/users/:userid/chat/channels/:channelid/users/"
-    },
-    {
-      "name": "Tag23",
-      "description": "/users/:userid/chat/channels/:channelid/unsuscribe/"
-    },
-    {
-      "name": "Tag24",
-      "description": "/users/:userid/chat/groups/:groupid/files/"
-    },
-    {
-      "name": "Tag25",
-      "description": "/auth/login/"
+      "name": "Auth",
+      "description": "Authorization operations"
     },
     {
       "name": "Tag26",
@@ -132,8 +56,8 @@
       "description": "/auth/social/"
     },
     {
-      "name": "Tag32",
-      "description": "/file/getSignedUrl/"
+      "name": "File",
+      "description": "Operations with Amazon S3"
     }
   ],
   "schemes": [
@@ -143,7 +67,7 @@
     "/users/": {
       "get": {
         "tags": [
-          "Tag1"
+          "User"
         ],
         "description": "Gets list of users of the chat.",
         "parameters": [
@@ -230,7 +154,7 @@
     "/users/{userid}/": {
       "get": {
         "tags": [
-          "Tag2"
+          "User"
         ],
         "description": "Gets {userid} User´s info.",
         "parameters": [
@@ -321,7 +245,7 @@
     "/users/{userid}/profile/": {
       "get": {
         "tags": [
-          "Tag3"
+          "User"
         ],
         "description": "Gets logged user's public profile info.",
         "parameters": [
@@ -412,7 +336,7 @@
     "/users/{userid}/privateprofile/": {
       "get": {
         "tags": [
-          "Tag4"
+          "User"
         ],
         "description": "Gets logged user's private profile info.",
         "parameters": [
@@ -503,7 +427,7 @@
     "/users/{userid}/chat/": {
       "get": {
         "tags": [
-          "Tag5"
+          "Chat"
         ],
         "description": "Gets logged user's chat info.",
         "parameters": [
@@ -594,7 +518,7 @@
     "/users/{userid}/chat/invitations/": {
       "get": {
         "tags": [
-          "Tag6"
+          "Chat"
         ],
         "description": "Gets the invitations list of logged user",
         "parameters": [
@@ -686,7 +610,7 @@
     "/users/{userid}/chat/invitations/{groupid}/": {
       "post": {
         "tags": [
-          "Tag7"
+          "Chat"
         ],
         "description": "Logged User accepts invitation to join group",
         "parameters": [
@@ -853,7 +777,7 @@
       },
       "delete": {
         "tags": [
-          "Tag7"
+          "Chat"
         ],
         "description": "Logged User regrets invitation to join group",
         "parameters": [
@@ -949,7 +873,7 @@
     "/users/{userid}/chat/groups/": {
       "get": {
         "tags": [
-          "Tag8"
+          "Group"
         ],
         "description": "Gets a list of groups of the logged user",
         "parameters": [
@@ -1038,7 +962,7 @@
       },
       "post": {
         "tags": [
-          "Tag8"
+          "Group"
         ],
         "description": "Logged User creates new group",
         "parameters": [
@@ -1208,7 +1132,7 @@
     "/users/{userid}/chat/groups/{groupid}/": {
       "get": {
         "tags": [
-          "Tag9"
+          "Group"
         ],
         "description": "Gets info of selected group",
         "parameters": [
@@ -1305,7 +1229,7 @@
       },
       "put": {
         "tags": [
-          "Tag9"
+          "Group"
         ],
         "description": "Logged User edits groupName",
         "parameters": [
@@ -1481,7 +1405,7 @@
       },
       "delete": {
         "tags": [
-          "Tag9"
+          "Group"
         ],
         "description": "Logged User deletes the group",
         "parameters": [
@@ -1650,7 +1574,7 @@
     "/users/{userid}/chat/groups/{groupid}/unsuscribe/": {
       "delete": {
         "tags": [
-          "Tag10"
+          "Group"
         ],
         "description": "Logged User unsuscribes from group",
         "parameters": [
@@ -1819,7 +1743,7 @@
     "/users/{userid}/chat/groups/{groupid}/users/": {
       "get": {
         "tags": [
-          "Tag11"
+          "Group"
         ],
         "description": "Gets the user list of the group.",
         "parameters": [
@@ -1922,7 +1846,7 @@
     "/users/{userid}/chat/groups/{groupid}/users/{userid1}/": {
       "post": {
         "tags": [
-          "Tag12"
+          "Group"
         ],
         "description": "Adds the user :userid1 to the group if logged user is the admin of the group.",
         "parameters": [
@@ -2031,7 +1955,7 @@
       },
       "delete": {
         "tags": [
-          "Tag12"
+          "Group"
         ],
         "description": "Deletes the user :userid1 from the group if logged user is the admin of the group.",
         "parameters": [
@@ -2142,7 +2066,7 @@
     "/users/{userid}/chat/groups/{groupid}/users/{userid1}/invite/": {
       "post": {
         "tags": [
-          "Tag13"
+          "Group"
         ],
         "description": "Invites the user :userid1 to the group if logged user is the admin of the group and if user :userid1 is not a member of the group and does not have an invitation pending for the group.",
         "parameters": [
@@ -2253,7 +2177,7 @@
     "/users/{userid}/chat/groups/{groupid}/channels/": {
       "get": {
         "tags": [
-          "Tag14"
+          "Channel"
         ],
         "description": "Gets a list of channels of the groupid group",
         "parameters": [
@@ -2386,7 +2310,7 @@
       },
       "post": {
         "tags": [
-          "Tag14"
+          "Channel"
         ],
         "description": "Logged User creates a new channel in the group",
         "parameters": [
@@ -2536,7 +2460,7 @@
     "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/users/": {
       "get": {
         "tags": [
-          "Tag15"
+          "Channel"
         ],
         "description": "Gets the user list of the channel.",
         "parameters": [
@@ -2647,7 +2571,7 @@
     "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/users/{userid1}/": {
       "post": {
         "tags": [
-          "Tag16"
+          "Channel"
         ],
         "description": "Deletes user :userid1 from the channel",
         "parameters": [
@@ -2804,7 +2728,7 @@
     "/users/{userid}/chat/groups/{groupid}/channels/{channelid}": {
       "get": {
         "tags": [
-          "Tag17"
+          "Channel"
         ],
         "description": "Gets :channelid channels info",
         "parameters": [
@@ -2960,7 +2884,7 @@
       },
       "put": {
         "tags": [
-          "Tag17"
+          "Channel"
         ],
         "description": "Edits :channelid channel Name",
         "parameters": [
@@ -3107,7 +3031,7 @@
       },
       "delete": {
         "tags": [
-          "Tag17"
+          "Channel"
         ],
         "description": "Deletes :channelid from group",
         "parameters": [
@@ -3256,7 +3180,7 @@
     "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/unsuscribe/": {
       "delete": {
         "tags": [
-          "Tag18"
+          "Channel"
         ],
         "description": "Logged user leaves :channelid channel",
         "parameters": [
@@ -3405,7 +3329,7 @@
     "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/messages/": {
       "get": {
         "tags": [
-          "Tag19"
+          "Message"
         ],
         "description": "Gets all the messagges on the channel",
         "parameters": [
@@ -3538,7 +3462,7 @@
       },
       "post": {
         "tags": [
-          "Tag19"
+          "Message"
         ],
         "description": "Creates a new message on the channel",
         "parameters": [
@@ -3677,7 +3601,7 @@
       },
       "delete": {
         "tags": [
-          "Tag19"
+          "Message"
         ],
         "description": "Deletes all messages from the channel",
         "parameters": [
@@ -3809,7 +3733,7 @@
     "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/messages/{messageid}": {
       "delete": {
         "tags": [
-          "Tag20"
+          "Message"
         ],
         "description": "Deletes a message from the channel",
         "parameters": [
@@ -3949,7 +3873,7 @@
     "/auth/login/": {
       "post": {
         "tags": [
-          "Tag25"
+          "Auth"
         ],
         "description": "Log in on the system",
         "parameters": [
