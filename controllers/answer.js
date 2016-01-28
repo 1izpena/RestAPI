@@ -24,9 +24,9 @@ exports.newanswer = function newanswer(request,response){
 				else
 				{
 					var query = {_id: request.params.questionid};
-					var update = { $push: { answers: answer._id},$inc: {answercount: 1}};
+					var update = { $inc: {answercount: 1}, $push: { answers: answer._id}};
 					var options = {};
-					Question.updateQuestion(request.body.questionid,update,options).then(function updateQuestion (error,result)
+					Question.updateQuestion(query,update,options).then(function updateQuestion (error,result)
 					{
 						if(error)
 						{
@@ -42,6 +42,58 @@ exports.newanswer = function newanswer(request,response){
 		}
 	});
 }
+
+exports.deleteanswer = function deleteanswer(request, response){
+	Auth(request, response).then(function(error, result) {
+		if(error)
+		{
+			response.status(error.code).json({message: error.message});
+		}
+		else
+		{	console.log(request.params.questionid);
+			var query = {_id: request.params.questionid};
+			var update = { $inc: {answercount: -1}, $pull: { answers: request.params.answerid}};
+			var options = {new: true};
+			Question.updateQuestion(query,update,options).then(function updateQuestion (error,question)
+			{
+				if(error)
+				{
+					console.log(error);
+							
+				}
+				else
+				{
+					Answer.deleteAnswer(request.params.answerid).then(function deleteAnswer(error,result)
+					{
+						if(error)
+						{
+							response.json( {message: error});
+						}
+						else
+						{
+							response.json(question);
+						}	
+					});	
+				}				
+			});
+		}
+	});
+}
+
+exports.editanswer = function editanswer(request, response)
+{
+	Auth(request, response).then(function(error, result) {
+		if(error)
+		{
+			response.status(error.code).json({message: error.message});
+		}
+		else
+		{	
+			
+		}
+	});
+}
+
 
 
 exports.commentanswer = function commentanswer(request, response){
@@ -91,7 +143,7 @@ exports.upvote = function upvote (request , response){
 				}
 				else
 				{
-					response.status(result.code).json(result.message);
+					response.status("200").json(result);
 				}
 			});
 		}
@@ -116,9 +168,10 @@ exports.downvote = function downvote (request , response){
 				}
 				else
 				{
-					response.status(result.code).json(result.message);
+					response.status("200").json(result);
 				}
 			});
 		}
 	});
 }
+
