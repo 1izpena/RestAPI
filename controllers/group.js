@@ -353,8 +353,9 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                                         if (error){
                                             response.status(error.code).json({message: error.message});
                                         }else {
-                                            groupservice.updategroupname(request.params.groupid,request.body.groupName).then(function (error,result){
+                                            groupservice.updategroupname(request.params.userid, request.params.groupid,request.body.groupName).then(function (error,result){
                                                 if(error){
+                                                    console.log("error: " + error.code + ' ' + error.message);
                                                     response.status(error.code).json({message: error.message});
                                                 }else{
                                                     socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('editedGroupName', result);

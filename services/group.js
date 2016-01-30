@@ -524,9 +524,11 @@ exports.updategroupname = function updategroupname(userid,groupid,groupName){
     var query = {"groupName": groupName};
     Group.updategroup (groupid,query,options).then (function (error,group){
         if (error){
+            console.log("error update");
             return promise.done(error,null);
         }
         else{
+            console.log("ok update");
             var Group = mongoose.model('Group');
             Group.parsepopulated(userid,groupid).then(function (error, group) {
                 if (error){
