@@ -347,10 +347,6 @@ exports.deleteuser = function deleteuser(userid,groupid,rem){
     var Channel = mongoose.model('Channel');
     var User = mongoose.model ('User');
 
-    //sacar de array de usuarios de grupo al grupo
-    //sacar al usuario del array de usuarios del grupo
-    //sacar de cada canal al usuario del array de usuarios
-
     Group.updategroup(groupid,{$pull:{users:rem}}).then(function (error,result) {
         if (error) {
             return promise.done(error, null);
@@ -478,61 +474,35 @@ exports.removegroup = function removegroup(userid,groupid){
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
+
     Group.parsepopulated(userid,groupid).then(function (error, group) {
-        if (error){
-            return promise.done(error,null);
+        if (error) {
+            return promise.done(error, null);
         }
         else {
             if (group){
                 var grupo = group;
-                var groupchannels = group.channels;
-                var groupusers = group.users;
-                Group.deletegroup (groupid).then(function(error){
+                User.updateuser (userid,{$pull:{groups:{_group:groupid}}},{new: true}).then (function (error,user){
                     if (error){
                         return promise.done(error,null);
                     }
                     else{
-                        var query3 = {_id:{$in:groupusers}};
-                        var populate = 'groups._group';
-                        User.searchpopulatedmany(query3,populate).then(function (error, users) {
-                            if (error){
+                        Channel.deletechannels({_id:{$in:grupo.channels}}).then(function (error,result){
+                            if(error){
                                 return promise.done(error,null);
                             }
                             else {
-                                for (i=0;i<users.length;i++){
-                                    var encontrado = false;
-                                    var listaGrupos = users[i].groups;
-                                    var j = 0;
-                                    while (encontrado == false && j<listaGrupos.length){
-                                        if (groupid == listaGrupos[j]._group._id){
-                                            listaGrupos.splice(j,1);
-                                            encontrado = true;
-                                        }
-                                        j++;
+                                Group.deletegroup(groupid).then (function (error){
+                                    if(error){
+                                        return promise.done(error,null);
                                     }
-                                    if (encontrado == true){
-                                        var update = {"groups":listaGrupos};
-                                        var options = {multi: true};
-                                        User.updateuser(users[i]._id,update,options).then(function (error,user){
-                                            if(error){
-                                                return promise.done(error,null);
-                                            }
-                                        });
+                                    else {
+                                        return promise.done(null,grupo);
                                     }
-                                }
-                                for (l=0;l<groupchannels.length;l++){
-                                    var query3 = {_id:{$in:groupchannels}};
-                                    Channel.deletechannels(query3).then(function (error,result){
-                                        if(error){
-                                            return promise.done(error,null);
-                                        }
-                                        else {
-                                            return promise.done(null,grupo);
-                                        }
-                                    });
-                                }
+                                });
                             }
-                        });//hasta akiii
+                        });
+
                     }
                 });
             } else {
@@ -542,6 +512,7 @@ exports.removegroup = function removegroup(userid,groupid){
                 };
                 return promise.done(err, null);
             }
+
         }
     });
     return promise;
