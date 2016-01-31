@@ -176,7 +176,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                         
                         response.status(error.code).json({message: error.message});
                     } else {
-                        groupservice.subscribegroup(request.params.groupid,result).then(function (error,result){
+                        groupservice.subscribegroup(request.params.groupid,result,request.params.userid1).then(function (error,result){
                             if(error){
                                 
                                 response.status(error.code).json({message: error.message});
@@ -221,7 +221,7 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedGroup', request.params.groupid);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedGroup', result);
                                         response.json(result);
                                     }
                                 });
@@ -251,11 +251,11 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                groupservice.deleteuser(request.params.groupid,request.params.userid1).then(function (error,result){
+                                groupservice.deleteuser(request.params.userid,request.params.groupid,request.params.userid1).then(function (error,result){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid1);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', result);
                                         response.json(result);
                                     }
                                 });
@@ -281,11 +281,11 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
-                        groupservice.deleteuser(request.params.groupid,request.params.userid).then(function (error,result){
+                        groupservice.deleteuser(request.params.userid,request.params.groupid,request.params.userid).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', request.params.userid);
+                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', result);
                                 response.json(result);
                             }
                         });
@@ -316,7 +316,7 @@ exports.addusertogroup = function addusertogroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', request.params.userid1);
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', result);
                                         response.json(result);
                                     }
                                 });
@@ -353,8 +353,9 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                                         if (error){
                                             response.status(error.code).json({message: error.message});
                                         }else {
-                                            groupservice.updategroupname(request.params.groupid,request.body.groupName).then(function (error,result){
+                                            groupservice.updategroupname(request.params.userid, request.params.groupid,request.body.groupName).then(function (error,result){
                                                 if(error){
+                                                    console.log("error: " + error.code + ' ' + error.message);
                                                     response.status(error.code).json({message: error.message});
                                                 }else{
                                                     socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('editedGroupName', result);

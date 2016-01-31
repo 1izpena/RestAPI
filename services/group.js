@@ -268,7 +268,7 @@ exports.adduser = function adduser(groupid,userid){
     return promise;
 };
 
-exports.subscribegroup = function subscribegroup(groupid,user){
+exports.subscribegroup = function subscribegroup(groupid,user,userid){
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
     var Channel = mongoose.model('Channel');
@@ -341,115 +341,41 @@ exports.subscribegroup = function subscribegroup(groupid,user){
     return promise;
 };
 
-exports.deleteuser = function deleteuser(groupid,userid){
+exports.deleteuser = function deleteuser(userid,groupid,rem){
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group');
     var Channel = mongoose.model('Channel');
-    var query = {_id: groupid};
-    var limit = 1;
+    var User = mongoose.model ('User');
 
-    Group.search(query,limit).then(function (error, group) {
-        if (error){
-            return promise.done(error,null);
+    Group.updategroup(groupid,{$pull:{users:rem}}).then(function (error,result) {
+        if (error) {
+            return promise.done(error, null);
         }
         else {
-            if (group){
-                var encontrado = false;
-                var i = 0;
-                while (encontrado === false && i<group.users.length){
-                    if (group.users[i] == userid){
-                        group.users.splice(i,1);
-                        encontrado = true;
-                    }
-                    i++;
+            var grupo = result;
+            User.updateuser (rem,{$pull:{groups:{_group:groupid}}},{new: true}).then (function (error,user){
+                if (error){
+                    return promise.done(error,null);
                 }
-                var options = {new: true};
-                var updateQuery = {users: group.users};
-                Group.updategroup (groupid,updateQuery,options).then (function (error,group){
-                    if (error){
-                        return promise.done(error,null);
-                    }
-                    else {
-                        var grupo =  group;
-                        var query = {_id: userid};
-                        var limit = 1;
-                        User.search(query,limit).then(function (error, user) {
-                            if (error) {
-                                return promise.done(error, null);
-                            }
-                            else {
-                                var i = 0;
-                                while (encontrado === false && i<user.groups.length){
-                                    if (user.groups[i]._group == groupid){
-                                        user.groups.splice(i,1);
-                                        encontrado = true;
-                                    }
-                                    i++;
+                else{
+                    Channel.updatechannels({_id:{$in:grupo.channels}},{$pull:{users: rem}},{new: true}).then(function (error,result){
+                        if (error){
+                            return promise.done(error,null);
+                        }
+                        else {
+                            var Group = mongoose.model('Group');
+                            Group.parsepopulated(userid,groupid).then(function (error, group) {
+                                if (error){
+                                    return promise.done(error,null);
                                 }
-                                User.updateuser (userid,{groups: user.groups},{new: true}).then (function (error,user){
-                                    if (error){
-                                        return promise.done(error,null);
-                                    }
-                                    else{
-                                        var query3 = {_id:{$in:grupo.channels}};
-                                        var limit3 = 0;
-                                        Channel.search(query3, limit3).then(function (error, channels) {
-                                            if (error) {
-                                                return promise.done(error, null);
-                                            }
-                                            else {
-                                                for (i=0;i<channels.length;i++){
-                                                    var users = channels[i].users;
-                                                    var encontrado = false;
-                                                    var j = 0;
-                                                    while (encontrado === false && j<users.length){
-                                                        if (users[j] == userid){
-                                                            users.splice(j,1);
-                                                            encontrado = true;
-                                                        }
-                                                        j++;
-                                                    }
-                                                    if (encontrado === true){
-                                                        var updateQuery2 = {users: users};
-                                                        var options2 = {new: true};
-                                                        Channel.updatechannel(channels[i],updateQuery2,options2).then(function (error,result){
-                                                            if (error){
-                                                                return promise.done(error,null);
-                                                            }
-                                                            else {
-                                                                console.log("user removed from channel: " + result._id + " channelName: " + result.channelName);
-                                                            }
-                                                        });
-                                                    }
-                                                }
-
-                                                var Group = mongoose.model('Group');
-                                                Group.parsepopulated(userid,groupid).then(function (error, group) {
-                                                    if (error){
-                                                        return promise.done(error,null);
-                                                    }
-                                                    else {
-                                                        return promise.done(null, group);
-                                                    }
-                                                });
-                                            }
-                                        });
-
-                                    }
-                                });
-
-                            }
-                        });
-                    }
-                });
-
-            }else {
-                var err = {
-                    code   : 400,
-                    message: 'group not found'
-                };
-                return promise.done(err, null);
-            }
+                                else {
+                                    return promise.done(null, group);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
     return promise;
@@ -524,9 +450,11 @@ exports.updategroupname = function updategroupname(userid,groupid,groupName){
     var query = {"groupName": groupName};
     Group.updategroup (groupid,query,options).then (function (error,group){
         if (error){
+            console.log("error update");
             return promise.done(error,null);
         }
         else{
+            console.log("ok update");
             var Group = mongoose.model('Group');
             Group.parsepopulated(userid,groupid).then(function (error, group) {
                 if (error){
@@ -546,61 +474,35 @@ exports.removegroup = function removegroup(userid,groupid){
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
+
     Group.parsepopulated(userid,groupid).then(function (error, group) {
-        if (error){
-            return promise.done(error,null);
+        if (error) {
+            return promise.done(error, null);
         }
         else {
             if (group){
                 var grupo = group;
-                var groupchannels = group.channels;
-                var groupusers = group.users;
-                Group.deletegroup (groupid).then(function(error){
+                User.updateuser (userid,{$pull:{groups:{_group:groupid}}},{new: true}).then (function (error,user){
                     if (error){
                         return promise.done(error,null);
                     }
                     else{
-                        var query3 = {_id:{$in:groupusers}};
-                        var populate = 'groups._group';
-                        User.searchpopulatedmany(query3,populate).then(function (error, users) {
-                            if (error){
+                        Channel.deletechannels({_id:{$in:grupo.channels}}).then(function (error,result){
+                            if(error){
                                 return promise.done(error,null);
                             }
                             else {
-                                for (i=0;i<users.length;i++){
-                                    var encontrado = false;
-                                    var listaGrupos = users[i].groups;
-                                    var j = 0;
-                                    while (encontrado == false && j<listaGrupos.length){
-                                        if (groupid == listaGrupos[j]._group._id){
-                                            listaGrupos.splice(j,1);
-                                            encontrado = true;
-                                        }
-                                        j++;
+                                Group.deletegroup(groupid).then (function (error){
+                                    if(error){
+                                        return promise.done(error,null);
                                     }
-                                    if (encontrado == true){
-                                        var update = {"groups":listaGrupos};
-                                        var options = {multi: true};
-                                        User.updateuser(users[i]._id,update,options).then(function (error,user){
-                                            if(error){
-                                                return promise.done(error,null);
-                                            }
-                                        });
+                                    else {
+                                        return promise.done(null,grupo);
                                     }
-                                }
-                                for (l=0;l<groupchannels.length;l++){
-                                    var query3 = {_id:{$in:groupchannels}};
-                                    Channel.deletechannels(query3).then(function (error,result){
-                                        if(error){
-                                            return promise.done(error,null);
-                                        }
-                                        else {
-                                            return promise.done(null,grupo);
-                                        }
-                                    });
-                                }
+                                });
                             }
-                        });//hasta akiii
+                        });
+
                     }
                 });
             } else {
@@ -610,6 +512,7 @@ exports.removegroup = function removegroup(userid,groupid){
                 };
                 return promise.done(err, null);
             }
+
         }
     });
     return promise;
