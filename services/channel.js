@@ -542,16 +542,22 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                                 return promise.done(error,null);
                             }
                             else {
-                                // Notificamos al canal se ha eliminado mensaje
-                                //socketio.getIO().sockets.to('CH_' + data.channelid).emit('messageDeleted', result);
-                                Channel.deletechannel (channelid).then(function(error){
+                                Group.updategroup({_id:groupid},{$pull:{channels: channelid}},{new: true}).then(function (error,result){
                                     if (error){
                                         return promise.done(error,null);
                                     }
                                     else {
-                                        return promise.done(null, canal);
+                                        Channel.deletechannel (channelid).then(function(error){
+                                            if (error){
+                                                return promise.done(error,null);
+                                            }
+                                            else {
+                                                return promise.done(null, canal);
+                                            }
+                                        });
                                     }
                                 });
+
                             }
                         });
                     }
