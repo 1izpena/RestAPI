@@ -251,7 +251,7 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                groupservice.deleteuser(request.params.groupid,request.params.userid1).then(function (error,result){
+                                groupservice.deleteuser(request.params.userid,request.params.groupid,request.params.userid1).then(function (error,result){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
@@ -281,7 +281,7 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
-                        groupservice.deleteuser(request.params.groupid,request.params.userid).then(function (error,result){
+                        groupservice.deleteuser(request.params.userid,request.params.groupid,request.params.userid).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
