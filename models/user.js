@@ -280,7 +280,7 @@ userSchema.statics.activate = function activate(attributes){
 //actualizar varios usuarios
 userSchema.statics.updateusers = function updateusers (query, update, options) {
     var promise = new Hope.Promise();
-    this.update(query, update, options,function(error, channel) {
+    this.update(query, update, options,function(error, user) {
         if (error) {
             return promise.done(error, null);
         }else {
