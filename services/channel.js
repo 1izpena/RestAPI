@@ -524,112 +524,34 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
     var query = {_id: groupid};
     var query1 = {_id: channelid};
     var limit1 = 1;
-
-    Channel.search(query1,limit1).then(function (error, channel) {
-        if (error){
-            return promise.done(error,null);
+    Channel.parsepopulated(userid,channelid).then(function (error, channel) {
+        if (error) {
+            return promise.done(error, null);
         }
         else {
-            var userschannel = channel.users;
             if (channel){
-                var Channel = mongoose.model('Channel');
-                Channel.parsepopulated(userid,channelid).then(function (error, result) {
+                var canal = channel;
+                User.updateusers ({_id:{$in:canal.users.id}},{$pull:{'groups.privateChannels':channelid}},{new: true}).then (function (error,user){
                     if (error){
                         return promise.done(error,null);
                     }
-                    else {
-                        var vuelta = result;
-                        Channel.deletechannel (channelid).then(function(error){
-                            if (error){
+                    else{
+                        var query3 = {_channel:channelid};
+                        Message.deletemessages(query3).then(function (error,result){
+                            if(error){
                                 return promise.done(error,null);
                             }
-                            else{
-                                //buscamos el groupid en user y quitamos el channel de privatechannels
-                                //eliminamos el canal de grupo
-                                var query3 = {_id:{$in:userschannel}};
-                                var populate = 'groups._group';
-                                User.searchpopulatedmany(query3,populate).then(function (error, users) {
+                            else {
+                                // Notificamos al canal se ha eliminado mensaje
+                                //socketio.getIO().sockets.to('CH_' + data.channelid).emit('messageDeleted', result);
+                                Channel.deletechannel (channelid).then(function(error){
                                     if (error){
                                         return promise.done(error,null);
                                     }
                                     else {
-                                        for (i=0;i<users.length;i++){
-                                            var listaGrupos = users[i].groups;
-                                            var encontrado = false;
-                                            var j = 0;
-                                            while (encontrado == false && j<listaGrupos.length){
-                                                if (groupid == listaGrupos[j]._group._id){
-                                                    for (k=0;k<listaGrupos[j].privateChannels.length;k++){
-                                                        if (channelid == listaGrupos[j].privateChannels[k]){
-                                                            listaGrupos[j].privateChannels.splice(k,1);
-                                                            encontrado = true;
-                                                        }
-                                                    }
-                                                }
-                                                j++;
-                                            }
-                                            if (encontrado == true){
-                                                var update = {"groups":listaGrupos};
-                                                var options = {multi: true};
-                                                User.updateuser(users[i]._id,update,options).then(function updateuser (error){
-                                                    if(error){
-                                                        return promise.done(error,null);
-                                                    }
-                                                });
-                                            }
-                                        }
-                                        //quitamos canal de grupo
-                                        Group.search(query,limit1).then(function (error, group) {
-                                            if (error){
-                                                return promise.done(error,null);
-                                            }
-                                            else {
-                                                if (group){
-                                                    var encontrado1 = false;
-                                                    var i = 0;
-                                                    while (encontrado1 === false && i<group.channels.length){
-                                                        if (group.channels[i] == channelid){
-                                                            group.channels.splice(i,1);
-                                                            encontrado1 = true;
-                                                        }
-                                                        i++;
-                                                    }
-                                                    if (encontrado1 == true){
-                                                        var options = {new: true};
-                                                        var updateQuery = {channels: group.channels};
-                                                        Group.updategroup (groupid,updateQuery,options).then (function (error,group){
-                                                            if (error){
-                                                                return promise.done(error,null);
-                                                            }
-                                                            else {
-                                                                var query3 = {_channel:channelid};
-                                                                Message.deletemessages(query3).then(function (error,result){
-                                                                    if(error){
-                                                                        return promise.done(error,null);
-                                                                    }
-                                                                    else {
-                                                                        // Notificamos al canal se ha eliminado mensaje
-                                                                        //socketio.getIO().sockets.to('CH_' + data.channelid).emit('messageDeleted', result);
-                                                                        console.log("Message deleted successfully");
-                                                                        return promise.done(null, vuelta);
-                                                                    }
-                                                                });
-
-                                                            }
-                                                        });
-                                                    }
-                                                } else {
-                                                    var err3 = {
-                                                        code   : 400,
-                                                        message: 'group not found'
-                                                    };
-                                                    return promise.done(err3, null);
-                                                }
-                                            }
-                                        });
-
+                                        return promise.done(null, canal);
                                     }
-                                });//hasta akiii
+                                });
                             }
                         });
                     }
@@ -637,13 +559,14 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
 
             } else {
                 var err = {
-                    code   : 403,
+                    code   : 400,
                     message: 'channel not found'
                 };
                 return promise.done(err, null);
             }
         }
     });
+
     return promise;
 };
 

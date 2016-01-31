@@ -277,7 +277,26 @@ userSchema.statics.activate = function activate(attributes){
   return promise;
 };
 
-
+//actualizar varios usuarios
+userSchema.statics.updateusers = function updateusers (query, update, options) {
+    var promise = new Hope.Promise();
+    this.update(query, update, options,function(error, channel) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            if (channel){
+                promise.done(null, channel);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'user not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
 //eliminar cuenta
 userSchema.statics.remove = function remove(attributes){
   var promise = new Hope.Promise();
