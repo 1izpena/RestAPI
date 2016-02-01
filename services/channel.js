@@ -412,7 +412,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                                                 return promise.done(error,null);
                                             }else{
                                                 var Channel = mongoose.model('Channel');
-                                                Channel.parsepopulated(userid,channelid).then(function (error, result) {
+                                                Channel.parsepopulated(channelid).then(function (error, result) {
                                                     if (error){
                                                         return promise.done(error,null);
                                                     }
@@ -430,7 +430,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                     });
                 } else {
                     //eliminamos el canal
-                    Channel.parsepopulated(userid,channelid).then(function (error, result) {
+                    Channel.parsepopulated(channelid).then(function (error, result) {
                         if (error){
                             return promise.done(error,null);
                         }
