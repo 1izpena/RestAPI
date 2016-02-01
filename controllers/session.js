@@ -18,9 +18,7 @@ exports.signup = function signup (request, response) {
     } else {
 
       var token = Token(result);
-      //request.session.user = token;
       result.token = token;
-      //response.json(result.parse());
 
       // Mail activación//
       result.action=0;
@@ -251,3 +249,4 @@ exports.social = function social (request, response) {
     }
   }); 
 };
+
