@@ -207,6 +207,7 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                             }else{
 
                                 socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', result);
+                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedUserFromChannel',{"userid": request.params.userid,"id": result.id});
                                 response.json(result);
                             }
                         });
