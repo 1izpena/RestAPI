@@ -259,6 +259,7 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
+                                        socketio.getIO().sockets.to('US_'+request.params.userid1).emit('deletedGroup', result);
                                         socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', result);
                                         response.json(result);
                                     }
