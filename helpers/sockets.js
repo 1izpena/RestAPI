@@ -31,7 +31,7 @@ module.exports = {
                                 console.log("ha dejado socket de new chat conection");
                                 socket.leave(room);
                         }
-                        console.log("ha dejado socket de select channel");
+                        console.log("ha entrado en socket de new chat conection");
                         socket.join(roomName);
                         socket.userid = data.userid;
                     }

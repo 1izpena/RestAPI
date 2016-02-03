@@ -33,6 +33,7 @@ exports.newchannel = function newchannel (request, response) {
                                             if (error) {
                                                 response.status(error.code).json({message: error.message});
                                             } else {
+
                                                 response.json(channel);
                                             }
                                         });
@@ -46,6 +47,9 @@ exports.newchannel = function newchannel (request, response) {
                                     }else {
                                         if (request.body.channelType == "PUBLIC"){
                                             socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newPublicChannel', channel);
+                                        }
+                                        if (request.body.channelType == "PRIVATE"){
+                                            socketio.getIO().sockets.to('US_'+request.params.userid).emit('newPrivateChannel', channel);
                                         }
                                         response.json(channel);
                                     }
@@ -127,7 +131,10 @@ exports.addusertochannel = function addusertochannel (request, response){
                                             if(error){
                                                 response.status(error.code).json({message: error.message});
                                             }else{
-                                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('newUserInChannel', result);
+                                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('newMemberInChannel', result);
+                                                if (result.channelType == "PRIVATE"){
+                                                    socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newPrivateChannel', result);
+                                                }
                                                 response.json(result);
                                             }
                                         });
@@ -167,6 +174,7 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                                 response.status(error.code).json({message: error.message});
                                             }else{
                                                 socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', result);
+                                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedUserFromChannel',{"userid": request.params.userid1,"id": result.id});
                                                 response.json(result);
                                             }
                                         });
@@ -197,7 +205,8 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemeberInChannel', result);
+
+                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', result);
                                 response.json(result);
                             }
                         });
@@ -232,7 +241,7 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
                                         if(error){
                                             response.status(error.code).json({message: error.message});
                                         }else{
-                                            if (result.channelType === "PRIVATE"){
+                                            if (result.channelType == "PRIVATE"){
                                                 socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('editedPrivateChannel', result);
                                             }
                                             if (result.channelType == "PUBLIC"){
