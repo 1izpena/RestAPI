@@ -1,15 +1,16 @@
 'use strict';
 var mongoose = require('mongoose');
 var Hope      	= require('hope');
+var User  = require('./user');
 var Schema = mongoose.Schema;
 
 var answerSchema = new Schema({
 	body:{ type: String, required: true },
-	_user : { type: Schema.ObjectId, ref: 'user', required: true },
+	_user : { type: Schema.ObjectId, ref: 'User', required: true },
 	created:{ type: Date, required: true },
 	modified:{ type: Date},
 	votes: Number,
-	comments:[{comment: String, _user:{ type: Schema.ObjectId, ref: 'user', required: true }, created: Date}],
+	comments:[{comment: String, _user:{ type: Schema.ObjectId, ref: 'User', required: true }, created: Date}],
 	userVotes:[{type: Schema.ObjectId, ref: 'User'}]
 });
 
@@ -52,7 +53,7 @@ return promise;
 /* ACTUALIZAR respuesta*/
 answerSchema.statics.updateAnswer = function updateAnswer(id, update, options) {
     var promise = new Hope.Promise();
-    this.findByIdAndUpdate(id, update, options,function(error, comment) {
+    this.findByIdAndUpdate(id, update, options).populate('_user comments._user').exec(function(error, comment) {
         if (error) {
             return promise.done(error, null);
         }else {

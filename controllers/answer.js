@@ -104,12 +104,10 @@ exports.commentanswer = function commentanswer(request, response){
 		}
 		else
 		{	
-			var user = {"_id" : result.id};
-			request.body._user = user;
 			var query = {_id: request.params.answerid};
 			var update = { $push: { comments: { "comment":request.body.comment, "created":request.body.created, _user:{"_id": result.id}}}};
-			var options = {};
-			Answer.updateAnswer(query,update, options).then(function updateAnswer (error,comment)
+			var options = {new: true};
+			Answer.updateAnswer(query,update, options).then(function updateAnswer (error,answer)
 			{
 				if(error)
 				{
@@ -118,7 +116,7 @@ exports.commentanswer = function commentanswer(request, response){
 				else
 				{
 					
-					response.status("200").json(comment);
+					response.status("200").json(answer.comments);
 				}
 			});
 		}
