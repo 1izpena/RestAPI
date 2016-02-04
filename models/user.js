@@ -254,6 +254,26 @@ userSchema.statics.updateuser = function updateuser (id, update, options) {
     return promise;
 };
 
+userSchema.statics.updateusers = function updateusers (query, update, options) {
+    var promise = new Hope.Promise();
+    this.update(query, update, options,function(error, user) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            if (user){
+                promise.done(null, user);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'user not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
 //ACTIVAR CUENTA
 userSchema.statics.activate = function activate(attributes){
   var promise = new Hope.Promise();
@@ -276,7 +296,26 @@ userSchema.statics.activate = function activate(attributes){
   return promise;
 };
 
-
+//actualizar varios usuarios
+userSchema.statics.updateusers = function updateusers (query, update, options) {
+    var promise = new Hope.Promise();
+    this.update(query, update, options,function(error, user) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            if (user){
+                promise.done(null, user);
+            }else {
+                var err = {
+                    code   : 400,
+                    message: 'user not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
 //eliminar cuenta
 userSchema.statics.remove = function remove(attributes){
   var promise = new Hope.Promise();

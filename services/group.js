@@ -3,7 +3,8 @@ var Group = require('../models/group');
 var Channel = require('../models/channel');
 var mongoose = require('mongoose');
 var Hope  = require('hope');
-
+var groupservice  = require('../services/group');
+var socketio  = require('../helpers/sockets');
 
 exports.getgrouplist = function getgrouplist(userid){
     var User = mongoose.model('User');
@@ -346,13 +347,45 @@ exports.deleteuser = function deleteuser(userid,groupid,rem){
     var Group = mongoose.model('Group');
     var Channel = mongoose.model('Channel');
     var User = mongoose.model ('User');
+    var query = {_id: groupid};
+    var limit = 1;
+    Group.search(query,limit).then(function (error, group) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else{
+            if (group.users.length >=2){
+                var query = "";
+                if (userid == group._admin){
+                    query = {users: group.users, _admin:group.users[0]};
+                } else {
+                    query = {users: group.users};
+                }
+            } else {
+                //eliminamos el grupo
+                groupservice.removegroup(userid,groupid).then(function (error,result){
+                    if(error){
+                        return promise.done(error,null);
+                    }else{
+                        console.log("group succesfully deleted");
+                        for (i=0;i<result.users.length;i++){
+                            socketio.getIO().sockets.to('US_'+ result.users[i]).emit('deletedGroup', result);
+                        }
 
+                        promise.done(null,result);
+                    }
+                });
+
+            }
+        }
+    });
     Group.updategroup(groupid,{$pull:{users:rem}}).then(function (error,result) {
         if (error) {
             return promise.done(error, null);
         }
         else {
             var grupo = result;
+
             User.updateuser (rem,{$pull:{groups:{_group:groupid}}},{new: true}).then (function (error,user){
                 if (error){
                     return promise.done(error,null);
@@ -474,47 +507,68 @@ exports.removegroup = function removegroup(userid,groupid){
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
-
-    Group.parsepopulated(userid,groupid).then(function (error, group) {
-        if (error) {
-            return promise.done(error, null);
+    var query = {_id: groupid};
+    var limit = 1;
+    Group.search(query,limit).then(function (error, group) {
+        if (error){
+            return promise.done(error,null);
         }
         else {
             if (group){
                 var grupo = group;
-                User.updateuser (userid,{$pull:{groups:{_group:groupid}}},{new: true}).then (function (error,user){
-                    if (error){
-                        return promise.done(error,null);
+                Group.parsepopulated(userid,groupid).then(function (error, group) {
+                    if (error) {
+                        return promise.done(error, null);
                     }
-                    else{
-                        Channel.deletechannels({_id:{$in:grupo.channels}}).then(function (error,result){
-                            if(error){
-                                return promise.done(error,null);
-                            }
-                            else {
-                                Group.deletegroup(groupid).then (function (error){
-                                    if(error){
-                                        return promise.done(error,null);
-                                    }
-                                    else {
-                                        return promise.done(null,grupo);
-                                    }
-                                });
-                            }
-                        });
+                    else {
+                        if (group){
+                            var vuelta = group;
+                            var options2 = {new:true,multi:true};
+                            var query3 = {_id:{$in:grupo.users}};
+                            User.updateusers(query3,{$pull:{groups:{_group:groupid}}},options2).then(function (error,user) {
+                                if (error){
+                                    return promise.done(error,null);
+                                }
+                                else{
+                                    Channel.deletechannels({_id:{$in:grupo.channels}}).then(function (error,result){
+                                        if(error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            Group.deletegroup(groupid).then (function (error){
+                                                if(error){
+                                                    return promise.done(error,null);
+                                                }
+                                                else {
+                                                    return promise.done(null,vuelta);
+                                                }
+                                            });
+                                        }
+                                    });
+
+                                }
+                            });
+                        } else {
+                            var err = {
+                                code   : 400,
+                                message: 'Group not found'
+                            };
+                            return promise.done(err, null);
+                        }
 
                     }
                 });
-            } else {
+            }
+            else{
                 var err = {
-                    code   : 400,
-                    message: 'channel not found'
+                    code   : 403,
+                    message: 'group not found'
                 };
                 return promise.done(err, null);
             }
-
         }
     });
+
     return promise;
 };
 

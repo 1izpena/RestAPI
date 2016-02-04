@@ -186,7 +186,7 @@ channelSchema.methods.parse = function parse () {
     };
 };
 
-channelSchema.statics.parsepopulated = function parsepopulated (userid,channelid) {
+channelSchema.statics.parsepopulated = function parsepopulated (channelid) {
     var query = { _id: channelid};
     var populate = 'group users _admin';
     var promise = new Hope.Promise();
