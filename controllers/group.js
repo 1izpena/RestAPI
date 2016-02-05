@@ -367,8 +367,14 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                                                 }else{
                                                     var i;
                                                     for (i=0;i<result.users.length;i++){
+                                                        console.log("estoy en editar del servidor");
+                                                        console.log(result.users[i].id);
+                                                        console.log(result);
                                                         socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('editedGroup', result);
-                                                    }response.json(result);
+                                                        
+        
+                                                    }
+                                                    response.json(result);
                                                 }
                                             });
                                         }
