@@ -134,7 +134,7 @@ exports.getinvitations = function getinvitations(userid){
             for (i=0;i<user.invitations.length;i++){
                 var elto = {
                     groupid    : user.invitations[i]._id,
-                    groupname  : user.invitations[i].groupName
+                    groupName  : user.invitations[i].groupName
                 };
                 vuelta.push(elto);
             }
@@ -204,17 +204,9 @@ exports.deleteinvitation = function deleteinvitation(groupid,user){
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
-    var encontrado = false;
-    var i = 0;
-    while (encontrado === false && i<user.invitations.length){
-        if (user.invitations[i] == groupid){
-            user.invitations.splice(i,1);
-            encontrado = true;
-        }
-        i++;
-    }
+
     var options = { new: true};
-    var query = { "invitations": user.invitations };
+    var query = {$pull:{invitations: groupid}};
     User.updateuser (user._id,query,options).then (function (error,res){
         if (error){
             return promise.done(error,null);
@@ -222,7 +214,7 @@ exports.deleteinvitation = function deleteinvitation(groupid,user){
         else{
             var options = {new: true};
             var query = {$pull:{invitedUsers: user._id}};
-            Group.updategroup (groupid,query,options).then (function (error,user){
+            Group.updategroup (groupid,query,options).then (function (error,group){
                 if (error){
                     return promise.done(error,null);
                 }

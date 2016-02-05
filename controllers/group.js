@@ -192,13 +192,10 @@ exports.regretinvitation = function regretinvitation (request, response) {
 
 exports.acceptinvitation = function acceptinvitation (request, response) {
     Auth(request, response).then(function(error, result) {
-        
         if (error) {
-            
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
-                
                 chatErrors.checkuseringroupinvitation(request.params.groupid,request.params.userid).then(function (error,result) {
                     if (error){
                         
@@ -206,19 +203,36 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                     } else {
                         groupservice.subscribegroup(request.params.groupid,result,request.params.userid1).then(function (error,result){
                             if(error){
-                                
                                 response.status(error.code).json({message: error.message});
                             }else{
                                 //al grupo que hay nuevo usuario
-                                
-                                var vuelta = {
-                                    id: result.id,
-                                    username: result.username,
-                                    mail: result.mail
-                                };
-                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', result);
-                                socketio.getIO().sockets.to('US_'+request.params.userid).emit('newGroup', result);
-                                response.json(result);
+                                var query = {_id: request.params.userid1};
+                                var limit = 1;
+                                var User = mongoose.model('User');
+                                User.search(query,limit).then(function (error, user) {
+                                    if (error){
+                                        response.status(error.code).json({message: error.message});
+                                    }
+                                    else {
+                                        if (user) {
+                                            var vuelta = {
+                                                userid: user._id,
+                                                username: user.username,
+                                                mail: user.mail
+                                            };
+                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', {groupid: request.params.groupid, user: vuelta});
+                                            socketio.getIO().sockets.to('US_'+request.params.userid).emit('newGroup', result);
+                                            response.json(result);
+                                        }
+                                        else {
+                                            var err = {
+                                                code   : 400,
+                                                message: 'User not found'
+                                            };
+                                            response.status(error.code).json({message: error.message});
+                                        }
+                                    }
+                                });
                             }
                         });
                     }
@@ -226,7 +240,6 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
 
             } else {
                 response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-
             }
         }
     });
@@ -252,7 +265,10 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                                     }else{
                                         var i;
                                         for (i=0;i<result.users.length;i++){
-                                            socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('deletedGroup', result);
+                                            //al usuario que elimino el grupo no le notificamos
+                                            //if (result.users[i].id != request.params.userid){
+                                                socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('deletedGroup', result);
+                                            //}
                                         }
                                         response.json(result);
                                     }
@@ -288,10 +304,34 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        socketio.getIO().sockets.to('US_'+request.params.userid1).emit('deletedGroup', result);
-                                        //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', result);
-                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', {userid: request.params.userid1, groupid: request.params.groupid});
-                                        response.json(result);
+                                        var query = {_id: request.params.userid1};
+                                        var limit = 1;
+                                        var User = mongoose.model('User');
+                                        User.search(query,limit).then(function (error, user) {
+                                            if (error){
+                                                response.status(error.code).json({message: error.message});
+                                            }
+                                            else {
+                                                if (user) {
+                                                    var vuelta = {
+                                                        userid: user._id,
+                                                        username: user.username,
+                                                        mail: user.mail
+                                                    };
+                                                    socketio.getIO().sockets.to('US_'+request.params.userid1).emit('deletedGroup', result);
+                                                    socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', {groupid: request.params.groupid, user: vuelta});
+                                                    response.json(result);
+                                                }
+                                                else {
+                                                    var err = {
+                                                        code   : 400,
+                                                        message: 'User not found'
+                                                    };
+                                                    response.status(error.code).json({message: error.message});
+                                                }
+                                            }
+                                        });
+
                                     }
                                 });
                             }
@@ -316,13 +356,19 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
+                        var usuario = result;
                         groupservice.deleteuser(request.params.userid,request.params.groupid,request.params.userid).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                //socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', result);
-                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', {userid: request.params.userid, groupid: request.params.groupid});
-                                socketio.getIO().sockets.to('US_'+request.params.userid).emit('deletedGroup', result);
+                                var vuelta = {
+                                    userid: usuario._id,
+                                    username: usuario.username,
+                                    mail: usuario.mail
+                                };
+                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', {groupid: request.params.groupid, user:vuelta});
+                                //No notificamos al usuario que se unsuscribed de que tiene un grupo menos, porque en angular ya se actualiza
+                                //socketio.getIO().sockets.to('US_'+request.params.userid).emit('deletedGroup', result);
                                 response.json(result);
                             }
                         });
@@ -342,6 +388,7 @@ exports.addusertogroup = function addusertogroup (request, response){
         } else {
             if (request.params.userid == result._id){
                 chatErrors.checkuseringroup(request.params.groupid,request.params.userid).then(function (error,result){
+                    var user = result;
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
@@ -353,7 +400,12 @@ exports.addusertogroup = function addusertogroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', result);
+                                        var emitUser = {
+                                            userid: user._id,
+                                            username: user.username,
+                                            mail: user.mail
+                                        };
+                                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', {groupid: request.params.groupid, user: emitUser});
                                         socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroup', result);
                                         response.json(result);
                                     }
@@ -399,12 +451,9 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                                                 }else{
                                                     var i;
                                                     for (i=0;i<result.users.length;i++){
-                                                        console.log("estoy en editar del servidor");
-                                                        console.log(result.users[i].id);
-                                                        console.log(result);
-                                                        socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('editedGroup', result);
-                                                        
-        
+                                                        //if (result.users[i].id != request.params.userid){
+                                                            socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('editedGroup', result);
+                                                        //}
                                                     }
                                                     response.json(result);
                                                 }
