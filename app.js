@@ -28,6 +28,9 @@ var options = { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000
 
 var mongooseUri = uriUtil.formatMongoose(config.database);
 mongoose.connect(mongooseUri, options);
+
+
+
 //swagger - inicio
 var subpath = express();
 app.use("/v1", subpath);
