@@ -7,7 +7,8 @@ var groupSchema   = new Schema({
     groupName: { type: String, required: true },
     _admin: { type: Schema.ObjectId, ref: 'User' },
     channels:  [ { type: Schema.ObjectId, ref: 'Channel' }],
-    users:  [ { type: Schema.ObjectId, ref: 'User' }]
+    users:  [ { type: Schema.ObjectId, ref: 'User' }],
+    invitedUsers:  [ { type: Schema.ObjectId, ref: 'User' }]
 });
 
 /* static methods */

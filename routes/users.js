@@ -60,6 +60,9 @@ router.route('/:userid/chat/groups/:groupid').put(group.updategroupinfo);
 /* DELETE el usuario logeado se va del grupo */
 router.route('/:userid/chat/groups/:groupid/unsuscribe').delete(group.unsuscribefromgroup);
 
+/* GET Devuelve la información del grupo seleccionado */
+router.route('/:userid/chat/groups/:groupid/invitedUsers').get(group.getusersinvited);
+
 /* GET Devuelve la lista de usuarios del grupo */
 router.route('/:userid/chat/groups/:groupid/users').get(group.getgroupuserlist);
 

@@ -30,6 +30,31 @@ exports.getgrouplist = function getgrouplist(userid){
     return promise;
 };
 
+exports.getinviteduserslist = function getinviteduserslist(groupid){
+    var Group = mongoose.model('Group');
+    var promise = new Hope.Promise();
+    var query = { _id: groupid};
+    var populate = 'invitedUsers';
+    Group.searchpopulated(query,populate).then(function (error, group) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            var vuelta = [];
+            for (i=0;i<group.invitedUsers.length;i++){
+                var elto = {
+                    id        : group.invitedUsers[i]._id,
+                    username  : group.invitedUsers[i].username,
+                    mail      : group.invitedUsers[i].mail
+                };
+                vuelta.push(elto);
+            }
+            promise.done(null,vuelta);
+        }
+    });
+    return promise;
+};
+
 exports.getchatinfo = function getchatinfo(userid){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
@@ -144,21 +169,32 @@ exports.inviteuser = function inviteuser(groupid,userid){
             return promise.done(error,null);
         }
         else{
-            var query = {_id: groupid};
-            var limit = 1;
-            Group.search(query,limit).then(function (error, group) {
+            //añaidmos a lista de invitados al grupo al usuario
+            var options = { new: true};
+            var query = { $push: { "invitedUsers": userid} };
+            Group.updategroup (groupid,query,options).then (function (error,user){
                 if (error){
                     return promise.done(error,null);
                 }
                 else{
+                    var query1 = {_id: groupid};
+                    var limit = 1;
+                    Group.search(query1,limit).then(function (error, group) {
+                        if (error){
+                            return promise.done(error,null);
+                        }
+                        else{
 
-                    var vuelta = {
-                        groupid    : group._id,
-                        groupName  : group.groupName
-                    };
-                    return promise.done(null,vuelta);
+                            var vuelta = {
+                                groupid    : group._id,
+                                groupName  : group.groupName
+                            };
+                            return promise.done(null,vuelta);
+                        }
+                    });
                 }
             });
+
         }
     });
     return promise;
@@ -179,23 +215,32 @@ exports.deleteinvitation = function deleteinvitation(groupid,user){
     }
     var options = { new: true};
     var query = { "invitations": user.invitations };
-    User.updateuser (user._id,query,options).then (function (error,user){
+    User.updateuser (user._id,query,options).then (function (error,res){
         if (error){
             return promise.done(error,null);
         }
         else{
-            var query = {_id: groupid};
-            var limit = 1;
-            Group.search(query,limit).then(function (error, group) {
+            var options = {new: true};
+            var query = {$pull:{invitedUsers: user._id}};
+            Group.updategroup (groupid,query,options).then (function (error,user){
                 if (error){
                     return promise.done(error,null);
                 }
                 else{
-                    var vuelta = {
-                        groupid    : group._id,
-                        groupName  : group.groupName
-                    };
-                    return promise.done(null,vuelta);
+                    var query1 = {_id: groupid};
+                    var limit = 1;
+                    Group.search(query1,limit).then(function (error, group) {
+                        if (error){
+                            return promise.done(error,null);
+                        }
+                        else{
+                            var vuelta = {
+                                groupid    : group._id,
+                                groupName  : group.groupName
+                            };
+                            return promise.done(null,vuelta);
+                        }
+                    });
                 }
             });
         }
@@ -362,20 +407,28 @@ exports.deleteuser = function deleteuser(userid,groupid,rem){
                     query = {users: group.users};
                 }
             } else {
-                //eliminamos el grupo
-                groupservice.removegroup(userid,groupid).then(function (error,result){
-                    if(error){
+                var Group = mongoose.model('Group');
+                Group.parsepopulated(userid,groupid).then(function (error, group) {
+                    if (error){
                         return promise.done(error,null);
-                    }else{
-                        console.log("group succesfully deleted");
-                        for (i=0;i<result.users.length;i++){
-                            socketio.getIO().sockets.to('US_'+ result.users[i]).emit('deletedGroup', result);
-                        }
+                    }
+                    else {
+                        groupservice.removegroup(userid,groupid).then(function (error,result){
+                            if(error){
+                                return promise.done(error,null);
+                            }else{
+                                console.log("group succesfully deleted");
 
-                        promise.done(null,result);
+                                for (i=0;i<result.users.length;i++){
+                                    socketio.getIO().sockets.to('US_'+ result.users[i]).emit('deletedGroup', result);
+                                }
+
+                                promise.done(null,result);
+                            }
+                        });
                     }
                 });
-
+                //eliminamos el grupo
             }
         }
     });
