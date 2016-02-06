@@ -73,7 +73,7 @@ groupSchema.statics.searchpopulated = function searchpopulated (query,populate) 
         }
         else {
             if (group){
-                promise.done(null, group);
+                return promise.done(null, group);
             }else {
                 var err = {
                     code   : 400,
@@ -94,7 +94,7 @@ groupSchema.statics.updategroup = function updategroup (id, update, options) {
             return promise.done(error, null);
         }else {
             if (group){
-                promise.done(null, group);
+                return promise.done(null, group);
             }else {
                 var err = {
                     code   : 400,
