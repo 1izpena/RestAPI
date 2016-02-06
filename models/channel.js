@@ -65,7 +65,10 @@ channelSchema.statics.search = function search (query, limit, page) {
     var promise = new Hope.Promise();
     var value2 = [];
     this.find(query).skip(skip).limit(limit).exec(function(error, value) {
-        if (limit === 1 && !error) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        if (limit === 1) {
             if (value.length === 0) {
                 error = {
                     code: 400,

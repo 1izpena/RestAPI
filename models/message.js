@@ -11,9 +11,13 @@ var messageSchema   = new Schema({
     datetime: { type: Date, required: true },
     messageType: { type: String, required: true },
     content: {
+        title: String,
         text: String,
         filename: String,
-        answers: [{ text: String }]
+        answers: [{
+            _user: {type: Schema.ObjectId, ref: 'User'},
+            datetime: { type: Date, required: true },
+            text: String }]
     }
 });
 
@@ -65,6 +69,17 @@ messageSchema.statics.newMessage = function (data) {
             }
             data.content = { text: data.text}
         }
+        else if (data.messageType === 'QUESTION') {
+            if (!data.title) {
+                error = { code: 400, message: 'title required.' };
+                return promise.done(error, null);
+            }
+            if (!data.text) {
+                error = { code: 400, message: 'text required.' };
+                return promise.done(error, null);
+            }
+            data.content = { title: data.title, text: data.text}
+        }
 
         var Message = mongoose.model('Message', messageSchema);
         Message = new Message(data);
@@ -81,7 +96,7 @@ messageSchema.statics.newMessage = function (data) {
                 return promise.done(error, null);
             }
             else {
-                message.populate( { path: '_channel _user'} , function(err, message) {
+                message.populate( { path: '_channel _user content.answers._user'} , function(err, message) {
                         return promise.done(error, message.parse());
                 });
             }
@@ -123,6 +138,63 @@ messageSchema.statics.getMessages = function (data) {
     return promise;
 };
 
+messageSchema.statics.newAnswer = function (data) {
+    var promise = new Hope.Promise();
+
+    var Message = mongoose.model('Message', messageSchema);
+    Message.search({_id: data.messageid}, limit = 1).then(function(error, message) {
+
+        if (error || (message === null)) {
+            error = { code: 400, message: 'Message not found.' };
+            return promise.done(error, null);
+        }
+        if (message.messageType != 'QUESTION') {
+            error = { code: 400, message: 'Message not a question' };
+            return promise.done(error, null);
+        }
+
+        var answer = {
+            _user: data.userid,
+            datetime: new Date(),
+            text: data.text
+        };
+
+        message.content.answers.push(answer);
+        message.save(function (error, message) {
+            if(error){
+                var messageError = '';
+                for (err in error.errors) {
+                    if (messageError !== '')
+                        messageError += '.';
+                    messageError += error.errors[err].message;
+                }
+
+                error = { code: 400, message: messageError };
+                return promise.done(error, null);
+            }
+            else {
+
+                message.populate( { path: 'content.answers._user'} , function(err, message) {
+
+                    message = message.parse();
+
+                    // Buscamos la ultima respuesta para devolver solo la respuesta creada
+                    var iLast = message.answers.length - 1;
+                    var retObject = {
+                        id: message.id,
+                        answer: message.answers[iLast]
+                    };
+                    return promise.done(null, retObject);
+                });
+            }
+        });
+
+
+    });
+
+    return promise;
+};
+
 messageSchema.statics.getFiles = function (data) {
     var promise = new Hope.Promise();
 
@@ -154,7 +226,7 @@ messageSchema.statics.search = function search (query, limit, page) {
 
     this.find(query).sort({datetime: -1})
         .skip(skip).limit(limit)
-        .populate('_channel _user')
+        .populate('_channel _user content.answers._user')
         .exec(function(error, value) {
             if (error) {
                 return promise.done(error, null);
@@ -172,9 +244,11 @@ messageSchema.statics.search = function search (query, limit, page) {
                 value=value.map(function(elem,index) {
                     return elem.parse();
                 });
+                // Ordenamos x orden descendente de fecha
+                value=value.reverse();
             }
             // Devolvemos en order ascendente de fecha
-            return promise.done(error, value.reverse());
+            return promise.done(error, value);
     });
     return promise;
 };
@@ -223,7 +297,6 @@ messageSchema.methods.parse = function parse () {
         date        : message.datetime,
         messageType : message.messageType,
         text        : message.content.text
-
     };
 
     if (message.messageType == 'FILE') {
@@ -231,7 +304,18 @@ messageSchema.methods.parse = function parse () {
     }
 
     if (message.messageType == 'QUESTION') {
-        parseMessage.answers = message.content.answers;
+        var answer;
+
+        parseMessage.title = message.content.title;
+        parseMessage.answers = [];
+        for (var i = 0; i < message.content.answers.length; i++) {
+            answer = {
+                user: message.content.answers[i]._user.parse(),
+                date: message.content.answers[i].datetime,
+                text: message.content.answers[i].text
+            };
+            parseMessage.answers.push(answer);
+        }
     }
 
     return parseMessage;

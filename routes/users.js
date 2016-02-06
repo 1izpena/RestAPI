@@ -108,6 +108,8 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').post(
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').get(message.getmessages);
 /* DELETE elimina todos los mensajes del canal :channelid */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').delete(message.deletechannelmessagges);
+/* POST crea una nueva respuesta para un mensaje de tipo question */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages/:messageid/answer').post(message.newanswer);
 
 /* GET devuelve los ficheros del grupo a los que puede acceder el usuario */
 router.route('/:userid/chat/groups/:groupid/files').get(message.getfiles);
