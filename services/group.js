@@ -13,6 +13,7 @@ exports.getgrouplist = function getgrouplist(userid){
     var populate = 'groups._group invitations';
     User.searchpopulated(query,populate).then(function (error, user) {
         if (error){
+            console.log("Error al llamar a GET de lista de grupos: " + error.code + " - " + error.message);
             return promise.done(error,null);
         }
         else {
@@ -24,7 +25,8 @@ exports.getgrouplist = function getgrouplist(userid){
                 };
                 vuelta.push(elto);
             }
-            promise.done(null,vuelta);
+            console.log("Ejecutado ok el GET de lista de grupos...");
+            return promise.done(null,vuelta);
         }
     });
     return promise;
@@ -49,7 +51,7 @@ exports.getinviteduserslist = function getinviteduserslist(groupid){
                 };
                 vuelta.push(elto);
             }
-            promise.done(null,vuelta);
+            return promise.done(null,vuelta);
         }
     });
     return promise;
@@ -77,7 +79,7 @@ exports.getchatinfo = function getchatinfo(userid){
             for (j=0;j<user.invitations.length;j++){
                 var elto2 = {
                     groupid        : user.invitations[j]._id,
-                    groupname  : user.invitations[j].groupName
+                    groupName  : user.invitations[j].groupName
                 };
                 invitaciones.push(elto2);
             }
@@ -114,7 +116,7 @@ exports.getuserlist = function getuserlist(groupid){
                 };
                 vuelta.push(elto);
             }
-            promise.done(null,vuelta);
+            return promise.done(null,vuelta);
         }
     });
     return promise;
@@ -138,7 +140,7 @@ exports.getinvitations = function getinvitations(userid){
                 };
                 vuelta.push(elto);
             }
-            promise.done(null,vuelta);
+            return promise.done(null,vuelta);
         }
     });
     return promise;
@@ -245,9 +247,8 @@ exports.adduser = function adduser(groupid,userid){
     var Group = mongoose.model('Group');
     var Channel = mongoose.model('Channel');
     var promise = new Hope.Promise();
-    var options = {new:true};
+    var options = {multi:true};
     var updateQuery = {$push:{"users":userid}};
-
     Group.updategroup (groupid,updateQuery,options).then (function (error,result){
         if (error){
             return promise.done(error,null);
@@ -311,61 +312,69 @@ exports.subscribegroup = function subscribegroup(groupid,user,userid){
     var Group = mongoose.model('Group');
     var Channel = mongoose.model('Channel');
     var promise = new Hope.Promise();
-    var options = {new:true};
-    var updateQuery = {$push:{"users":user._id}};
+    var options = {multi:true};
+    var updateQuery = {$push:{"users":userid}};
+    var updateQuery2 = {$pull:{"invitedUsers":userid}};
     Group.updategroup (groupid,updateQuery,options).then (function (error,result){
         if (error){
             return promise.done(error,null);
         }
         else{
-            var query = { _id: groupid};
-            var populate = 'channels users';
-            Group.searchpopulated(query,populate).then(function (error, group) {
+            Group.updategroup (groupid,updateQuery2,options).then (function (error,result){
                 if (error){
                     return promise.done(error,null);
                 }
-                else {
-                    var grupo = group;
-                    var idpublicos = [];
-                    for (i=0;i<grupo.channels.length;i++){
-                        if (grupo.channels[i].channelType === "PUBLIC" ){
-                            idpublicos.push(grupo.channels[i]._id);
-                        }
-                    }
-                    var dat = {
-                        _group: grupo._id,
-                        privateChannels: [],
-                        directMessageChannels: []
-                    };
-                    var encontrado = false;
-                    var i = 0;
-                    while (encontrado === false && i<user.invitations.length){
-                        if (user.invitations[i] == groupid){
-                            user.invitations.splice(i,1);
-                            encontrado = true;
-                        }
-                        i++;
-                    }
-                    var query = {$push:{"groups": dat}, "invitations": user.invitations };
-                    User.updateuser (user._id,query,options).then (function (error,user){
+                else{
+                    var query = { _id: groupid};
+                    var populate = 'channels users';
+                    Group.searchpopulated(query,populate).then(function (error, group) {
                         if (error){
                             return promise.done(error,null);
                         }
-                        else{
-                            var options2 = {new:true,multi:true};
-                            var query3 = {_id:{$in:idpublicos}};
-                            Channel.updatechannels(query3,updateQuery,options2).then(function (error,result){
+                        else {
+                            var grupo = group;
+                            var idpublicos = [];
+                            for (i=0;i<grupo.channels.length;i++){
+                                if (grupo.channels[i].channelType === "PUBLIC" ){
+                                    idpublicos.push(grupo.channels[i]._id);
+                                }
+                            }
+                            var dat = {
+                                _group: grupo._id,
+                                privateChannels: [],
+                                directMessageChannels: []
+                            };
+                            var encontrado = false;
+                            var i = 0;
+                            while (encontrado === false && i<user.invitations.length){
+                                if (user.invitations[i] == groupid){
+                                    user.invitations.splice(i,1);
+                                    encontrado = true;
+                                }
+                                i++;
+                            }
+                            var query = {$push:{"groups": dat}, "invitations": user.invitations };
+                            User.updateuser (user._id,query,options).then (function (error,user){
                                 if (error){
                                     return promise.done(error,null);
                                 }
-                                else {
-                                    var Group = mongoose.model('Group');
-                                    Group.parsepopulated(userid,groupid).then(function (error, group) {
+                                else{
+                                    var options2 = {new:true,multi:true};
+                                    var query3 = {_id:{$in:idpublicos}};
+                                    Channel.updatechannels(query3,updateQuery,options2).then(function (error,result){
                                         if (error){
                                             return promise.done(error,null);
                                         }
                                         else {
-                                            return promise.done(null, group);
+                                            var Group = mongoose.model('Group');
+                                            Group.parsepopulated(userid,groupid).then(function (error, group) {
+                                                if (error){
+                                                    return promise.done(error,null);
+                                                }
+                                                else {
+                                                    return promise.done(null, group);
+                                                }
+                                            });
                                         }
                                     });
                                 }
@@ -374,6 +383,7 @@ exports.subscribegroup = function subscribegroup(groupid,user,userid){
                     });
                 }
             });
+
         }
     });
     return promise;
@@ -410,7 +420,6 @@ exports.deleteuser = function deleteuser(userid,groupid,rem){
                                 return promise.done(error,null);
                             }else{
                                 console.log("group succesfully deleted");
-
                                 for (i=0;i<result.users.length;i++){
                                     socketio.getIO().sockets.to('US_'+ result.users[i]).emit('deletedGroup', result);
                                 }

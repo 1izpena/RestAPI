@@ -201,12 +201,12 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                         
                         response.status(error.code).json({message: error.message});
                     } else {
-                        groupservice.subscribegroup(request.params.groupid,result,request.params.userid1).then(function (error,result){
+                        groupservice.subscribegroup(request.params.groupid,result,request.params.userid).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
                                 //al grupo que hay nuevo usuario
-                                var query = {_id: request.params.userid1};
+                                var query = {_id: request.params.userid};
                                 var limit = 1;
                                 var User = mongoose.model('User');
                                 User.search(query,limit).then(function (error, user) {
@@ -226,7 +226,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                                         }
                                         else {
                                             var err = {
-                                                code   : 400,
+                                                code   : 404,
                                                 message: 'User not found'
                                             };
                                             response.status(error.code).json({message: error.message});
@@ -324,7 +324,7 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                                 }
                                                 else {
                                                     var err = {
-                                                        code   : 400,
+                                                        code   : 404,
                                                         message: 'User not found'
                                                     };
                                                     response.status(error.code).json({message: error.message});

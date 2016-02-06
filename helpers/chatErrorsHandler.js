@@ -257,10 +257,10 @@ exports.checkuseringroupinvitation = function(groupid,userid) {
                 }
             }else {
                 var err2 = {
-                    code   : 400,
+                    code   : 404,
                     message: 'group not found'
                 };
-                console.log("Error 400 - group not found");
+                console.log("Error 404 - group not found");
                 return promise.done(err2, null);
             }
         }
