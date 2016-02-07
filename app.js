@@ -31,6 +31,8 @@ console.log("Conectando con base de datos...");
 console.log("mongooseUri: " + mongooseUri);
 
 var client = mongoose.connect(mongooseUri, options);
+
+
 if (client){
     console.log("conexion con mongo ok. Client: " + client);
 } else {

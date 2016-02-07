@@ -216,7 +216,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                                     else {
                                         if (user) {
                                             var vuelta = {
-                                                userid: user._id,
+                                                id: user._id,
                                                 username: user.username,
                                                 mail: user.mail
                                             };
@@ -314,7 +314,7 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                             else {
                                                 if (user) {
                                                     var vuelta = {
-                                                        userid: user._id,
+                                                        id: user._id,
                                                         username: user.username,
                                                         mail: user.mail
                                                     };
@@ -362,7 +362,7 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                                 response.status(error.code).json({message: error.message});
                             }else{
                                 var vuelta = {
-                                    userid: usuario._id,
+                                    id: usuario._id,
                                     username: usuario.username,
                                     mail: usuario.mail
                                 };
