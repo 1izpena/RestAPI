@@ -56,6 +56,51 @@ tagSchema.statics.getTags = function getTags () {
 	return promise;
 }
 
+
+/*static methods*/
+/* SearchTagByName*/
+tagSchema.statics.searchTag = function searchTag(data) {
+    var promise = new Hope.Promise();
+    var Tag = mongoose.model('Tag', tagSchema);
+    var newTag = new Tag(data);
+    Tag.findOne({'text': data.text.toString()},function(error, tag) {
+        if (error) {
+            return promise.done(error, null);
+        }else 
+        {
+        	if(tag != null)
+        	{
+        		tag.tagQuestions.push(data.tagQuestions);
+        		tag.save(function(error,tag){
+        			if(error)
+        			{
+        				return promise.done(error,null);
+        			}
+        			else
+        			{
+        				return promise.done(error,tag._id);
+        			}
+        		});
+        	}
+        	else
+        	{
+        		newTag.save(function(error,tag){
+        			if(error)
+        			{
+        				return promise.done(error,null);
+        			}
+        			else
+        			{
+        				return promise.done(error,tag._id);
+        			}
+        		});
+        	}
+            
+        }
+    });
+    return promise;
+};
+
 /* static methods*/
 /* ACTUALIZAR pregunta*/
 tagSchema.statics.updateTag = function updateTag (id, update, options) {
@@ -73,7 +118,7 @@ tagSchema.statics.updateTag = function updateTag (id, update, options) {
 tagSchema.statics.getTag = function getTag(id){
 	var promise = new Hope.Promise();
 	var Tag = mongoose.model('Tag', tagSchema);
-	Tag.findById(id,function(error,result){
+	Tag.findById(id).populate('tagQuestions').exec(function(error,result){
 		if(error)
 		{
 			var messageError = '';
@@ -87,6 +132,5 @@ tagSchema.statics.getTag = function getTag(id){
 	return promise;
 
 }
-
 
 module.exports = mongoose.model('Tag', tagSchema);

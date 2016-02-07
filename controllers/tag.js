@@ -41,5 +41,5 @@ exports.getQuestionsByTag = function getQuestionsByTag(request, response){
 		{
 			response.status("200").json(tag.tagQuestions);
 		}
-	})
+	});
 }

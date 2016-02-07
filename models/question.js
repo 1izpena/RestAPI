@@ -15,7 +15,7 @@ var questionSchema = new Schema({
 	votes: Number,
 	views: Number,
 	comments:[{comment: String, _user:{ type: Schema.ObjectId, ref: 'User'}, created: Date}],
-	tags:[{ tag: String }],
+	tags:[{type: Schema.ObjectId, ref: 'Tag'}],
 	answers:[{type: Schema.ObjectId, ref: 'Answer'}],
 	userVotes:[{type: Schema.ObjectId, ref: 'User'}]
 });
@@ -153,9 +153,10 @@ questionSchema.statics.voteQuestion = function votequestion (id , attributes)
 questionSchema.statics.getQuestions = function getQuestions(){
 	var promise = new Hope.Promise();
 	var Question = mongoose.model('Question', questionSchema);
-	Question.find().populate('_user').exec(function(error,result){
+	Question.find().populate('_user tags').exec(function(error,result){
 		if(error)
 		{
+			console.log(error);
 			var messageError = '';
 			error = {code:"400", message:'Questions not found'};
 			return promise.done(error,null);
@@ -175,7 +176,7 @@ questionSchema.statics.getQuestion = function getQuestion(attributes)
 {
 	var promise = new Hope.Promise();
 	var Question = mongoose.model('Question', questionSchema);
-	Question.findOne({_id: attributes}).populate('_user comments._user answers').exec(function(error,value){
+	Question.findOne({_id: attributes}).populate('_user comments._user answers tags').exec(function(error,value){
 		if(error)
 		{
 			error = {code:'400', message:'Undefined id'};

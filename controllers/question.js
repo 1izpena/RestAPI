@@ -4,6 +4,8 @@ var Tag  = require('../models/tag');
 var Auth  = require('../helpers/authentication');
 var User  = require('../models/user');
 var mongoose = require('mongoose');
+var async = require("async");
+
 
 
 exports.newquestion = function newquestion (request, response){
@@ -16,6 +18,9 @@ exports.newquestion = function newquestion (request, response){
 		{	
 			var user = {"_id" : result.id};
 			request.body._user = user;
+			var tags = request.body.tags;
+			request.body.tags =[];
+			var newtags = [];
 			Question.createQuestion(request.body).then(function createQuestion (error, result){
 				if(error)
 				{
@@ -23,7 +28,43 @@ exports.newquestion = function newquestion (request, response){
 				}
 				else
 				{
-					response.status("200").json(result);
+					var tagQuestions= [];
+					tagQuestions.push(result._id);
+					async.each(tags,function(item,callback){
+						var data ={"text": item.text,"tagQuestions": tagQuestions};
+						Tag.searchTag(data).then(function(error,tag){
+							if (error)
+							{
+								console.log(error);
+							}
+							else
+							{
+								console.log(result);
+								result.tags.push(tag);
+								callback();
+							}
+						})},function(error)
+						{
+							if(error)
+							{
+								console.log(error);
+							}
+							else
+							{
+									result.save(function(error,question){
+										if(error)
+										{
+											response.status.json({message:error.message});
+										}
+										else
+										{
+											return response.status("200").json(question);
+										}
+									});
+							}
+							
+						}
+					);
 				}
 			});
 		}
@@ -162,8 +203,7 @@ exports.commentquestion = function commentquestion(request, response)
 				}
 				else
 				{
-					console.log(result);
-					response.status("200").json(result);
+					response.status("200").json(result.comments);
 				}
 			});
 		}
