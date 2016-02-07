@@ -62,8 +62,8 @@ router.route('/question/:questionid/answer/:answerid/edit').put(answer.editanswe
 /*Get obtener los tags*/
 router.route('/tags').get(tag.gettags);
 
-/*Post crear tag*/
-router.route('/tag/newtag').post(tag.newtag);
+/*GET obtener todas las preguntas por tag*/
+router.route('tag/:tagid').get(tag.getQuestionsByTag);
 
 
 module.exports = router;
