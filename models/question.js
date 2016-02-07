@@ -247,15 +247,15 @@ questionSchema.methods.parse = function parse () {
 
 
 //Crear mapeado y copiar coleccion elastic,solo ejecutar la primera vez
-/*
+
 var Question = mongoose.model('Question', questionSchema);
 Question.createMapping(function(err, mapping){ 
    if(err){ 
-     console.log('error creating mapping (you can safely ignore this)'); 
-     console.log(err); 
+   //  console.log('error creating mapping (you can safely ignore this)'); 
+   //  console.log(err); 
    }else{ 
-     console.log('mapping created!'); 
-     console.log(mapping); 
+    // console.log('mapping created!'); 
+    // console.log(mapping); 
    } 
  }); 
 
@@ -274,7 +274,7 @@ stream.on('close', function(){
 stream.on('error', function(err){
   console.log(err);
 });
-*/
+
 
 
 
