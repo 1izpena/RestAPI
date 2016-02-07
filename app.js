@@ -27,7 +27,19 @@ var options = { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000
     replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } };
 
 var mongooseUri = uriUtil.formatMongoose(config.database);
-mongoose.connect(mongooseUri, options);
+console.log("Conectando con base de datos...");
+console.log("mongooseUri: " + mongooseUri);
+
+var client = mongoose.connect(mongooseUri, options);
+
+
+if (client){
+    console.log("conexion con mongo ok. Client: " + client);
+} else {
+    console.log("error al conectar con mongo")
+}
+
+
 //swagger - inicio
 var subpath = express();
 app.use("/v1", subpath);

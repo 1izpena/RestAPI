@@ -4065,6 +4065,141 @@
         }
       }
     },
+    "/users/{userid}/chat/groups/{groupid}/channels/{channelid}/messages/{messageid}/answer": {
+      "post": {
+        "tags": [
+          "Message"
+        ],
+        "description": "Create a new answer in a question message",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "token",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "name": "userid",
+            "in": "path",
+            "description": "id of logged user",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "groupid",
+            "in": "path",
+            "description": "id of group",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "channelid",
+            "in": "path",
+            "description": "id of channel",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "messageid",
+            "in": "path",
+            "description": "id of message",
+            "required": true,
+            "type": "string",
+            "format": "ObjectID"
+          },
+          {
+            "name": "newAnswerData",
+            "in": "body",
+            "description": "answer object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/newAnswerTask"
+            }
+          }
+
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "message",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "answer": {
+                  "title": "answer",
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "string"
+                    },
+                    "date": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    }
+                  }
+
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on input parameters",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "title": "error",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/login/": {
       "post": {
         "tags": [
@@ -4768,17 +4903,33 @@
       "description": "Task object",
       "properties": {
         "messageType": {
-          "description": "new message type - FILE, TEXT",
+          "description": "new message type - FILE, TEXT, QUESTION",
           "type": "string",
           "format": "string"
         },
         "text": {
-          "description": "TEXT message type's text",
+          "description": "message text (for TEXT and QUESTION type), comment (for FILE type)",
           "type": "string",
           "format": "string"
         },
         "filename": {
-          "description": "FILE message type's file name",
+          "description": "filename (only for FILE type)",
+          "type": "string",
+          "format": "string"
+        },
+        "title": {
+          "description": "title (only for QUESTION type)",
+          "type": "string",
+          "format": "string"
+        }
+      }
+    },
+    "newAnswerTask": {
+      "type": "object",
+      "description": "Task object",
+      "properties": {
+        "text": {
+          "description": "Answer text ",
           "type": "string",
           "format": "string"
         }

@@ -7,7 +7,8 @@ var groupSchema   = new Schema({
     groupName: { type: String, required: true },
     _admin: { type: Schema.ObjectId, ref: 'User' },
     channels:  [ { type: Schema.ObjectId, ref: 'Channel' }],
-    users:  [ { type: Schema.ObjectId, ref: 'User' }]
+    users:  [ { type: Schema.ObjectId, ref: 'User' }],
+    invitedUsers:  [ { type: Schema.ObjectId, ref: 'User' }]
 });
 
 /* static methods */
@@ -72,7 +73,7 @@ groupSchema.statics.searchpopulated = function searchpopulated (query,populate) 
         }
         else {
             if (group){
-                promise.done(null, group);
+                return promise.done(null, group);
             }else {
                 var err = {
                     code   : 400,
@@ -93,7 +94,7 @@ groupSchema.statics.updategroup = function updategroup (id, update, options) {
             return promise.done(error, null);
         }else {
             if (group){
-                promise.done(null, group);
+                return promise.done(null, group);
             }else {
                 var err = {
                     code   : 400,

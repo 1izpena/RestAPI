@@ -36,7 +36,7 @@ exports.updateuserchannellist = function updateuserchannellist(userid,groupid,ch
                     if(error){
                         return promise.done(error,null);
                     }else{
-                        promise.done(null,user);
+                        return promise.done(null,user);
                     }
                 });
             }
@@ -59,7 +59,7 @@ exports.updateuserchannellist = function updateuserchannellist(userid,groupid,ch
                     if(error){
                         return promise.done(error,null);
                     }else{
-                        promise.done(null,user);
+                        return promise.done(null,user);
                     }
                 });
             }
@@ -238,7 +238,7 @@ exports.getuserlist = function getuserlist(channelid){
                 };
                 vuelta.push(elto);
             }
-            promise.done(null,vuelta);
+            return promise.done(null,vuelta);
         }
     });
     return promise;
@@ -285,7 +285,7 @@ exports.getchannellist = function getchannellist(groupid,userid){
                 privateChannels: privados,
                 directMessageChannels: directos
             };
-            promise.done(null,vuelta);
+            return promise.done(null,vuelta);
         }
     });
     return promise;
@@ -325,12 +325,10 @@ exports.adduser = function adduser(groupid,userid,channelid){
                                         return promise.done(null, result);
                                     }
                                 });
-                                return promise.done(null,result);
                             }
                         });
                     }
                 });
-
             }else {
                 var err = {
                     code   : 400,
@@ -447,7 +445,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                                     if (vuelta.channelType == "PUBLIC"){
                                         socketio.getIO().sockets.to('GR_'+ groupid).emit('deletedPublicChannel', vuelta);
                                     }
-                                    promise.done(null,vuelta);
+                                    return promise.done(null,vuelta);
                                 }
                             });
 

@@ -50,6 +50,50 @@ exports.newmessage = function newmessage (request, response) {
     });
 };
 
+exports.newanswer = function newmessage (request, response) {
+
+    // Verificamos si el token es valido y corresponde a un usuario
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        }
+
+        if (request.params.userid == result._id) {
+            chatErrors.checkuserinchannel(request.params.channelid,request.params.userid)
+                .then (function (error,result) {
+                if (error) {
+                    response.status(401).json({message: 'User not included in requested channel'});
+                }
+                else {
+                    var data = request.body;
+                    if (!data.text) {
+                        response.status(400).json({message: 'text required'});
+                    }
+                    else {
+                        data.messageid = request.params.messageid;
+                        data.channelid = request.params.channelid;
+                        data.userid = request.params.userid;
+                        Message.newAnswer(data).then(function newAnswer(error, result) {
+                                if (error) {
+                                    response.status(error.code).json({message: error.message});
+                                }
+                                else {
+                                    // Notificamos al canal que se ha modificado un mensaje
+                                    socketio.getIO().sockets.to('CH_' + data.channelid).emit('newQuestionAnswer', result);
+                                    response.json(result);
+                                }
+                            }
+                        );
+                    }
+                }
+            });
+        }
+        else {
+            response.status(401).json({message: 'Not authorized to send answer from another user'});
+        }
+    });
+};
+
 exports.getmessages = function getmessages (request, response) {
 
     // Verificamos si el token es valido y corresponde a un usuario
@@ -162,9 +206,17 @@ function checkNewMessageInput (data)
                 fieldsReq.push('text');
             }
         }
-        if (data.messageType == 'FILE') {
+        else if (data.messageType == 'FILE') {
             if (!data.filename) {
                 fieldsReq.push('filename');
+            }
+        }
+        else if (data.messageType == 'QUESTION') {
+            if (!data.title) {
+                fieldsReq.push('title');
+            }
+            if (!data.text) {
+                fieldsReq.push('text');
             }
         }
     }
