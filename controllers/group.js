@@ -178,6 +178,10 @@ exports.regretinvitation = function regretinvitation (request, response) {
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
+
+                        
+                        //Notificamos por el grupo que se ha rechazado su invitacion
+                        socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('regretGroupInvitation', {userid: request.params.userid});
                         response.json(result);
                     }
                 });

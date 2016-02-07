@@ -40,9 +40,6 @@ if (client){
 }
 
 
-
-
-
 //swagger - inicio
 var subpath = express();
 app.use("/v1", subpath);
