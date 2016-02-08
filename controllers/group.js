@@ -233,7 +233,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                                                 code   : 404,
                                                 message: 'User not found'
                                             };
-                                            response.status(error.code).json({message: error.message});
+                                            response.status(err.code).json({message: err.message});
                                         }
                                     }
                                 });
