@@ -9,8 +9,8 @@ var client = new elasticsearch.Client({
 
 
 
-exports.search = function search (request, response) {
-    
+exports.forumsearch = function forumsearch (request, response) {
+
 client.search({
   index: 'questions',
   body: {
@@ -26,6 +26,25 @@ client.search({
     response.json(resp);
 }, function (err) {
     response.json(err.message);
-});     
+});
     };
 
+    exports.chatsearch = function chatsearch (request, response) {
+
+    client.search({
+      index: 'messages',
+      body: {
+        query: {
+                    query_string:{
+                       "fields" : ["content.title", "content.text", "content.answers", "_user"],
+                       query:request.body.key
+                    }
+                }
+
+      }
+    }).then(function (resp) {
+        response.json(resp);
+    }, function (err) {
+        response.json(err.message);
+    });
+        };

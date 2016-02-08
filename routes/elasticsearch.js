@@ -14,7 +14,10 @@ router.use(function(req, res, next) {
 });
 
 
-router.route('/search')
-    .post(elasticsearch.search);
+router.route('/forumsearch')
+    .post(elasticsearch.forumsearch);
+
+router.route('/chatsearch')
+    .post(elasticsearch.chatsearch);
 
 module.exports = router;

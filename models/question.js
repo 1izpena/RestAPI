@@ -55,7 +55,7 @@ Question.save(function (error, question){
 	}
 	else
 	{
-		
+
 		return promise.done(error,question);
 	}
 
@@ -125,9 +125,9 @@ questionSchema.statics.voteQuestion = function votequestion (id , attributes)
 					Question.findOneAndUpdate(query, update, options,function(error,result) {
 						if(error)
 						{
-							return promise.done(error,null);			
+							return promise.done(error,null);
 						}
-						else 
+						else
 						{
 							if(result == null)
 							{
@@ -138,11 +138,11 @@ questionSchema.statics.voteQuestion = function votequestion (id , attributes)
 							{
 								result = {code:"200", message:"Vote successfully"}
 								return promise.done(error,result);
-							}	
+							}
 						}
 					});
 				}
-			}	
+			}
 		});
 	}
 	return promise;
@@ -191,9 +191,9 @@ questionSchema.statics.getQuestion = function getQuestion(attributes)
                 return promise.done(error,null);
             }
             else{
-            	
+
             	return promise.done(error,value);
-            }	
+            }
 		}
 	});
 	return promise;
@@ -224,7 +224,7 @@ questionSchema.methods.parse = function parse () {
     return {
         id:        question._id,
         title:     question.title,
-        body:      question.body, 
+        body:      question.body,
         user: {
             id         : (question._user._id) ? question._user._id : question._user,
             username   : (question._user.username) ? question._user.username :  ''
@@ -241,7 +241,7 @@ questionSchema.methods.parse = function parse () {
             username   : (question.comments._user.username) ? question.comments._user.username :  ''
         	}
 		}*/
-    };  
+    };
 };
 
 
@@ -249,27 +249,27 @@ questionSchema.methods.parse = function parse () {
 //Crear mapeado y copiar coleccion elastic,solo ejecutar la primera vez
 
 var Question = mongoose.model('Question', questionSchema);
-Question.createMapping(function(err, mapping){ 
-   if(err){ 
-   //  console.log('error creating mapping (you can safely ignore this)'); 
-   //  console.log(err); 
-   }else{ 
-    // console.log('mapping created!'); 
-    // console.log(mapping); 
-   } 
- }); 
+Question.createMapping(function(err, mapping){
+   if(err){
+   //  console.log('error creating mapping (you can safely ignore this)');
+   //  console.log(err);
+   }else{
+    // console.log('mapping created!');
+    // console.log(mapping);
+   }
+ });
 
 
 
 var Question = mongoose.model('Question', questionSchema)
   , stream = Question.synchronize()
   , count = 0;
- 
+
 stream.on('data', function(err, doc){
   count++;
 });
 stream.on('close', function(){
-  console.log('indexed ' + count + ' documents!');
+  console.log('indexed questions ' + count + ' documents!');
 });
 stream.on('error', function(err){
   console.log(err);
