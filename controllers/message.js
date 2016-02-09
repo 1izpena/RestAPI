@@ -2,9 +2,11 @@
 
 var Auth  = require('../helpers/authentication');
 var Message  = require('../models/message');
+var User  = require('../models/user');
 var socketio  = require('../helpers/sockets');
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var groupservice  = require('../services/group');
+var config  = require('../config');
 
 exports.newmessage = function newmessage (request, response) {
 
@@ -73,13 +75,34 @@ exports.newanswer = function newmessage (request, response) {
                         data.messageid = request.params.messageid;
                         data.channelid = request.params.channelid;
                         data.userid = request.params.userid;
-                        Message.newAnswer(data).then(function newAnswer(error, result) {
+                        Message.newAnswer(data).then(function newAnswer(error, messageAnswer) {
                                 if (error) {
                                     response.status(error.code).json({message: error.message});
                                 }
                                 else {
                                     // Notificamos al canal que se ha modificado un mensaje
-                                    socketio.getIO().sockets.to('CH_' + data.channelid).emit('newQuestionAnswer', result);
+                                    socketio.getIO().sockets.to('CH_' + data.channelid).emit('newQuestionAnswer', messageAnswer);
+
+                                    //Creamos un mensaje de texto avisando que se ha creado una respuesta:
+                                    // Lo creamos con el usuario internalUser
+                                    User.search({mail: config.internalUserMail}, 1).then(function(error, internalUser) {
+                                        var messageData = {
+                                            channelid: data.channelid,
+                                            userid: internalUser.id ,
+                                            messageType: 'TEXT',
+                                            text: "internalMessage#NEW_ANSWER. QuestionId: '" + messageAnswer.id +
+                                                                           "'. AnswerId: '" + messageAnswer.answer.id + "" +
+                                                                           "'"
+                                        };
+                                        Message.newMessage(messageData).then(function newmessage(error, result) {
+                                            if (!error) {
+                                                // Notificamos al canal que hay nuevo mensaje
+                                                socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage', result);
+                                            }
+                                        });
+                                    });
+
+
                                     response.json(result);
                                 }
                             }

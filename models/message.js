@@ -310,6 +310,7 @@ messageSchema.methods.parse = function parse () {
         parseMessage.answers = [];
         for (var i = 0; i < message.content.answers.length; i++) {
             answer = {
+                id: message.content.answers[i]._id,
                 user: message.content.answers[i]._user.parse(),
                 date: message.content.answers[i].datetime,
                 text: message.content.answers[i].text

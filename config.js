@@ -6,6 +6,7 @@ module.exports = {
     'salt_work_factor' : 5,
     'database': 'mongodb://dessiuser:dessi2015@ds063134.mongolab.com:63134/dessi',
     'port': 3200,
+    'internalUserMail': 'internalUser@localhost',
 
     // AWS - S3 config
     'bucketName': 'dessi',
