@@ -1,4 +1,5 @@
 var mongoose    = require('mongoose');
+var mongoosastic = require('mongoosastic');
 var Hope      	= require('hope');
 var Channel  = require('./channel');
 var User  = require('./user');
@@ -20,6 +21,8 @@ var messageSchema   = new Schema({
             text: String }]
     }
 });
+
+messageSchema.plugin(mongoosastic);
 
 messageSchema.path('messageType').validate(function(messageType){
     var validTypes = ['FILE', 'TEXT', 'QUESTION'];
@@ -322,9 +325,36 @@ messageSchema.methods.parse = function parse () {
     return parseMessage;
 };
 
+//Crear mapeado y copiar coleccion elastic,solo ejecutar la primera vez
+
+var Message = mongoose.model('Message', messageSchema);
+Message.createMapping(function(err, mapping){
+   if(err){
+   //  console.log('error creating mapping (you can safely ignore this)');
+   //  console.log(err);
+   }else{
+    // console.log('mapping created!');
+    // console.log(mapping);
+   }
+ });
+
+
+
+var Message = mongoose.model('Message', messageSchema)
+  , stream = Message.synchronize()
+  , count = 0;
+
+stream.on('data', function(err, doc){
+  count++;
+});
+stream.on('close', function(){
+  console.log('indexed message ' + count + ' documents!');
+});
+stream.on('error', function(err){
+  console.log(err);
+});
+
+
+
 
 module.exports = mongoose.model('Message', messageSchema);
-
-
-
-

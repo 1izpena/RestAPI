@@ -157,6 +157,11 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
+                var vuelta = {
+                    id: result._id,
+                    username: result.username,
+                    mail: result.mail
+                };
                 chatErrors.checkuserinchannel(request.params.channelid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
@@ -173,8 +178,7 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                             if(error){
                                                 response.status(error.code).json({message: error.message});
                                             }else{
-                                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', result);
-                                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedUserFromChannel',{"userid": request.params.userid1,"id": result.id});
+                                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedUserFromChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
                                                 response.json(result);
                                             }
                                         });
@@ -196,6 +200,11 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
+            var vuelta = {
+                id: result._id,
+                username: result.username,
+                mail: result.mail
+            };
             if (request.params.userid == result._id){
                 chatErrors.checkuserinchannel(request.params.channelid,request.params.userid).then(function (error,result){
                     if(error){
@@ -205,10 +214,10 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-
-                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannel', result);
-                                socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedUserFromChannel',{"userid": request.params.userid,"id": result.id});
+                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedUserFromChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
+                                console.log("result unsuscribe: " + result.id);
                                 response.json(result);
+
                             }
                         });
                     }
