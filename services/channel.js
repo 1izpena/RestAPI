@@ -223,21 +223,30 @@ exports.getuserlist = function getuserlist(channelid){
     var Channel = mongoose.model('Channel');
     var promise = new Hope.Promise();
     var query = {_id: channelid};
-    var populate = 'users';
+    var populate = 'users _admin';
     Channel.searchpopulated(query,populate).then(function (error, channel) {
         if (error){
             return promise.done(error,null);
         }
         else{
-            var vuelta = [];
+            var users = [];
             for (i=0;i<channel.users.length;i++){
                 var elto = {
                     id        : channel.users[i]._id,
                     username  : channel.users[i].username,
                     mail      :channel.users[i].mail
                 };
-                vuelta.push(elto);
+                users.push(elto);
             }
+            var admin = {
+                id: channel._admin._id,
+                username: channel._admin.username,
+                mail:  channel._admin.mail
+            };
+            var vuelta = {
+                admin: admin,
+                users: users
+            };
             return promise.done(null,vuelta);
         }
     });

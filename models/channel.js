@@ -226,7 +226,7 @@ channelSchema.statics.parsepopulated = function parsepopulated (channelid) {
                     admin: elto5,
                     users: usuarios
                 };
-                promise.done(null, vuelta);
+                return promise.done(null, vuelta);
             }else {
                 var err = {
                     code   : 400,

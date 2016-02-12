@@ -33,7 +33,7 @@ exports.newchannel = function newchannel (request, response) {
                                             if (error) {
                                                 response.status(error.code).json({message: error.message});
                                             } else {
-
+                                                console.log("channel successfully created... ");
                                                 response.json(channel);
                                             }
                                         });
@@ -51,6 +51,7 @@ exports.newchannel = function newchannel (request, response) {
                                         if (request.body.channelType == "PRIVATE"){
                                             socketio.getIO().sockets.to('US_'+request.params.userid).emit('newPrivateChannel', channel);
                                         }
+                                        console.log("channel successfully created... ");
                                         response.json(channel);
                                     }
                                 });
