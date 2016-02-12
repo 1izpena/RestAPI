@@ -295,7 +295,8 @@ messageSchema.methods.parse = function parse () {
 },
         user: {
             id         : (message._user._id) ? message._user._id : message._user,
-            username   : (message._user.username) ? message._user.username :  ''
+            username   : (message._user.username) ? message._user.username :  '',
+            mail       : (message._user.mail) ? message._user.mail :  ''
         },
         date        : message.datetime,
         messageType : message.messageType,
