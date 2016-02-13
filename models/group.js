@@ -139,6 +139,9 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
     this.findOne(query).populate(populate).populate({
         path:     'channels',
         populate: { path:  'users', model: 'User' }
+    }).populate({
+        path:     'channels',
+        populate: { path:  '_admin', model: 'User' }
     }).exec(function (error, group) {
         if (error){
             return promise.done(error,null);
@@ -151,9 +154,15 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                 var usuarios = [];
                 for (var i=0;i<group.channels.length;i++){
                     if (group.channels[i].channelType == "PUBLIC"){
+                        var adminPublic = {
+                            id: group.channels[i]._admin._id,
+                            username: group.channels[i]._admin.username,
+                            mail: group.channels[i]._admin.mail
+                        };
                         var elto = {
                             id        : group.channels[i]._id,
-                            channelName  : group.channels[i].channelName
+                            channelName  : group.channels[i].channelName,
+                            admin: adminPublic
                         };
                         publicos.push(elto);
                     }if (group.channels[i].channelType == "PRIVATE"){
@@ -170,9 +179,15 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                                     };
                                     usuariosCanal.push(usuario);
                                 }
+                                var adminPrivate = {
+                                    id: group.channels[i]._admin._id,
+                                    username: group.channels[i]._admin.username,
+                                    mail: group.channels[i]._admin.mail
+                                };
                                 var elto2 = {
                                     id        : group.channels[i]._id,
                                     channelName  : group.channels[i].channelName,
+                                    admin: adminPrivate,
                                     users: usuariosCanal
                                 };
                                 privados.push(elto2);
