@@ -2,6 +2,8 @@
 var mongoose = require('mongoose');
 var mongoosastic = require('mongoosastic');
 var User  = require('./user');
+var Answer = require('./answer');
+var Tag = require('./tag');
 var Hope      	= require('hope');
 var Schema = mongoose.Schema;
 
@@ -67,7 +69,7 @@ return promise;
 /* ACTUALIZAR pregunta*/
 questionSchema.statics.updateQuestion = function updatequestion (id, update, options) {
     var promise = new Hope.Promise();
-    this.findByIdAndUpdate(id, update, options,function(error, question) {
+     this.findByIdAndUpdate(id, update, options).populate('comments._user').exec(function(error, question) {
         if (error) {
             return promise.done(error, null);
         }else {
@@ -156,7 +158,6 @@ questionSchema.statics.getQuestions = function getQuestions(){
 	Question.find().populate('_user tags').exec(function(error,result){
 		if(error)
 		{
-			console.log(error);
 			var messageError = '';
 			error = {code:"400", message:'Questions not found'};
 			return promise.done(error,null);
@@ -176,73 +177,159 @@ questionSchema.statics.getQuestion = function getQuestion(attributes)
 {
 	var promise = new Hope.Promise();
 	var Question = mongoose.model('Question', questionSchema);
-	Question.findOne({_id: attributes}).populate('_user comments._user answers tags').exec(function(error,value){
+	Question.incrementView(attributes,function(error){
+		if(error)
+		{
+			return promise(error,null);
+		}
+	});
+	Question.findOne({_id: attributes}).lean().populate('_user comments._user answers tags').exec(function(error,question){
 		if(error)
 		{
 			error = {code:'400', message:'Undefined id'};
 			return promise.done(error,null);
 		}
-		else
-		{   if (value.length === 0) {
+		else	
+		{   if(question === null)
+			{
+				error = {
+                    code: 400,
+                    message: "Question not Exist."
+                };
+                 return promise.done(error,null);
+			}
+			else if (question.length === 0) {
                 error = {
                     code: 402,
                     message: "Question not found."
                 };
                 return promise.done(error,null);
             }
-            else{
+            else
+            {
+            	User.populate(question, {
+     				path: 'answers._user answers.comments._user',
+      				select: 'username'
+    				},
+    				function (error, updatedQuestion) 
+    				{
+    					return promise.done(error,updatedQuestion);
+   					}
+   				);
+  			} 							
+        }	
+	});
+	return promise;
+}
 
-            	return promise.done(error,value);
-            }
+questionSchema.statics.deleteQuestion = function deleteQuestion(id)
+{
+	var promise = new Hope.Promise();
+	var Question = mongoose.model('Question', questionSchema);
+	Question.findById(id, function(error,question)
+	{
+		if(error)
+		{
+			return promise.done(error, null);
+		}
+		else
+		{
+			if( question.answers.length != 0)
+			{
+				question.answers.forEach(function(answer)
+				{
+					Answer.deleteAnswer(answer,function(error)
+					{
+						if(error)
+						{
+							return promise.done(error,null);
+						}
+					});
+				});	
+			}
+			Tag.deleteQuestionInTag(id,question.tags,function(error)
+			{
+				if (error)
+				{
+					return promise.done(error, null);
+				}
+				else
+				{
+					console.log("llega");
+					Question.remove({_id:id},function(error) {
+				    if (error) {
+				        return promise.done(error, null);
+				    }else {
+				        return promise.done(null, {message: 'Question deleted successfully'});
+				    }
+				});	
+				}
+			});
+		}
+	});
+    return promise;
+}
+
+questionSchema.statics.incrementView = function incrementView(id)
+{
+	var promise = new Hope.Promise();
+	var query = { _id: id };
+	var update = { $inc: {views: 1}};
+	var options = { new: true};
+	var Question = mongoose.model('Question', questionSchema);
+	Question.updateQuestion(query,update,options, function(error,result){
+		if(error)
+		{
+			return promise.done(error,null)
+		}
+		else
+		{
+			return promise.done(error,result);
 		}
 	});
 	return promise;
 }
 
 
-
-/*questionSchema.statics.deleteQuestion = function deleteQuestion(id)
-{
-	var promise = new Hope.Promise();
-    this.remove({_id:id},function(error) {
-        if (error) {
-            return promise.done(error, null);
-        }else {
-            return promise.done(null, {message: 'Question deleted successfully'});
-        }
-    });
-    return promise;
-}*/
-
-/* Static methods*/
-/* Obtener las preguntas por tag*/
-
-
-/*Parser de una*/
+/*Parser de una Pregunta*/
 questionSchema.methods.parse = function parse () {
     var question = this;
+    var commentsArray = [];
+    var newcomment = {};
+    question.comments.forEach(function(comment) 
+    {
+    	newcomment ={
+
+				comment: comment.comment,
+				_user: {
+	            _id         : (comment._user._id) ? comment._user._id : comment._user,
+	            username   : (comment._user.username) ? comment._user.username :  ''
+	        	},
+	        	created: comment.created
+			};
+			commentsArray.push(newcomment);
+    });
+
+
+     	
     return {
-        id:        question._id,
+        _id:        question._id,
         title:     question.title,
-        body:      question.body,
-        user: {
-            id         : (question._user._id) ? question._user._id : question._user,
+        body:      question.body, 
+        _user: {
+            _id         : (question._user._id) ? question._user._id : question._user,
             username   : (question._user.username) ? question._user.username :  ''
         },
         created:   question.created,
         modified:  question.modified,
         answercount: question.answercount,
 		votes: question.votes,
-		views: question.view,
-		/*comments: {
-			comment: question.comments.comment,
-			user: {
-            id         : (question.comments._user._id) ? question.comments._user._id : question.comments._user,
-            username   : (question.comments._user.username) ? question.comments._user.username :  ''
-        	}
-		}*/
-    };
-};
+		views: question.views,
+		comments: commentsArray,		
+		tags: question.tags,	
+		answers: question.answers
+	}
+}
 
 
 

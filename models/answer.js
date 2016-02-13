@@ -145,4 +145,36 @@ answerSchema.statics.deleteAnswer = function deleteanswer(id)
     return promise;
 }
 
+
+/*Parser de una Pregunta*/
+answerSchema.methods.parse = function parse () {
+    var answer = this;
+    var commentsArray = [];
+    var newcomment = {};
+    answer.comments.forEach(function(comment) 
+    {
+    	newcomment ={
+
+				comment: comment.comment,
+				_user: {
+	            _id         : (comment._user._id) ? comment._user._id : comment._user,
+	            username   : (comment._user.username) ? comment._user.username :  ''
+	        	},
+	        	created: comment.created
+			};
+			commentsArray.push(newcomment);
+    });  	
+    return {
+        _id:        answer._id,
+        body:      answer.body, 
+        _user: {
+            _id         : (answer._user._id) ? answer._user._id : answer._user,
+            username   : (answer._user.username) ? answer._user.username :  ''
+        },
+        created:   answer.created,
+        modified:  question.modified,
+		votes: answer.votes,
+		comments: commentsArray	
+	}
+}
 module.exports = mongoose.model('Answer', answerSchema);
