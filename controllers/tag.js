@@ -39,7 +39,7 @@ exports.getQuestionsByTag = function getQuestionsByTag(request, response){
 		}
 		else
 		{
-			response.status("200").json(tag.tagQuestions);
+			response.status("200").json(tag);
 		}
 	});
 }

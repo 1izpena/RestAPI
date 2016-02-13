@@ -1,5 +1,6 @@
 'use strict';
 var Question  = require('../models/question');
+var Answer  = require('../models/answer');
 var Tag  = require('../models/tag');
 var Auth  = require('../helpers/authentication');
 var User  = require('../models/user');
@@ -35,11 +36,10 @@ exports.newquestion = function newquestion (request, response){
 						Tag.searchTag(data).then(function(error,tag){
 							if (error)
 							{
-								console.log(error);
+								response.json({message:error.message});
 							}
 							else
 							{
-								console.log(result);
 								result.tags.push(tag);
 								callback();
 							}
@@ -47,7 +47,7 @@ exports.newquestion = function newquestion (request, response){
 						{
 							if(error)
 							{
-								console.log(error);
+								response.json({message:error.message});
 							}
 							else
 							{
@@ -79,7 +79,17 @@ exports.deletequestion = function deletequestion(request, response){
 		}
 		else
 		{	
-			
+			Question.deleteQuestion(request.params.questionid).then(function(error,result)
+			{
+				if(error)
+				{
+					response.json({message:error.message});
+				}
+				else
+				{
+					response.json(result);
+				}
+			});			
 		}
 	});
 }
@@ -93,7 +103,7 @@ exports.editquestion = function editquestion(request, response)
 		}
 		else
 		{	
-			
+			Question.deleteQuestion(request.params.questionid)
 		}
 	});
 }
@@ -128,12 +138,6 @@ exports.getquestionbyid = function getquestionbyid(request, response)
 	});
 	
 }
-
-exports.getquestionbytag = function getquestionbytag(request, response)
-{
-
-}
-
 
 exports.upvote = function upvote (request , response){
 	Auth(request, response).then(function(error, result) {
@@ -209,4 +213,6 @@ exports.commentquestion = function commentquestion(request, response)
 		}
 	});
 }
+
+
 

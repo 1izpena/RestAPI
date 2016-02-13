@@ -42,7 +42,7 @@ exports.newanswer = function newanswer(request,response){
 		}
 	});
 }
-
+/*Elimina la respuesta y modifica el array de preguntas para quitar la respuesta*/
 exports.deleteanswer = function deleteanswer(request, response){
 	Auth(request, response).then(function(error, result) {
 		if(error)
@@ -50,7 +50,7 @@ exports.deleteanswer = function deleteanswer(request, response){
 			response.status(error.code).json({message: error.message});
 		}
 		else
-		{	console.log(request.params.questionid);
+		{	
 			var query = {_id: request.params.questionid};
 			var update = { $inc: {answercount: -1}, $pull: { answers: request.params.answerid}};
 			var options = {new: true};
@@ -58,7 +58,7 @@ exports.deleteanswer = function deleteanswer(request, response){
 			{
 				if(error)
 				{
-					console.log(error);
+					response.json({message:error,message});
 							
 				}
 				else
@@ -79,6 +79,7 @@ exports.deleteanswer = function deleteanswer(request, response){
 		}
 	});
 }
+
 
 exports.editanswer = function editanswer(request, response)
 {
