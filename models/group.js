@@ -131,11 +131,15 @@ groupSchema.methods.parse = function parse () {
     };
 };
 
+
 groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
     var query = { _id: groupid};
     var populate = 'channels users _admin';
     var promise = new Hope.Promise();
-    this.findOne(query).populate(populate).exec(function (error, group) {
+    this.findOne(query).populate(populate).populate({
+        path:     'channels',
+        populate: { path:  'users', model: 'User' }
+    }).exec(function (error, group) {
         if (error){
             return promise.done(error,null);
         }
@@ -145,8 +149,7 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                 var privados = [];
                 var directos = [];
                 var usuarios = [];
-                var i;
-                for (i=0;i<group.channels.length;i++){
+                for (var i=0;i<group.channels.length;i++){
                     if (group.channels[i].channelType == "PUBLIC"){
                         var elto = {
                             id        : group.channels[i]._id,
@@ -157,10 +160,22 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                         var encontrado = false;
                         var j = 0;
                         while (encontrado == false && j<group.channels[i].users.length){
-                            if (userid == group.channels[i].users[j]){
+                            console.log("userid: " + userid);
+                            console.log ("group.channels[i].users[j]._id: " + group.channels[i].users[j]._id);
+                            if (userid == group.channels[i].users[j]._id){
+                                var usuariosCanal = [];
+                                for (var l=0;l<group.channels[i].users.length;l++){
+                                    var usuario = {
+                                        id: group.channels[i].users[l]._id,
+                                        username: group.channels[i].users[l].username,
+                                        mail: group.channels[i].users[l].mail
+                                    };
+                                    usuariosCanal.push(usuario);
+                                }
                                 var elto2 = {
                                     id        : group.channels[i]._id,
-                                    channelName  : group.channels[i].channelName
+                                    channelName  : group.channels[i].channelName,
+                                    users: usuariosCanal
                                 };
                                 privados.push(elto2);
                                 encontrado = true;
@@ -183,8 +198,7 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                     }
 
                 }
-                var k;
-                for (k=0;k<group.users.length;k++){
+                for (var k=0;k<group.users.length;k++){
                     var elto4 = {
                         id        : group.users[k]._id,
                         username  : group.users[k].username,

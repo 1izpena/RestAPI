@@ -58,6 +58,7 @@ exports.getgroupinfo = function getgroupinfo (request, response) {
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
+                        console.log("OK getGroupInfo...");
                         response.json(result);
                     }
                 });
