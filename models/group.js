@@ -160,8 +160,6 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                         var encontrado = false;
                         var j = 0;
                         while (encontrado == false && j<group.channels[i].users.length){
-                            console.log("userid: " + userid);
-                            console.log ("group.channels[i].users[j]._id: " + group.channels[i].users[j]._id);
                             if (userid == group.channels[i].users[j]._id){
                                 var usuariosCanal = [];
                                 for (var l=0;l<group.channels[i].users.length;l++){
@@ -184,13 +182,27 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                         }
                     }if (group.channels[i].channelType == "DIRECT"){
                         if (group.channels[i].users.length == 2) {
-                            if (group.channels[i].users[0] == userid ||
-                                group.channels[i].users[1] == userid) {
+                            if (group.channels[i].users[0]._id == userid ||
+                                group.channels[i].users[1]._id == userid) {
+                                var usuariosDirecto = [];
+
+                                var usu1 = {
+                                    id        : group.channels[i].users[0]._id,
+                                    username  : group.channels[i].users[0].username,
+                                    mail: group.channels[i].users[0].mail
+                                };
+                                var usu2 = {
+                                    id        : group.channels[i].users[1]._id,
+                                    username  : group.channels[i].users[1].username,
+                                    mail: group.channels[i].users[1].mail
+                                };
+                                usuariosDirecto.push(usu1);
+                                usuariosDirecto.push(usu2);
 
                                 var elto3 = {
                                     id        : group.channels[i]._id,
                                     channelName  : group.channels[i].channelName,
-                                    users : [group.channels[i].users[0], group.channels[i].users[1]]
+                                    users : usuariosDirecto
                                 };
                                 directos.push(elto3);
                             }
