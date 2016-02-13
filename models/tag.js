@@ -1,6 +1,7 @@
 'use strict';
 var mongoose = require('mongoose');
 var Hope      	= require('hope');
+var User  = require('./user');
 var Schema = mongoose.Schema;
 
 var tagSchema = new Schema({
@@ -118,7 +119,7 @@ tagSchema.statics.updateTag = function updateTag (id, update, options) {
 tagSchema.statics.getTag = function getTag(id){
 	var promise = new Hope.Promise();
 	var Tag = mongoose.model('Tag', tagSchema);
-	Tag.findById(id).populate('tagQuestions').exec(function(error,result){
+	Tag.findById(id).lean().populate('tagQuestions').exec(function(error,questions){
 		if(error)
 		{
 			var messageError = '';
@@ -126,11 +127,44 @@ tagSchema.statics.getTag = function getTag(id){
 		}
 		else
 		{
-			return promise.done(error,result);
+            User.populate(questions.tagQuestions, {
+                    path: '_user',
+                    select: 'username'
+                    },
+                    function (error, updatedQuestions) 
+                    {                
+                       Tag.populate(updatedQuestions, {
+                            path: 'tags',
+                            select: 'text'
+                            },
+                            function (error, updated) 
+                            {
+                                return promise.done(error,updated);
+                            }
+                        );
+                    }
+            );
 		}
 	});
 	return promise;
+};
 
-}
+tagSchema.statics.deleteQuestionInTag = function deleteQuestionInTag(questionid,tags){
+    console.log("llega");
+    var promise = new Hope.Promise();
+    var Tag = mongoose.model('Tag', tagSchema);
+    var update = {$pull: { tagQuestions: questionid}};
+    var options = {new:true};
+    tags.forEach(function(tag)
+    {
+        Tag.updateTag({_id:tag},update,options, function(error){
+            if(error)
+            {
+                return promise.done(error,null);
+            }
+        });
+    });
+    return promise;
+};
 
 module.exports = mongoose.model('Tag', tagSchema);
