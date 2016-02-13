@@ -253,18 +253,14 @@ questionSchema.statics.deleteQuestion = function deleteQuestion(id)
 				{
 					return promise.done(error, null);
 				}
-				else
-				{
-					console.log("llega");
-					Question.remove({_id:id},function(error) {
-				    if (error) {
+			});
+			Question.remove({_id:id},function(error) {
+				if (error) {
 				        return promise.done(error, null);
 				    }else {
 				        return promise.done(null, {message: 'Question deleted successfully'});
 				    }
 				});	
-				}
-			});
 		}
 	});
     return promise;
