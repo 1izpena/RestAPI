@@ -217,7 +217,7 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                                 var elto3 = {
                                     id        : group.channels[i]._id,
                                     channelName  : group.channels[i].channelName,
-                                    users : usuariosDirecto
+                                    users : [group.channels[i].users[0]._id, group.channels[i].users[1]._id]
                                 };
                                 directos.push(elto3);
                             }
