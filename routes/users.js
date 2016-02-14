@@ -111,6 +111,9 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages').delet
 /* POST crea una nueva respuesta para un mensaje de tipo question */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages/:messageid/answer').post(message.newanswer);
 
+/* POST crea una nueva respuesta para un mensaje de tipo question */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/messages/:messageid/publish').post(message.publishQuestion);
+
 /* GET devuelve los ficheros del grupo a los que puede acceder el usuario */
 router.route('/:userid/chat/groups/:groupid/files').get(message.getfiles);
 
