@@ -90,7 +90,19 @@ exports.editanswer = function editanswer(request, response)
 		}
 		else
 		{	
-			
+			var query = {_id: request.params.answerid};
+			var update = {"body":request.body.body, "modified": request.body.modified};
+			var options = {new: true};
+			Answer.updateAnswer(query,update,options).then( function updateAnswer (error,answer){
+				if(error)
+				{
+					response.json({message:error.message});
+				}
+				else
+				{
+					response.status("200").json(answer);
+				}
+			});
 		}
 	});
 }
