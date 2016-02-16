@@ -3,6 +3,7 @@
 var Auth  = require('../helpers/authentication');
 var Message  = require('../models/message');
 var User  = require('../models/user');
+var QuestionService  = require('../services/question');
 var socketio  = require('../helpers/sockets');
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var groupservice  = require('../services/group');
@@ -213,6 +214,95 @@ exports.getfiles = function getfiles (request, response) {
     });
 };
 
+exports.publishQuestion = function publishQuestion (request, response) {
+
+    // Verificamos si el token es valido y corresponde a un usuario
+    Auth(request, response).then(function(error, result) {
+        if (error) {
+            response.status(error.code).json({message: error.message});
+        }
+
+        if (request.params.userid == result._id) {
+            chatErrors.checkismessageadmin(request.params.messageid,request.params.userid)
+                .then (function (error, message) {
+                if (error) {
+                    response.status(401).json({message: 'Unauthorized to publish another user message'});
+                }
+                else {
+                    if (message.messageType != 'QUESTION') {
+                        response.status(400).json({message: 'Message not QUESTION type'});
+                    }
+                    else if (message.publish) {
+                        response.status(401).json({message: 'Message already publish'});
+                    }
+                    else {
+                        var answersData = [];
+                        var answer;
+                        for (var i=0; i < message.content.answers.length; i++) {
+                            answer = {
+                                _user: message.content.answers[i]._user,
+                                body: message.content.answers[i].text,
+                                created: message.content.answers[i].datetime
+                            };
+                            answersData.push(answer);
+                        }
+
+                        QuestionService.createanswers(answersData).then(function createAnswers(error, insertAnswers) {
+                            if (error) {
+                                if (error.code)
+                                    response.status(error.code).json({message: error.message});
+                                else
+                                    response.status(500).json(error)
+                            }
+                            else {
+                                var questionData = {
+                                    _user:  message._user,
+                                    created: message.datetime,
+                                    title:  message.content.title,
+                                    body:  message.content.text,
+                                    answers: insertAnswers.answersCreated,
+                                    answercount: insertAnswers.answersCreated.length,
+                                    tags: request.body.tags
+                                };
+                                QuestionService.createquestion(questionData).then(function createanswers (error, question) {
+                                    if (error){
+                                        if (error.code)
+                                            response.status(error.code).json({message: error.message});
+                                        else
+                                            response.status(500).json(error)
+                                    }
+                                    else {
+                                        // Modificamos mensaje
+                                        message.publish = true;
+                                        message.save(function(error,message){
+                                            if(error) {
+                                                if (error.code)
+                                                    response.status(error.code).json({message: error.message});
+                                                else
+                                                    response.status(500).json(error)
+                                            }
+                                            else {
+                                                response.json(message)
+                                            }
+                                        });
+
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+
+
+                }
+            });
+        }
+        else {
+            response.status(401).json({message: 'Not authorized to send answer from another user'});
+        }
+    });
+}
+
 function checkNewMessageInput (data)
 {
     var checked = true;
@@ -263,6 +353,8 @@ function checkNewMessageInput (data)
     }
 
 }
+
+
 
 exports.deletechannelmessagges = function deletechannelmessagges (request, response) {
 

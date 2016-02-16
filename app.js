@@ -23,6 +23,7 @@ var port = process.env.PORT || config.port; //3200
 app.set('superSecret', config.phrase); // setear frase secreta
 
 /* mongoconfig */
+
 var options = { server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
     replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } } };
 
@@ -38,6 +39,9 @@ if (client){
 } else {
     console.log("error al conectar con mongo")
 }
+
+
+//mongoose.connect("mongodb://localhost/dessi");
 
 
 //swagger - inicio

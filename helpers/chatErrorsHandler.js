@@ -467,26 +467,26 @@ exports.checkismessageadmin = function(messageid,userid) {
         }
         else {
             if (message){
-                if (userid == message._user){
+                if (userid == message._user._id){
                     console.log("userid: " + userid);
                     console.log("message._user: " + message._user);
                     console.log("the user is the creator of the message");
-                    return promise.done(null, channel);
+                    return promise.done(null, message);
                 }else {
                     var err = {
                         code   : 401,
                         message: 'the user is not the creator of the message'
                     };
-                    console.log("Error 401 - the user is not the admin of the channel");
+                    console.log("Error 401 - the user is not the creator of the message");
                     return promise.done(err, null);
                 }
             }else {
-                var err1 = {
+                var err = {
                     code   : 400,
-                    message: 'channel not found'
+                    message: 'message not found'
                 };
-                console.log("Error 400 - channel not found");
-                return promise.done(err1, null);
+                console.log("Error 400 - message not found");
+                return promise.done(err, null);
             }
         }
     });

@@ -11,6 +11,7 @@ var messageSchema   = new Schema({
     _user : { type: Schema.ObjectId, ref: 'User', required: true },
     datetime: { type: Date, required: true },
     messageType: { type: String, required: true },
+    publish: { type: Boolean, default: false },
     content: {
         title: String,
         text: String,
@@ -310,6 +311,7 @@ messageSchema.methods.parse = function parse () {
     if (message.messageType == 'QUESTION') {
         var answer;
 
+        parseMessage.publish = message.publish;
         parseMessage.title = message.content.title;
         parseMessage.answers = [];
         for (var i = 0; i < message.content.answers.length; i++) {

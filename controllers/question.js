@@ -1,6 +1,7 @@
 'use strict';
 var Question  = require('../models/question');
 var Answer  = require('../models/answer');
+var QuestionService  = require('../services/question');
 var Tag  = require('../models/tag');
 var Auth  = require('../helpers/authentication');
 var User  = require('../models/user');
@@ -19,52 +20,16 @@ exports.newquestion = function newquestion (request, response){
 		{	
 			var user = {"_id" : result.id};
 			request.body._user = user;
-			var tags = request.body.tags;
-			request.body.tags =[];
-			var newtags = [];
-			Question.createQuestion(request.body).then(function createQuestion (error, result){
+
+			QuestionService.createquestion(request.body).then(function createquestion (error, result){
 				if(error)
 				{
 					response.status(error.code).json({message: error.message});
 				}
 				else
 				{
-					var tagQuestions= [];
-					tagQuestions.push(result._id);
-					async.each(tags,function(item,callback){
-						var data ={"text": item.text,"tagQuestions": tagQuestions};
-						Tag.searchTag(data).then(function(error,tag){
-							if (error)
-							{
-								response.json({message:error.message});
-							}
-							else
-							{
-								result.tags.push(tag);
-								callback();
-							}
-						})},function(error)
-						{
-							if(error)
-							{
-								response.json({message:error.message});
-							}
-							else
-							{
-									result.save(function(error,question){
-										if(error)
-										{
-											response.status.json({message:error.message});
-										}
-										else
-										{
-											return response.status("200").json(question);
-										}
-									});
-							}
-							
-						}
-					);
+					return response.status("200").json(result);
+
 				}
 			});
 		}
