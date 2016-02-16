@@ -291,7 +291,8 @@ messageSchema.methods.parse = function parse () {
         id          : message._id,
         channel: {
             id         : (message._channel._id) ? message._channel._id : message._channel,
-            channelName: (message._channel.channelName) ? message._channel.channelName : ''
+            channelName: (message._channel.channelName) ? message._channel.channelName : '',
+            channelType: (message._channel.channelType) ? message._channel.channelType : ''
 
 },
         user: {
