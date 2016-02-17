@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var User = require('../models/user');
 var socketio  = require('../helpers/sockets');
+var io = require('socket.io');
 
 
 exports.newchannel = function newchannel (request, response) {
@@ -47,6 +48,19 @@ exports.newchannel = function newchannel (request, response) {
                                     }else {
                                         if (request.body.channelType == "PUBLIC"){
                                             socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newPublicChannel', channel);
+                                            for (var i=0;i<channel.users.length;i++){
+                                                var roomName = 'US_'+ channel.users[i].id;
+                                                for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+                                                    if ( socketio.getIO().sockets.connected[socketid]) {
+                                                        var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+                                                        if (connectedUser && connectedUser == channel.users[i].id) {
+                                                            console.log("Emit new Group Event for added user");
+                                                            socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: channel.group.groupId, channelid: channel.id,message: 'new public channel added to group ' + channel.group.groupId});
+                                                        }
+
+                                                    }
+                                                }
+                                            }
                                         }
                                         if (request.body.channelType == "PRIVATE"){
                                             socketio.getIO().sockets.to('US_'+request.params.userid).emit('newPrivateChannel', channel);

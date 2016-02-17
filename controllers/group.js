@@ -5,7 +5,7 @@ var groupservice  = require('../services/group');
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var mongoose = require('mongoose');
 var socketio  = require('../helpers/sockets');
-
+var io = require('socket.io');
 exports.getusergrouplist = function getusergrouplist (request, response) {
     Auth(request, response).then(function(error, result) {
         if (error) {
@@ -411,6 +411,23 @@ exports.addusertogroup = function addusertogroup (request, response){
                                             mail: user.mail
                                         };
                                         socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', {groupid: request.params.groupid, user: emitUser});
+                                        //hacemos un emit a todos los usuarios del grupo que no esten conectados
+
+                                        for (var i=0;i<result.users.length;i++){
+                                            var roomName = 'US_'+ result.users[i].id;
+                                            for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+                                                if ( socketio.getIO().sockets.connected[socketid]) {
+                                                    var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+                                                    if (connectedUser && connectedUser == result.users[i].id) {
+                                                        console.log("Emit new Group Event for added user");
+                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: result.id, message: 'new user added to group ' + request.params.groupid});
+                                                    }
+
+                                                }
+                                            }
+                                        }
+
+                                        //
                                         socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroup', result);
                                         response.json(result);
                                     }
