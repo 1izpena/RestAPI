@@ -18,7 +18,7 @@ exports.getgrouplist = function getgrouplist(userid){
         }
         else {
             var vuelta = [];
-            for (var i=0;i<user.groups.length;i++){
+            for (i=0;i<user.groups.length;i++){
                 var elto = {
                     id        : user.groups[i]._group._id,
                     groupName  : user.groups[i]._group.groupName
@@ -43,7 +43,7 @@ exports.getinviteduserslist = function getinviteduserslist(groupid){
         }
         else {
             var vuelta = [];
-            for (var i=0;i<group.invitedUsers.length;i++){
+            for (i=0;i<group.invitedUsers.length;i++){
                 var elto = {
                     id        : group.invitedUsers[i]._id,
                     username  : group.invitedUsers[i].username,
@@ -69,14 +69,14 @@ exports.getchatinfo = function getchatinfo(userid){
         else {
             var grupos = [];
             var invitaciones = [];
-            for (var i=0;i<user.groups.length;i++){
+            for (i=0;i<user.groups.length;i++){
                 var elto = {
                     id        : user.groups[i]._group._id,
                     groupName  : user.groups[i]._group.groupName
                 };
                 grupos.push(elto);
             }
-            for (var j=0;j<user.invitations.length;j++){
+            for (j=0;j<user.invitations.length;j++){
                 var elto2 = {
                     groupid        : user.invitations[j]._id,
                     groupName  : user.invitations[j].groupName
@@ -108,7 +108,7 @@ exports.getuserlist = function getuserlist(groupid){
         }
         else{
             var vuelta = [];
-            for (var i=0;i<group.users.length;i++){
+            for (i=0;i<group.users.length;i++){
                 var elto = {
                     id        : group.users[i]._id,
                     username  : group.users[i].username,
@@ -133,7 +133,7 @@ exports.getinvitations = function getinvitations(userid){
         }
         else{
             var vuelta = [];
-            for (var i=0;i<user.invitations.length;i++){
+            for (i=0;i<user.invitations.length;i++){
                 var elto = {
                     groupid    : user.invitations[i]._id,
                     groupName  : user.invitations[i].groupName
@@ -264,7 +264,7 @@ exports.adduser = function adduser(groupid,userid){
 
                     var grupo = group;
                     var idpublicos = [];
-                    for (var i=0;i<grupo.channels.length;i++){
+                    for (i=0;i<grupo.channels.length;i++){
                         if (grupo.channels[i].channelType === "PUBLIC" ){
                             idpublicos.push(grupo.channels[i]._id);
                         }
@@ -334,7 +334,7 @@ exports.subscribegroup = function subscribegroup(groupid,user,userid){
                         else {
                             var grupo = group;
                             var idpublicos = [];
-                            for (var i=0;i<grupo.channels.length;i++){
+                            for (i=0;i<grupo.channels.length;i++){
                                 if (grupo.channels[i].channelType === "PUBLIC" ){
                                     idpublicos.push(grupo.channels[i]._id);
                                 }
@@ -345,13 +345,13 @@ exports.subscribegroup = function subscribegroup(groupid,user,userid){
                                 directMessageChannels: []
                             };
                             var encontrado = false;
-                            var j = 0;
-                            while (encontrado === false && j<user.invitations.length){
-                                if (user.invitations[j] == groupid){
-                                    user.invitations.splice(j,1);
+                            var i = 0;
+                            while (encontrado === false && i<user.invitations.length){
+                                if (user.invitations[i] == groupid){
+                                    user.invitations.splice(i,1);
                                     encontrado = true;
                                 }
-                                j++;
+                                i++;
                             }
                             var query = {$push:{"groups": dat}, "invitations": user.invitations };
                             User.updateuser (user._id,query,options).then (function (error,user){
@@ -420,7 +420,7 @@ exports.deleteuser = function deleteuser(userid,groupid,rem){
                                 return promise.done(error,null);
                             }else{
                                 console.log("group succesfully deleted");
-                                for (var i=0;i<result.users.length;i++){
+                                for (i=0;i<result.users.length;i++){
                                     socketio.getIO().sockets.to('US_'+ result.users[i]).emit('deletedGroup', result);
                                 }
 
