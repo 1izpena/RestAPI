@@ -272,7 +272,7 @@ exports.getchannellist = function getchannellist(groupid,userid){
             var publicos = [];
             var privados = [];
             var directos = [];
-            for (i=0;i<group.channels.length;i++){
+            for (var i=0;i<group.channels.length;i++){
                 var encontrado = false;
                 var j = 0;
                 while (encontrado == false && j<group.channels[i].users.length){
@@ -405,7 +405,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                                     while (encontrado == false && j<listaGrupos.length){
                                         if (groupid == listaGrupos[j]._group._id){
                                             if (channelType == "PRIVATE"){
-                                                for (k=0;k<listaGrupos[j].privateChannels.length;k++){
+                                                for (var k=0;k<listaGrupos[j].privateChannels.length;k++){
                                                     if (channelid == listaGrupos[j].privateChannels[k]){
                                                         listaGrupos[j].privateChannels.splice(k,1);
                                                         encontrado = true;
@@ -561,13 +561,13 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    for (i=0;i<users.length;i++){
+                                    for (var i=0;i<users.length;i++){
                                         var listaGrupos = users[i].groups;
                                         var encontrado = false;
                                         var j = 0;
                                         while (encontrado == false && j<listaGrupos.length){
                                             if (groupid == listaGrupos[j]._group._id){
-                                                for (k=0;k<listaGrupos[j].privateChannels.length;k++){
+                                                for (var k=0;k<listaGrupos[j].privateChannels.length;k++){
                                                     if (channelid == listaGrupos[j].privateChannels[k]){
                                                         listaGrupos[j].privateChannels.splice(k,1);
                                                         encontrado = true;
