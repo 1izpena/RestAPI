@@ -38,11 +38,7 @@ exports.newmessage = function newmessage (request, response) {
                                     }
                                     else {
                                         // Notificamos al canal que hay nuevo mensaje
-                                        socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage',
-                                            {
-                                                groupid: request.params.groupid,
-                                                message: result
-                                            });
+                                        socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage', result);
                                         response.json(result);
                                     }
                                 }
@@ -102,11 +98,7 @@ exports.newanswer = function newmessage (request, response) {
                                         Message.newMessage(messageData).then(function newmessage(error, result) {
                                             if (!error) {
                                                 // Notificamos al canal que hay nuevo mensaje
-                                                socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage',
-                                                    {
-                                                        groupid: request.params.groupid,
-                                                        message: result
-                                                    });
+                                                socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage', result);
                                             }
                                         });
                                     });
