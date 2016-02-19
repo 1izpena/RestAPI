@@ -73,6 +73,18 @@ exports.newchannel = function newchannel (request, response) {
                                         if (request.body.channelType == "PRIVATE"){
                                             socketio.getIO().sockets.to('US_'+request.params.userid).emit('newPrivateChannel', channel);
                                         }
+
+                                        // Para todos los usuarios del canal, si esta conectado,
+                                        // lo incluimos en la sala del nuevo canal
+                                        // para recibir notificaciones de nuevos mensajes
+                                        for (var i=0;i<channel.users.length;i++) {
+                                            var userSocket = socketio.getUserSocket(channel.users[i].id);
+                                            if (userSocket) {
+                                                userSocket.join('MSGCH_' + channel.id);
+                                                console.log("========== SOCKET(newChannel):  " + userSocket.id + "(userid=" + userSocket.userid + ") join room MSGCH_" + channel.id);
+                                            }
+                                        }
+
                                         console.log("channel successfully created... ");
                                         response.json(channel);
                                     }
@@ -200,6 +212,13 @@ exports.addusertochannel = function addusertochannel (request, response){
 
                                                     }
                                                 });
+                                                // Si el usuario esta conectado, lo incluimos en la sala del nuevo canal
+                                                // para recibir notificaciones de nuevos mensajes
+                                                var userSocket = socketio.getUserSocket(request.params.userid1);
+                                                if (userSocket) {
+                                                    userSocket.join('MSGCH_'+request.params.channelid);
+                                                    console.log ("========== SOCKET(addusertochannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
+                                                }
                                                 response.json(result);
                                             }
                                         });
@@ -263,6 +282,14 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                                         }
                                                     }
                                                 }
+
+                                                // Si el usuario esta conectado, lo sacamos de la sala del canal
+                                                var userSocket = socketio.getUserSocket(request.params.userid1);
+                                                if (userSocket) {
+                                                    userSocket.leave('MSGCH_'+request.params.channelid);
+                                                    console.log ("========== SOCKET(deleteuserfromchannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
+                                                }
+
                                                 response.json(result);
                                             }
                                         });
@@ -335,6 +362,14 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
 
                                     }
                                 });
+
+                                // Si el usuario esta conectado, lo sacamos de la sala del canal
+                                var userSocket = socketio.getUserSocket(request.params.userid);
+                                if (userSocket) {
+                                    userSocket.leave('MSGCH_'+request.params.channelid);
+                                    console.log ("========== SOCKET(unsuscribefromchannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
+                                }
+
                                 response.json(result);
                             }
                         });
@@ -486,6 +521,19 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
 
                                             }
                                         });
+
+                                        // Para todos los usuarios del canal, si esta conectado,
+                                        // lo eliminamos de la sala del canal
+                                        console.log("canal eliminado. usuarios = ");
+                                        console.log(result.users);
+                                        for (var i=0;i<result.users.length;i++) {
+                                            var userSocket = socketio.getUserSocket(result.users[i].id);
+                                            if (userSocket) {
+                                                userSocket.leave('MSGCH_' + result.id);
+                                                console.log("========== SOCKET(deletechannelfromgroup):  " + userSocket.id + "(userid=" + userSocket.userid + ") leave room MSGCH_" + result.id);
+                                            }
+                                        }
+
                                         response.json(result);
                                     }
                                 });
