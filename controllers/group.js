@@ -268,12 +268,8 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
-                                        var i;
-                                        for (i=0;i<result.users.length;i++){
-                                            //al usuario que elimino el grupo no le notificamos
-                                            //if (result.users[i].id != request.params.userid){
-                                                socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('deletedGroup', result);
-                                            //}
+                                        for (var i=0;i<result.users.length;i++){
+                                            socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('deletedGroup', result);
                                         }
                                         response.json(result);
                                     }

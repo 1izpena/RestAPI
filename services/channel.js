@@ -1,3 +1,5 @@
+'use strict';
+
 var User = require('../models/user');
 var Group = require('../models/group');
 var Channel = require('../models/channel');
@@ -230,7 +232,7 @@ exports.getuserlist = function getuserlist(channelid){
         }
         else{
             var users = [];
-            for (i=0;i<channel.users.length;i++){
+            for (var i=0;i<channel.users.length;i++){
                 var elto = {
                     id        : channel.users[i]._id,
                     username  : channel.users[i].username,
@@ -268,7 +270,7 @@ exports.getchannellist = function getchannellist(groupid,userid){
             var publicos = [];
             var privados = [];
             var directos = [];
-            for (i=0;i<group.channels.length;i++){
+            for (var i=0;i<group.channels.length;i++){
                 var encontrado = false;
                 var j = 0;
                 while (encontrado == false && j<group.channels[i].users.length){
@@ -401,7 +403,7 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                                     while (encontrado == false && j<listaGrupos.length){
                                         if (groupid == listaGrupos[j]._group._id){
                                             if (channelType == "PRIVATE"){
-                                                for (k=0;k<listaGrupos[j].privateChannels.length;k++){
+                                                for (var k=0;k<listaGrupos[j].privateChannels.length;k++){
                                                     if (channelid == listaGrupos[j].privateChannels[k]){
                                                         listaGrupos[j].privateChannels.splice(k,1);
                                                         encontrado = true;
@@ -448,12 +450,6 @@ exports.deleteuser = function deleteuser(groupid,userid,channelid){
                                     return promise.done(error,null);
                                 }else{
                                     console.log("channel succesfully deleted");
-                                    if (vuelta.channelType === "PRIVATE"){
-                                        socketio.getIO().sockets.to('GR_'+ groupid).emit('deletedPrivateChannel', vuelta);
-                                    }
-                                    if (vuelta.channelType == "PUBLIC"){
-                                        socketio.getIO().sockets.to('GR_'+ groupid).emit('deletedPublicChannel', vuelta);
-                                    }
                                     return promise.done(null,vuelta);
                                 }
                             });
@@ -557,13 +553,13 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    for (i=0;i<users.length;i++){
+                                    for (var i=0;i<users.length;i++){
                                         var listaGrupos = users[i].groups;
                                         var encontrado = false;
                                         var j = 0;
                                         while (encontrado == false && j<listaGrupos.length){
                                             if (groupid == listaGrupos[j]._group._id){
-                                                for (k=0;k<listaGrupos[j].privateChannels.length;k++){
+                                                for (var k=0;k<listaGrupos[j].privateChannels.length;k++){
                                                     if (channelid == listaGrupos[j].privateChannels[k]){
                                                         listaGrupos[j].privateChannels.splice(k,1);
                                                         encontrado = true;
@@ -594,13 +590,6 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                                                     return promise.done(error,null);
                                                 }
                                                 else {
-
-                                                    if (vuelta.channelType === "PRIVATE"){
-                                                        socketio.getIO().sockets.to('GR_'+ groupid).emit('deletedPrivateChannel', vuelta);
-                                                    }
-                                                    if (vuelta.channelType == "PUBLIC"){
-                                                        socketio.getIO().sockets.to('GR_'+ groupid).emit('deletedPublicChannel', vuelta);
-                                                    }
                                                     console.log("Message deleted successfully");
                                                     return promise.done(null, vuelta);
                                                 }
@@ -637,6 +626,8 @@ exports.getinfo = function getinfo(userid,channelid){
     });
     return promise;
 };
+
+
 
 
 
