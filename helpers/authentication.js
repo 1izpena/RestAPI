@@ -50,7 +50,7 @@ module.exports = function(request, response) {
 
     		
   } else {
-	response.status(403).json({message: 'Access control token header required. ' });
+	response.status(419).json({message: 'Access control token header required. Please log in again.' });
 
   }
 
