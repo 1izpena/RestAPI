@@ -13,14 +13,15 @@ module.exports = function(request, response, client) {
                     		//" OR content.answers._user:"+request.body.key+
                     		" OR content.answers.text:"+request.body.key+
                     		" OR content.filename:"+request.body.key+
-                    		/*" OR _user:"+request.body.key+*/
-                    		") AND (_channel:"+request.body.channel+")"
+                    		//" OR _user:"+request.body.key+
+                    		") AND (_channel:"+request.params.channelid+")"
                     }
 
                     	
                 }
 
       		}
+           
 
     });
 
