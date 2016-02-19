@@ -4,6 +4,7 @@ var session = require('../controllers/session');
 var group = require('../controllers/group');
 var channel = require('../controllers/channel');
 var message = require('../controllers/message');
+var elasticsearch = require('../controllers/elasticsearch');
 
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
@@ -80,6 +81,11 @@ router.route('/:userid/chat/groups/:groupid/channels').post(channel.newchannel);
 
 /* GET Devuelve la lista de canales que tenga el usuario en ese grupo */
 router.route('/:userid/chat/groups/:groupid/channels').get(channel.getgroupchannellist);
+
+
+/* POST Devuelve la lista de mensajes del canal que coinciden con el contenido de la búsqueda*/
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/search').post(elasticsearch.chatsearch);
+
 
 /* GET Devuelve la lista de usuarios del canal */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/users').get(channel.getchanneluserlist);

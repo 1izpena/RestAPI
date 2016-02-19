@@ -14,13 +14,14 @@ module.exports = function(request, response, client) {
                     		" OR content.answers.text:"+request.body.key+
                     		" OR content.filename:"+request.body.key+
                     		//" OR _user:"+request.body.key+
-                    		") AND (_channel:"+request.body.channel+")"
+                    		") AND (_channel:"+request.params.channelid+")"
                     }
 
                     	
                 }
 
       		}
+           
 
     });
 
