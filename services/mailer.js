@@ -18,33 +18,34 @@ switch(request.action){
 
 		case 0:
 
-		var html = "<img src='http://www.investrade.com/gunnallen/images/activate.png' style='width:200px;height:128px;'><br/>"+
-    	"<p>Para activar tu cuenta accede a <a href='http://localhost:9000/#/activate/"+request.token+"'>activar</a></p>";
-    	var subject = "Activa tu cuenta";
+		var html = "<img src='http://i66.tinypic.com/1z2m64k.png' style='width:350px;height:128px;'><br/>"+
+    	"<p style='color:#163B5A;'>To activate your account follow the link  <a href='http://localhost:9000/#/activate/"+request.token+"'>activate</a></p>";
+    	var subject = "Meanstack activate account";
 
     	break;
 
     	case 1:
 
-    	var html = "<img src='http://squares.thinkcommand.com/images/forgot_pass/ForgotPasswordIcon.png' style='width:128px;height:128px;'><br/>"+
-    	"<p>Para resetear tu pass accede a <a href='http://localhost:9000/#/reset/"+request.token+"'>RESETEO</a></p>";
-    	var subject = "Resetear contraseña";
+    	var html = "<img src='http://i66.tinypic.com/1z2m64k.png' style='width:350px;height:128px;'><br/>"+
+    	"<p style='color:#163B5A;'>To restart your password follow the link <a href='http://localhost:9000/#/reset/"+request.token+"'>Restart Pass</a></p>";
+    	var subject = "Meanstack restart password";
 
     	break;
 
     	case 2:
 
-    	var html = "Hola " + request.username +" !! Tu contraseña ha sido reseteada"+
-		"<a href='http://localhost:9000/#/login/'>Login</a>"; 
-		var subject = "Contraseña reseteada";
+    	var html = "<img src='http://i66.tinypic.com/1z2m64k.png' style='width:350px;height:128px;'><br/>"+
+      "<p style='color:#163B5A;'> Hi " + request.username +" !! your password has been restarted"+
+		"<a href='http://localhost:9000/#/login/'>Login</a>";
+		var subject = "Meanstack password restarted";
 
 		break;
 
         case 3:
 
-    var html = "<img src='http://www.investrade.com/gunnallen/images/activate.png' style='width:200px;height:128px;'><br/>"+
-      "<p>Para recuperar tu contraseña tienes que activar tu cuenta <a href='http://localhost:9000/#/activate/"+request.token+"'>activar</a></p>";
-      var subject = "Activa tu cuenta";
+    var html = "<img src='http://i66.tinypic.com/1z2m64k.png' style='width:350px;height:128px;'><br/>"+
+      "<p style='color:#163B5A;'>Before you restart your password you must activate it<a href='http://localhost:9000/#/activate/"+request.token+"'>activate</a></p>";
+      var subject = "Meanstack activate account";
 
       break;
 
@@ -55,27 +56,21 @@ switch(request.action){
 }
 
 
-	
+
 
   var mailOptions = {
-    from: "Dessi2015", 
-	to: request.mail, 
-	subject: subject, 
+    from: "Dessi2015",
+	to: request.mail,
+	subject: subject,
 	html: html
   }
-				    
+
   smtpTransport.sendMail(mailOptions, function(error, result){
     if(error){
-    response({message:"error"});    	
+    response({message:"error"});
 	}else{
 	 	response({message:"ok"});
 	}
 
-  });	
+  });
 }
-
-
-
-
-
-
