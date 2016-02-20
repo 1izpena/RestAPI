@@ -5,7 +5,7 @@ var groupservice  = require('../services/group');
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var mongoose = require('mongoose');
 var socketio  = require('../helpers/sockets');
-
+var io = require('socket.io');
 exports.getusergrouplist = function getusergrouplist (request, response) {
     Auth(request, response).then(function(error, result) {
         if (error) {
@@ -242,6 +242,10 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                                                     }
                                                 }
                                             }
+
+                                            // Suscribimos al usuario a todos los canales del grupo a los que tiene acceso
+                                            socketio.manageGroupChannelRooms('JOIN',request.params.userid,request.params.groupid);
+
                                             response.json(result);
                                         }
                                         else {
@@ -286,6 +290,10 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                                         for (var i=0;i<result.users.length;i++){
                                             console.log("Emit deletedGroup event");
                                             socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('deletedGroup', result);
+
+                                            // Cancelamos la suscripcion a todos los canales del grupo borrado
+                                            // Una vez borrado no podemos saber la lista de canales para suscribirse
+                                            // socketio.manageGroupChannelRooms('LEAVE',result.users[i].id,request.params.groupid);
                                         }
                                         response.json(result);
                                     }
@@ -353,6 +361,10 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                                             }
                                                         }
                                                     }
+
+                                                    // Cancelamos la suscripcion a todos los canales del grupo borrado
+                                                    socketio.manageGroupChannelRooms('LEAVE',request.params.userid1,request.params.groupid);
+
                                                     response.json(result);
                                                 }
                                                 else {
@@ -415,6 +427,10 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                                         }
                                     }
                                 }
+
+                                // Cancelamos la suscripcion a todos los canales del grupo borrado
+                                socketio.manageGroupChannelRooms('LEAVE',request.params.userid,request.params.groupid);
+
                                 response.json(result);
                             }
                         });
@@ -467,6 +483,10 @@ exports.addusertogroup = function addusertogroup (request, response){
                                             }
                                         }
                                         socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroup', result);
+
+                                        // Añadimos la suscripcion a todos los canales del grupo al que se ha añadido
+                                        socketio.manageGroupChannelRooms('JOIN',request.params.userid1,request.params.groupid);
+
                                         response.json(result);
                                     }
                                 });

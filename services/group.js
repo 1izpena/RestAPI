@@ -4,7 +4,6 @@ var Channel = require('../models/channel');
 var mongoose = require('mongoose');
 var Hope  = require('hope');
 var groupservice  = require('../services/group');
-var socketio  = require('../helpers/sockets');
 
 exports.getgrouplist = function getgrouplist(userid){
     var User = mongoose.model('User');

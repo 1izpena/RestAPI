@@ -5,9 +5,10 @@ var Group = require('../models/group');
 var Channel = require('../models/channel');
 var Hope  = require('hope');
 var mongoose = require('mongoose');
+var async = require("async");
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var channelservice  = require('../services/channel');
-var socketio  = require('../helpers/sockets');
+var groupservice  = require('../services/group');
 
 exports.updateuserchannellist = function updateuserchannellist(userid,groupid,channelid,channelType){
     var promise = new Hope.Promise();
@@ -624,6 +625,45 @@ exports.getinfo = function getinfo(userid,channelid){
             return promise.done(null, channel);
         }
     });
+    return promise;
+};
+
+exports.getallgroupschannellist = function getallgroupschannellist (userid) {
+
+    var promise = new Hope.Promise();
+
+    groupservice.getgrouplist(userid).then(function (error,groups){
+        if(error){
+            return promise.done(error,null);
+        }else{
+            var channels = []
+            async.each(groups, function (group, callback){
+                    groupservice.getinfo(group.id,userid).then(function (error, result){
+                        if(error){
+                            callback(error);
+                        }
+                        else{
+                            channels = channels
+                                .concat(result.publicChannels)
+                                .concat(result.privateChannels)
+                                .concat(result.directMessageChannels);
+                            callback();
+                        }
+                    });
+                }
+                ,function(error) {
+                    if(error) {
+                        return promise.done(error,null);
+                    }
+                    else {
+                        return promise.done(null,channels);
+                    }
+
+                }
+            );
+        }
+    });
+
     return promise;
 };
 

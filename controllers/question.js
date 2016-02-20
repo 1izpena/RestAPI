@@ -68,7 +68,20 @@ exports.editquestion = function editquestion(request, response)
 		}
 		else
 		{	
-			Question.deleteQuestion(request.params.questionid)
+			var query = {_id: request.params.questionid};
+			var update = {"title": request.body.title , "body":request.body.body, "modified": request.body.modified};
+			var options = {new: true};
+			Question.updateQuestion(query,update,options).then(function updateQuestion(error,question){
+				if(error)
+				{
+					response.json({message:error.message});
+				}
+				else
+				{
+					response.status("200").json(question);
+				}
+
+			});
 		}
 	});
 }

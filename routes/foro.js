@@ -37,7 +37,7 @@ router.route('/question/:questionid/comment').put(question.commentquestion);
 router.route('/question/:questionid/delete').delete(question.deletequestion);
 
 /*PUT Editar una pregunta*/
-router.route('/question/:questionid/edit').put(question.deletequestion);
+router.route('/question/:questionid/edit').put(question.editquestion);
 
 
 /*POST Nueva respuesta a una pregunta por id*/
