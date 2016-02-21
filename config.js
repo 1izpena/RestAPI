@@ -5,6 +5,7 @@ module.exports = {
     'algorithm':'RS256',
     'salt_work_factor' : 5,
     'database': 'mongodb://dessiuser:dessi2015@ds063134.mongolab.com:63134/dessi',
+    //'database': 'mongodb://127.0.0.1:27017/dessi',
     'port': 3200,
     'internalUserMail': 'internalUser@localhost',
 
@@ -14,4 +15,3 @@ module.exports = {
     'secretAccessKey': '2+3ooDZl/wR6xSD2qmknoUn/ltqIVrB8cxD2+2DC',
     'region': 'eu-west-1'
 };
-

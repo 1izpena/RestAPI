@@ -35,7 +35,7 @@ switch(request.action){
     	case 2:
 
     	var html = "<img src='http://i66.tinypic.com/1z2m64k.png' style='width:350px;height:128px;'><br/>"+
-      "<p style='color:#163B5A;'> Hi " + request.username +" !! your password has been restarted"+
+      "<p style='color:#163B5A;'> Hi " + request.username +" !! your password has been restarted "+
 		"<a style='color:#8d1313;text-decoration: none;' href='http://localhost:9000/#/login/'>Login</a>";
 		var subject = "Meanstack password restarted";
 
