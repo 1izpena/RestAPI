@@ -61,7 +61,9 @@ exports.newchannel = function newchannel (request, response) {
                                                                 var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                 if (connectedUser && connectedUser == group.users[i].id) {
                                                                     console.log("Emit newGroupEvent for new public channel");
-                                                                    socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: group.id,  message: group.groupName + ' --> New Public channel ' + channel.channelName + ' in group'});
+                                                                    socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: group.id,  message: group.groupName + ':New Public channel ' + channel.channelName});
+                                                                    console.log("Emit newChannelEvent for new public channel");
+                                                                    socketio.getIO().sockets.to(roomName).emit('newChannelEvent', {groupid: group.id, channelid: channel.id, channelType:channel.channelType, message: group.groupName + ': New Public channel ' + channel.channelName});
                                                                 }
 
                                                             }
@@ -74,6 +76,7 @@ exports.newchannel = function newchannel (request, response) {
                                             socketio.getIO().sockets.to('US_'+request.params.userid).emit('newPrivateChannel', channel);
                                         }
 
+                                        /*
                                         // Para todos los usuarios del canal, si esta conectado,
                                         // lo incluimos en la sala del nuevo canal
                                         // para recibir notificaciones de nuevos mensajes
@@ -83,7 +86,7 @@ exports.newchannel = function newchannel (request, response) {
                                                 userSocket.join('MSGCH_' + channel.id);
                                                 console.log("========== SOCKET(newChannel):  " + userSocket.id + "(userid=" + userSocket.userid + ") join room MSGCH_" + channel.id);
                                             }
-                                        }
+                                        }*/
 
                                         console.log("channel successfully created... ");
                                         response.json(channel);
@@ -197,9 +200,11 @@ exports.addusertochannel = function addusertochannel (request, response){
                                                                             for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                                                 if ( socketio.getIO().sockets.connected[socketid]) {
                                                                                     var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                                    if (connectedUser && connectedUser == group.users[i].id) {
+                                                                                    if (connectedUser && connectedUser == group.users[i].id && connectedUser != request.params.userid1) {
                                                                                         console.log("Emit newGroupEvent for new member in public channel");
-                                                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ' --> New user ' + vuelta.username + ' added to public channel ' + result.channelName});
+                                                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ': New user ' + vuelta.username + ' added to public channel ' + result.channelName});
+                                                                                        console.log("Emit newChannelEvent for new member in public channel");
+                                                                                        socketio.getIO().sockets.to(roomName).emit('newChannelEvent', {groupid: request.params.groupid, channelid: result.id, channelType: result.channelType, message: group.groupName + ': New user ' + vuelta.username + ' added to public channel ' + result.channelName});
                                                                                     }
                                                                                 }
                                                                             }
@@ -210,9 +215,11 @@ exports.addusertochannel = function addusertochannel (request, response){
                                                                             for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                                                 if ( socketio.getIO().sockets.connected[socketid]) {
                                                                                     var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                                    if (connectedUser && connectedUser == result.users[j].id) {
+                                                                                    if (connectedUser && connectedUser == result.users[j].id && connectedUser != request.params.userid1) {
                                                                                         console.log("Emit newGroupEvent for new member in private channel");
-                                                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ' --> New user ' + vuelta.username + ' added to private channel ' + result.channelName});
+                                                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ': New user ' + vuelta.username + ' added to private channel ' + result.channelName});
+                                                                                        console.log("Emit newChannelEvent for new member in private channel");
+                                                                                        socketio.getIO().sockets.to(roomName).emit('newChannelEvent', {groupid: request.params.groupid, channelid: result.id, channelType: result.channelType, message: group.groupName + ': New user ' + vuelta.username + ' added to private channel ' + result.channelName});
                                                                                     }
                                                                                 }
                                                                             }
@@ -223,11 +230,11 @@ exports.addusertochannel = function addusertochannel (request, response){
                                                             });
                                                             // Si el usuario esta conectado, lo incluimos en la sala del nuevo canal
                                                             // para recibir notificaciones de nuevos mensajes
-                                                            var userSocket = socketio.getUserSocket(request.params.userid1);
+                                                           /* var userSocket = socketio.getUserSocket(request.params.userid1);
                                                             if (userSocket) {
                                                                 userSocket.join('MSGCH_'+request.params.channelid);
                                                                 console.log ("========== SOCKET(addusertochannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
-                                                            }
+                                                            }*/
                                                             response.json(result);
                                                         }else {
                                                             var err = {
@@ -312,11 +319,11 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                                             }
 
                                                             // Si el usuario esta conectado, lo sacamos de la sala del canal
-                                                            var userSocket = socketio.getUserSocket(request.params.userid1);
+                                                           /* var userSocket = socketio.getUserSocket(request.params.userid1);
                                                             if (userSocket) {
                                                                 userSocket.leave('MSGCH_'+request.params.channelid);
                                                                 console.log ("========== SOCKET(deleteuserfromchannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
-                                                            }
+                                                            }*/
 
                                                             response.json(result);
                                                         }
@@ -392,7 +399,7 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                                                         connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                         if (connectedUser && connectedUser == result.users[j].id) {
                                                             console.log("Emit newGroupEvent for unsuscribed member from private channel");
-                                                            socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ' --> user ' + vuelta.username + ' unsuscribed from private channel ' + result.channelName});
+                                                            socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ': user ' + vuelta.username + ' unsuscribed from private channel ' + result.channelName});
                                                         }
                                                     }
                                                 }
@@ -403,11 +410,11 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                                 });
 
                                 // Si el usuario esta conectado, lo sacamos de la sala del canal
-                                var userSocket = socketio.getUserSocket(request.params.userid);
+                               /* var userSocket = socketio.getUserSocket(request.params.userid);
                                 if (userSocket) {
                                     userSocket.leave('MSGCH_'+request.params.channelid);
                                     console.log ("========== SOCKET(unsuscribefromchannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
-                                }
+                                }*/
 
                                 response.json(result);
                             }
@@ -463,7 +470,7 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
                                                                     var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                     if (connectedUser && connectedUser == group.users[i].id) {
                                                                         console.log("Emit newGroupEvent for edited public channel");
-                                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ' --> public channel ' + result.channelName + ' edited '});
+                                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ': public channel ' + result.channelName + ' edited '});
                                                                     }
                                                                 }
                                                             }
@@ -476,7 +483,7 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
                                                                     connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                     if (connectedUser && connectedUser == result.users[j].id) {
                                                                         console.log("Emit newGroupEvent for edited private channel");
-                                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ' --> private channel ' + result.channelName + ' edited '});
+                                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ': private channel ' + result.channelName + ' edited '});
                                                                     }
                                                                 }
                                                             }
@@ -536,9 +543,9 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
                                                         for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                             if ( socketio.getIO().sockets.connected[socketid]) {
                                                                 var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                if (connectedUser && connectedUser == group.users[i].id) {
+                                                                if (connectedUser && connectedUser == group.users[i].id ) {
                                                                     console.log("Emit newGroupEvent for deleted public channel");
-                                                                    socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ' --> public channel ' + result.channelName + ' deleted '});
+                                                                    socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ': public channel ' + result.channelName + ' deleted '});
                                                                 }
                                                             }
                                                         }
@@ -551,7 +558,7 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
                                                                 connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                 if (connectedUser && connectedUser == result.users[j].id) {
                                                                     console.log("Emit newGroupEvent for deleted private channel");
-                                                                    socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ' --> private channel ' + result.channelName + ' deleted '});
+                                                                    socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: request.params.groupid,  message: group.groupName + ': private channel ' + result.channelName + ' deleted '});
                                                                 }
                                                             }
                                                         }
@@ -563,7 +570,7 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
 
                                         // Para todos los usuarios del canal, si esta conectado,
                                         // lo eliminamos de la sala del canal
-                                        console.log("canal eliminado. usuarios = ");
+                                       /* console.log("canal eliminado. usuarios = ");
                                         console.log(result.users);
                                         for (var i=0;i<result.users.length;i++) {
                                             var userSocket = socketio.getUserSocket(result.users[i].id);
@@ -571,7 +578,7 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
                                                 userSocket.leave('MSGCH_' + result.id);
                                                 console.log("========== SOCKET(deletechannelfromgroup):  " + userSocket.id + "(userid=" + userSocket.userid + ") leave room MSGCH_" + result.id);
                                             }
-                                        }
+                                        }*/
 
                                         response.json(result);
                                     }

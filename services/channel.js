@@ -544,58 +544,57 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                             return promise.done(error,null);
                         }
                         else{
-                            //buscamos el groupid en user y quitamos el channel de privatechannels
-                            //eliminamos el canal de grupo
-                            console.log("users: " + canal.users);
-                            var query3 = {_id:{$in:canal.users}};
-                            var populate = 'groups._group';
-                            User.searchpopulatedmany(query3,populate).then(function (error, users) {
+                            Group.updategroup({_id:groupid},{$pull:{channels: channelid}},{new: true}).then(function (error,group){
                                 if (error){
                                     return promise.done(error,null);
                                 }
                                 else {
-                                    for (var i=0;i<users.length;i++){
-                                        var listaGrupos = users[i].groups;
-                                        var encontrado = false;
-                                        var j = 0;
-                                        while (encontrado == false && j<listaGrupos.length){
-                                            if (groupid == listaGrupos[j]._group._id){
-                                                for (var k=0;k<listaGrupos[j].privateChannels.length;k++){
-                                                    if (channelid == listaGrupos[j].privateChannels[k]){
-                                                        listaGrupos[j].privateChannels.splice(k,1);
-                                                        encontrado = true;
-                                                    }
-                                                }
-                                            }
-                                            j++;
-                                        }
-                                        if (encontrado == true){
-                                            console.log("encontrado canal privado en user");
-                                            var update = {"groups":listaGrupos};
-                                            var options = {multi: true};
-                                            User.updateuser(users[i]._id,update,options).then(function updateuser (error){
-                                                if(error){
-                                                    return promise.done(error,null);
-                                                }
-                                            });
-                                        }
-                                    }
-                                    Group.updategroup({_id:groupid},{$pull:{channels: channelid}},{new: true}).then(function (error,group){
-                                        if (error){
+                                    var query3 = {_channel:channelid};
+                                    Message.deletemessages(query3).then(function (error,result){
+                                        if(error){
                                             return promise.done(error,null);
                                         }
                                         else {
-                                            var query3 = {_channel:channelid};
-                                            Message.deletemessages(query3).then(function (error,result){
-                                                if(error){
-                                                    return promise.done(error,null);
-                                                }
-                                                else {
-                                                    console.log("Message deleted successfully");
-                                                    return promise.done(null, vuelta);
-                                                }
-                                            });
-
+                                            console.log("Message deleted successfully");
+                                            if (vuelta.channelType == "PRIVATE"){
+                                                console.log("users: " + canal.users);
+                                                var query3 = {_id:{$in:canal.users}};
+                                                var populate = 'groups._group';
+                                                User.searchpopulatedmany(query3,populate).then(function (error, users) {
+                                                    if (error){
+                                                        return promise.done(error,null);
+                                                    }
+                                                    else {
+                                                        for (var i=0;i<users.length;i++){
+                                                            var listaGrupos = users[i].groups;
+                                                            var encontrado = false;
+                                                            var j = 0;
+                                                            while (encontrado == false && j<listaGrupos.length){
+                                                                if (groupid == listaGrupos[j]._group._id){
+                                                                    for (var k=0;k<listaGrupos[j].privateChannels.length;k++){
+                                                                        if (channelid == listaGrupos[j].privateChannels[k]){
+                                                                            listaGrupos[j].privateChannels.splice(k,1);
+                                                                            encontrado = true;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                j++;
+                                                            }
+                                                            if (encontrado == true){
+                                                                console.log("encontrado canal privado en user");
+                                                                var update = {"groups":listaGrupos};
+                                                                var options = {multi: true};
+                                                                User.updateuser(users[i]._id,update,options).then(function updateuser (error){
+                                                                    if(error){
+                                                                        return promise.done(error,null);
+                                                                    }
+                                                                });
+                                                            }
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                            return promise.done(null, vuelta);
                                         }
                                     });
 
@@ -604,11 +603,8 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                         }
                     });
 
-
-
                 }
             });
-
         }
     });
     return promise;

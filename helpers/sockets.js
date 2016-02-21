@@ -27,7 +27,7 @@ function manageGroupChannelRooms (op, userid, groupid) {
     var channels=[];
     var roomName;
     var userSocket;
-    console.log("manageGroupChannelRooms. op = "+op+" userid = "+userid+" groupid = "+groupid)
+    console.log("manageGroupChannelRooms. op = "+op+" userid = "+userid+" groupid = "+groupid);
     groupservice.getinfo(groupid,userid)
         .then(function (error, result){
             if(!error){
@@ -101,7 +101,7 @@ module.exports = {
                         socket.userid = data.userid;
 
                         console.log ("========== SOCKET(newChatConnection): "+socket.id+"(userid="+socket.userid+") join to room "+roomName);
-
+                        /*
                         // Buscamos todos los canales a los que tiene acceso el usuario
                         // y nos suscribimos
                         channelservice.getallgroupschannellist(data.userid).then(function (error,channels){
@@ -114,7 +114,7 @@ module.exports = {
                                     console.log ("========== SOCKET(newChatConnection) "+socket.id+"(userid="+socket.userid+") join to room "+roomName);
                                 }
                             }
-                        });
+                        });*/
                     }
                 });
 
