@@ -145,7 +145,7 @@ module.exports = {
                         var socketid;
 
                         console.log ("========== SOCKET:  get usersConnected in room " + roomName );
-                        for (socketid in io.sockets.adapter.rooms[roomName].sockets) {
+                        for (socketid in io.sockets.adapter.rooms[roomName]) {
                             console.log ("========== SOCKET "+socketid);
                             if ( io.sockets.connected[socketid]) {
                                 userid = io.sockets.connected[socketid].userid;
