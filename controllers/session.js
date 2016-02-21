@@ -90,7 +90,7 @@ exports.userlist = function userlist (request, response) {
           var page = request.query.page;
 
 
-          var filter = {};
+          var filter = {active: true};
 	  User.search(filter, limit, page).then(function(error, user) {
 			if (user === null) {
 			    response.status(400).json({message: 'User not found.'});
