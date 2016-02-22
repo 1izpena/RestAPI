@@ -62,7 +62,7 @@ exports.newmessage = function newmessage (request, response) {
                                                                         var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                         if (connectedUser && connectedUser == group.users[i].id && connectedUser!= request.params.userid) {
                                                                             console.log("Emit newMessageEvent in public channel");
-                                                                            socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType});
+                                                                            socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
                                                                         }
                                                                     }
                                                                 }
@@ -75,7 +75,7 @@ exports.newmessage = function newmessage (request, response) {
                                                                         connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                         if (connectedUser && connectedUser == channel.users[j].id && connectedUser!= request.params.userid) {
                                                                             console.log("Emit newMessageEvent in private channel");
-                                                                            socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType});
+                                                                            socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
                                                                         }
                                                                     }
                                                                 }
@@ -168,7 +168,7 @@ exports.newanswer = function newmessage (request, response) {
                                                                                     var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                                     if (connectedUser && connectedUser == group.users[i].id && connectedUser!= request.params.userid) {
                                                                                         console.log("Emit newMessageEvent in public channel");
-                                                                                        socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType});
+                                                                                        socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message:result});
                                                                                     }
                                                                                 }
                                                                             }
@@ -181,7 +181,7 @@ exports.newanswer = function newmessage (request, response) {
                                                                                     connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                                     if (connectedUser && connectedUser == channel.users[j].id && connectedUser!= request.params.userid) {
                                                                                         console.log("Emit newMessageEvent in private channel");
-                                                                                        socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType});
+                                                                                        socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message:result});
                                                                                     }
                                                                                 }
                                                                             }

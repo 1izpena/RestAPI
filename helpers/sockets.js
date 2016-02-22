@@ -184,14 +184,15 @@ module.exports = {
                 if (userid && channelid) {
                     // Salimos del namespace asociado al canal si ya esta incluido en alguno
                     var roomName = 'CH_'+channelid;
-                    for (var room in socket.adapter.rooms) {
-                        if ((room.indexOf('CH_') == 0)) {
+                    for (var room in socket.adapter.rooms ) {
+                        if ((room.indexOf('CH_') == 0) && (room != roomName)) {
                             socket.leave(room);
-                            console.log ("SOCKET(disconnectChannel):  "+socket.id+"(userid="+socket.userid+") leave room "+room);
+                            console.log ("DISCONNECT FROM --->SOCKET(disconnectChannel):  "+socket.id+"(userid="+socket.userid+") leave room "+room);
                         }
                     }
 
                 }
+
             });
 
             // Hacemos join al namespace asociado al canal seleccionado
@@ -201,9 +202,9 @@ module.exports = {
                     // Salimos del namespace asociado al canal si ya esta incluido en alguno
                     var roomName = 'GR_'+ groupid;
                     for (var room in socket.adapter.rooms) {
-                        if ((room.indexOf('GR_') == 0)) {
+                        if ((room.indexOf('GR_') == 0) && (room != roomName)) {
                             socket.leave(room);
-                            console.log ("SOCKET(disconnectGroup):  "+socket.id+"(userid="+socket.userid+") leave room "+room);
+                            console.log ("DISCONNECT FROM --->SOCKET(disconnectGroup):  "+socket.id+"(userid="+socket.userid+") leave room "+room);
                         }
                     }
 
