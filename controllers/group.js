@@ -228,20 +228,26 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
                                             console.log("Emit newMemberInGroup event");
                                             socketio.getIO().sockets.to('US_'+request.params.userid).emit('newGroup', result);
                                             console.log("Emit newGroup event");
+                                            socketio.getIO().sockets.to('US_'+request.params.userid).emit('newGroupEvent', {groupid: grupo.id,  groupName:grupo.groupName, channelid:''});
+                                            console.log("Emit newGroupEvent event");
                                             //hacemos un emit a todos los usuarios del grupo que no esten conectados
+                                            var roomName = 'GR_'+request.params.groupid;
                                             for (var i=0;i<grupo.users.length;i++){
-                                                var roomName = 'US_'+ grupo.users[i].id;
+                                                var encontrado = false;
                                                 for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                     if ( socketio.getIO().sockets.connected[socketid]) {
                                                         var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                        if (connectedUser && connectedUser == grupo.users[i].id && connectedUser!=user._id) {
-                                                            console.log("Emit newGroupEvent for added user");
-                                                            socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: grupo.id, userid:vuelta.id,  message: grupo.groupName + ': New user ' + vuelta.username + ' in group'});
+                                                        if (connectedUser && connectedUser == grupo.users[i].id) {
+                                                            encontrado = true;
                                                         }
-
                                                     }
                                                 }
+                                                if (encontrado == false && grupo.users[i].id!=request.params.userid){
+                                                    console.log("Emit newMemberInGroupEvent event");
+                                                    socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('newMemberInGroupEvent', {groupid: grupo.id,  groupName:grupo.groupName , userid:vuelta.id, username:vuelta.username, channelid:''});
+                                                }
                                             }
+
 
                                             // Suscribimos al usuario a todos los canales del grupo a los que tiene acceso
                                             socketio.manageGroupChannelRooms('JOIN',request.params.userid,request.params.groupid);
@@ -290,10 +296,10 @@ exports.deletegroupfromsystem = function deletegroupfromsystem (request, respons
                                         for (var i=0;i<result.users.length;i++){
                                             console.log("Emit deletedGroup event");
                                             socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('deletedGroup', result);
-
+                                            //socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('deletedGroupEvent', result);
                                             // Cancelamos la suscripcion a todos los canales del grupo borrado
                                             // Una vez borrado no podemos saber la lista de canales para suscribirse
-                                            // socketio.manageGroupChannelRooms('LEAVE',result.users[i].id,request.params.groupid);
+                                             socketio.manageGroupChannelRooms('LEAVE',result.users[i].id,request.params.groupid);
                                         }
                                         response.json(result);
                                     }
@@ -348,22 +354,25 @@ exports.deleteuserfromgroup = function deleteuserfromgroup (request, response){
                                                     console.log("Emit deletedGroup event");
                                                     socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', {groupid: request.params.groupid, user: vuelta});
                                                     console.log("Emit deletedMemberInGroup event");
+                                                    var roomName = 'GR_'+request.params.groupid;
                                                     for (var i=0;i<grupo.users.length;i++){
-                                                        var roomName = 'US_'+ grupo.users[i].id;
+                                                        var encontrado = false;
                                                         for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                             if ( socketio.getIO().sockets.connected[socketid]) {
                                                                 var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
                                                                 if (connectedUser && connectedUser == grupo.users[i].id) {
-                                                                    console.log("Emit newGroupEvent for deleted user");
-                                                                    socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: grupo.id, userid:vuelta.id,  message: grupo.groupName + ': user ' + vuelta.username + ' deleted'});
+                                                                    encontrado = true;
                                                                 }
-
                                                             }
+                                                        }
+                                                        if (encontrado == false && grupo.users[i].id!=request.params.userid1){
+                                                            console.log("Emit deletedMemberInGroupEvent event");
+                                                            socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('deletedMemberInGroupEvent', {groupid: request.params.groupid, groupName: result.groupName, userid: vuelta.id, username: vuelta.username, channelid:''});
                                                         }
                                                     }
 
                                                     // Cancelamos la suscripcion a todos los canales del grupo borrado
-                                                    //socketio.manageGroupChannelRooms('LEAVE',request.params.userid1,request.params.groupid);
+                                                    socketio.manageGroupChannelRooms('LEAVE',request.params.userid1,request.params.groupid);
 
                                                     response.json(result);
                                                 }
@@ -411,25 +420,28 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
                                     username: usuario.username,
                                     mail: usuario.mail
                                 };
+                                var grupo = result;
                                 socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedMemberInGroup', {groupid: request.params.groupid, user:vuelta});
-                                //No notificamos al usuario que se unsuscribed de que tiene un grupo menos, porque en angular ya se actualiza
-                                //socketio.getIO().sockets.to('US_'+request.params.userid).emit('deletedGroup', result);
+                                var roomName = 'GR_'+request.params.groupid;
                                 for (var i=0;i<result.users.length;i++){
-                                    var roomName = 'US_'+ result.users[i].id;
+                                    var encontrado = false;
                                     for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                         if ( socketio.getIO().sockets.connected[socketid]) {
                                             var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                            if (connectedUser && connectedUser == result.users[i].id && connectedUser!=request.params.userid) {
-                                                console.log("Emit newGroupEvent for deleted user");
-                                                socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: result.id, userid:vuelta.id,  message: result.groupName + ': user ' + vuelta.username + ' unsuscribed'});
+                                            if (connectedUser && connectedUser == result.users[i].id) {
+                                                encontrado = true;
                                             }
-
                                         }
+                                    }
+                                    if (encontrado == false && result.users[i].id!=request.params.userid){
+                                        console.log("Emit deletedMemberInGroupEvent event");
+                                        socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('deletedMemberInGroupEvent', {groupid: request.params.groupid, groupName: result.groupName, userid: vuelta.id, username: vuelta.username, channelid:''});
                                     }
                                 }
 
+
                                 // Cancelamos la suscripcion a todos los canales del grupo borrado
-                               // socketio.manageGroupChannelRooms('LEAVE',request.params.userid,request.params.groupid);
+                                socketio.manageGroupChannelRooms('LEAVE',request.params.userid,request.params.groupid);
 
                                 response.json(result);
                             }
@@ -462,6 +474,7 @@ exports.addusertogroup = function addusertogroup (request, response){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
+                                        var grupo = result;
                                         var emitUser = {
                                             userid: user._id,
                                             username: user.username,
@@ -469,23 +482,27 @@ exports.addusertogroup = function addusertogroup (request, response){
                                         };
                                         socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newMemberInGroup', {groupid: request.params.groupid, user: emitUser});
                                         //hacemos un emit a todos los usuarios del grupo que no esten conectados
-                                        for (var i=0;i<result.users.length;i++){
-                                            var roomName = 'US_'+ result.users[i].id;
+                                        var roomName = 'GR_'+request.params.groupid;
+                                        for (var i=0;i<grupo.users.length;i++){
+                                            var encontrado = false;
                                             for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                 if ( socketio.getIO().sockets.connected[socketid]) {
                                                     var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                    if (connectedUser && connectedUser == result.users[i].id && result.users[i] != user._id) {
-                                                        console.log("Emit newGroupEvent for added user");
-                                                        socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: result.id, userid:emitUser.username,  message: result.groupName + ': new user added to group'});
+                                                    if (connectedUser && connectedUser == grupo.users[i].id) {
+                                                        encontrado = true;
                                                     }
-
                                                 }
                                             }
+                                            if (encontrado == false && grupo.users[i].id!=request.params.userid1){
+                                                console.log("Emit deletedMemberInGroup event");
+                                                socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('newGroupEvent', {groupid: grupo.id, message: grupo.groupName + ': user ' + emitUser.username + ' added'});
+                                            }
                                         }
+
                                         socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroup', result);
 
                                         // A�adimos la suscripcion a todos los canales del grupo al que se ha a�adido
-                                        //socketio.manageGroupChannelRooms('JOIN',request.params.userid1,request.params.groupid);
+                                        socketio.manageGroupChannelRooms('JOIN',request.params.userid1,request.params.groupid);
 
                                         response.json(result);
                                     }
@@ -529,19 +546,11 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                                                     console.log("error: " + error.code + ' ' + error.message);
                                                     response.status(error.code).json({message: error.message});
                                                 }else{
-                                                    for (var i=0;i<result.users.length;i++){
+                                                    var grupo = result;
+                                                    var roomName = 'GR_'+request.params.groupid;
+                                                    for (var i=0;i<grupo.users.length;i++){
                                                         socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('editedGroup', result);
-                                                        var roomName = 'US_'+ result.users[i].id;
-                                                        for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                            if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                if (connectedUser && connectedUser == result.users[i].id && result.users[i] != user._id) {
-                                                                    console.log("Emit newGroupEvent for added user");
-                                                                    socketio.getIO().sockets.to(roomName).emit('newGroupEvent', {groupid: result.id, userid:emitUser.username,  message: result.groupName + ': new user added to group'});
-                                                                }
-
-                                                            }
-                                                        }
+                                                        socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('editedGroupEvent', {groupid: grupo.id, groupName: grupo.groupName, channelid:''});
                                                     }
                                                     response.json(result);
                                                 }

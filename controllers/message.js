@@ -8,6 +8,7 @@ var socketio  = require('../helpers/sockets');
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var groupservice  = require('../services/group');
 var config  = require('../config');
+var mongoose = require('mongoose');
 
 exports.newmessage = function newmessage (request, response) {
 
@@ -38,16 +39,53 @@ exports.newmessage = function newmessage (request, response) {
                                     }
                                     else {
                                         // Notificamos al canal que hay nuevo mensaje
-                                        socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage',
-                                            {
-                                                groupid: request.params.groupid,
-                                                message: result
+                                        socketio.getIO().sockets.to('MSGCH_' + data.channelid).emit('newMessage', {groupid: request.params.groupid, message: result});
+                                        //socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage', {groupid: request.params.groupid, message: result});
+                                        var Channel = mongoose.model('Channel');
+                                        Channel.parsepopulated(data.channelid).then(function (error, channel) {
+                                            if (error){
+                                                response.status(error.code).json({message: error.message});
+                                            }
+                                            else {
+                                                var Group = mongoose.model('Group');
+                                                Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
+                                                    if (error){
+                                                        response.status(error.code).json({message: error.message});
+                                                    }
+                                                    else {
+                                                        console.log("channelType: " + channel.channelType);
+                                                        if (channel.channelType == "PUBLIC"){
+                                                            for (var i=0;i<group.users.length;i++){
+                                                                var roomName = 'US_'+ group.users[i].id;
+                                                                for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+                                                                    if ( socketio.getIO().sockets.connected[socketid]) {
+                                                                        var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+                                                                        if (connectedUser && connectedUser == group.users[i].id && connectedUser!= request.params.userid) {
+                                                                            console.log("Emit newMessageEvent in public channel");
+                                                                            socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType});
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }if (channel.channelType == "PRIVATE"){
+                                                            for (var j=0;j<channel.users.length;j++){
+                                                                roomName = 'US_'+ channel.users[j].id;
+                                                                for (socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+                                                                    if ( socketio.getIO().sockets.connected[socketid]) {
+                                                                        connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+                                                                        if (connectedUser && connectedUser == channel.users[j].id && connectedUser!= request.params.userid) {
+                                                                            console.log("Emit newMessageEvent in private channel");
+                                                                            socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType});
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+
+                                                    }
+                                                });
+                                            }
                                         });
-                                        /*socketio.getIO().sockets.to('MSGCH_' + data.channelid).emit('newMessage',
-                                            {
-                                                groupid: request.params.groupid,
-                                                message: result
-                                            });*/
                                         response.json(result);
                                     }
                                 }
@@ -73,65 +111,99 @@ exports.newanswer = function newmessage (request, response) {
         if (request.params.userid == result._id) {
             chatErrors.checkuserinchannel(request.params.channelid,request.params.userid)
                 .then (function (error,result) {
-                if (error) {
-                    response.status(401).json({message: 'User not included in requested channel'});
-                }
-                else {
-                    var data = request.body;
-                    if (!data.text) {
-                        response.status(400).json({message: 'text required'});
+                    if (error) {
+                        response.status(401).json({message: 'User not included in requested channel'});
                     }
                     else {
-                        data.messageid = request.params.messageid;
-                        data.channelid = request.params.channelid;
-                        data.userid = request.params.userid;
-                        Message.newAnswer(data).then(function newAnswer(error, messageAnswer) {
-                                if (error) {
-                                    response.status(error.code).json({message: error.message});
-                                }
-                                else {
-                                    // Notificamos al canal que se ha modificado un mensaje
-                                    socketio.getIO().sockets.to('CH_' + data.channelid).emit('newQuestionAnswer', messageAnswer);
+                        var data = request.body;
+                        if (!data.text) {
+                            response.status(400).json({message: 'text required'});
+                        }
+                        else {
+                            data.messageid = request.params.messageid;
+                            data.channelid = request.params.channelid;
+                            data.userid = request.params.userid;
+                            Message.newAnswer(data).then(function newAnswer(error, messageAnswer) {
+                                    if (error) {
+                                        response.status(error.code).json({message: error.message});
+                                    }
+                                    else {
+                                        // Notificamos al canal que se ha modificado un mensaje
+                                        socketio.getIO().sockets.to('CH_' + data.channelid).emit('newQuestionAnswer', messageAnswer);
 
-                                    //Creamos un mensaje de texto avisando que se ha creado una respuesta:
-                                    // Lo creamos con el usuario internalUser
-                                    User.search({mail: config.internalUserMail}, 1).then(function(error, internalUser) {
-                                        var messageData = {
-                                            channelid: data.channelid,
-                                            userid: internalUser.id ,
-                                            messageType: 'TEXT',
-                                            text: "internalMessage#NEW_ANSWER. QuestionId: '" + messageAnswer.id +
-                                                                           "'. AnswerId: '" + messageAnswer.answer.id + "" +
-                                                                           "'"
-                                        };
-                                        Message.newMessage(messageData).then(function newmessage(error, result) {
-                                            if (!error) {
-                                                // Notificamos al canal que hay nuevo mensaje
+                                        //Creamos un mensaje de texto avisando que se ha creado una respuesta:
+                                        // Lo creamos con el usuario internalUser
+                                        User.search({mail: config.internalUserMail}, 1).then(function(error, internalUser) {
+                                            var messageData = {
+                                                channelid: data.channelid,
+                                                userid: internalUser.id ,
+                                                messageType: 'TEXT',
+                                                text: "internalMessage#NEW_ANSWER. QuestionId: '" + messageAnswer.id +
+                                                "'. AnswerId: '" + messageAnswer.answer.id + "" +
+                                                "'"
+                                            };
+                                            Message.newMessage(messageData).then(function newmessage(error, result) {
+                                                if (!error) {
+                                                    // Notificamos al canal que hay nuevo mensaje
+                                                    socketio.getIO().sockets.to('MSGCH_' + data.channelid).emit('newMessage', {groupid: request.params.groupid,message: result});
+                                                    //socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage', {groupid: request.params.groupid,message: result});
+                                                    var Channel = mongoose.model('Channel');
+                                                    Channel.parsepopulated(data.channelid).then(function (error, channel) {
+                                                        if (error){
+                                                            response.status(error.code).json({message: error.message});
+                                                        }
+                                                        else {
+                                                            var Group = mongoose.model('Group');
+                                                            Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
+                                                                if (error){
+                                                                    response.status(error.code).json({message: error.message});
+                                                                }
+                                                                else {
+                                                                    console.log("channelType: " + channel.channelType);
+                                                                    if (channel.channelType == "PUBLIC"){
+                                                                        for (var i=0;i<group.users.length;i++){
+                                                                            var roomName = 'US_'+ group.users[i].id;
+                                                                            for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+                                                                                if ( socketio.getIO().sockets.connected[socketid]) {
+                                                                                    var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+                                                                                    if (connectedUser && connectedUser == group.users[i].id && connectedUser!= request.params.userid) {
+                                                                                        console.log("Emit newMessageEvent in public channel");
+                                                                                        socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType});
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }if (channel.channelType == "PRIVATE"){
+                                                                        for (var j=0;j<channel.users.length;j++){
+                                                                            roomName = 'US_'+ channel.users[j].id;
+                                                                            for (socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+                                                                                if ( socketio.getIO().sockets.connected[socketid]) {
+                                                                                    connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+                                                                                    if (connectedUser && connectedUser == channel.users[j].id && connectedUser!= request.params.userid) {
+                                                                                        console.log("Emit newMessageEvent in private channel");
+                                                                                        socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType});
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
 
-                                                socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage',
-                                                {
-                                                        groupid: request.params.groupid,
-                                                        message: result
-                                                });
-
-                                                /*socketio.getIO().sockets.to('MSGCH_' + data.channelid).emit('newMessage',
-                                                    {
-                                                        groupid: request.params.groupid,
-                                                        message: result
-                                                    });*/
-
-                                            }
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            });
                                         });
-                                    });
 
 
-                                    response.json(result);
+                                        response.json(result);
+                                    }
                                 }
-                            }
-                        );
+                            );
+                        }
                     }
-                }
-            });
+                });
         }
         else {
             response.status(401).json({message: 'Not authorized to send answer from another user'});
@@ -246,83 +318,83 @@ exports.publishQuestion = function publishQuestion (request, response) {
         if (request.params.userid == result._id) {
             chatErrors.checkismessageadmin(request.params.messageid,request.params.userid)
                 .then (function (error, message) {
-                if (error) {
-                    response.status(401).json({message: 'Unauthorized to publish another user message'});
-                }
-                else {
-                    if (message.messageType != 'QUESTION') {
-                        response.status(400).json({message: 'Message not QUESTION type'});
-                    }
-                    else if (message.publish) {
-                        response.status(401).json({message: 'Message already publish'});
+                    if (error) {
+                        response.status(401).json({message: 'Unauthorized to publish another user message'});
                     }
                     else {
-                        var answersData = [];
-                        var answer;
-                        for (var i=0; i < message.content.answers.length; i++) {
-                            answer = {
-                                _user: message.content.answers[i]._user,
-                                body: message.content.answers[i].text,
-                                created: message.content.answers[i].datetime
-                            };
-                            answersData.push(answer);
+                        if (message.messageType != 'QUESTION') {
+                            response.status(400).json({message: 'Message not QUESTION type'});
+                        }
+                        else if (message.publish) {
+                            response.status(401).json({message: 'Message already publish'});
+                        }
+                        else {
+                            var answersData = [];
+                            var answer;
+                            for (var i=0; i < message.content.answers.length; i++) {
+                                answer = {
+                                    _user: message.content.answers[i]._user,
+                                    body: message.content.answers[i].text,
+                                    created: message.content.answers[i].datetime
+                                };
+                                answersData.push(answer);
+                            }
+
+                            QuestionService.createanswers(answersData).then(function createAnswers(error, insertAnswers) {
+                                if (error) {
+                                    if (error.code)
+                                        response.status(error.code).json({message: error.message});
+                                    else
+                                        response.status(500).json(error)
+                                }
+                                else {
+                                    var questionData = {
+                                        _user:  message._user,
+                                        created: message.datetime,
+                                        title:  message.content.title,
+                                        body:  message.content.text,
+                                        answers: insertAnswers.answersCreated,
+                                        answercount: insertAnswers.answersCreated.length,
+                                        tags: request.body.tags
+                                    };
+                                    QuestionService.createquestion(questionData).then(function createanswers (error, question) {
+                                        if (error){
+                                            if (error.code)
+                                                response.status(error.code).json({message: error.message});
+                                            else
+                                                response.status(500).json(error)
+                                        }
+                                        else {
+                                            // Modificamos mensaje
+                                            message.publish = true;
+                                            message.save(function(error,message){
+                                                if(error) {
+                                                    if (error.code)
+                                                        response.status(error.code).json({message: error.message});
+                                                    else
+                                                        response.status(500).json(error)
+                                                }
+                                                else {
+                                                    response.json(message)
+                                                }
+                                            });
+
+                                        }
+                                    });
+                                }
+                            });
                         }
 
-                        QuestionService.createanswers(answersData).then(function createAnswers(error, insertAnswers) {
-                            if (error) {
-                                if (error.code)
-                                    response.status(error.code).json({message: error.message});
-                                else
-                                    response.status(500).json(error)
-                            }
-                            else {
-                                var questionData = {
-                                    _user:  message._user,
-                                    created: message.datetime,
-                                    title:  message.content.title,
-                                    body:  message.content.text,
-                                    answers: insertAnswers.answersCreated,
-                                    answercount: insertAnswers.answersCreated.length,
-                                    tags: request.body.tags
-                                };
-                                QuestionService.createquestion(questionData).then(function createanswers (error, question) {
-                                    if (error){
-                                        if (error.code)
-                                            response.status(error.code).json({message: error.message});
-                                        else
-                                            response.status(500).json(error)
-                                    }
-                                    else {
-                                        // Modificamos mensaje
-                                        message.publish = true;
-                                        message.save(function(error,message){
-                                            if(error) {
-                                                if (error.code)
-                                                    response.status(error.code).json({message: error.message});
-                                                else
-                                                    response.status(500).json(error)
-                                            }
-                                            else {
-                                                response.json(message)
-                                            }
-                                        });
 
-                                    }
-                                });
-                            }
-                        });
+
                     }
-
-
-
-                }
-            });
+                });
         }
         else {
             response.status(401).json({message: 'Not authorized to send answer from another user'});
         }
     });
-}
+};
 
 function checkNewMessageInput (data)
 {

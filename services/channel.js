@@ -159,22 +159,24 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
                             return promise.done(error,null);
                         }else{
                             if (channelType == "PRIVATE" || channelType == "DIRECT"){
-                                channelservice.updateuserchannellist(userid,groupid, result._id,channelType).then(function(error,result){
-                                    if (error){
-                                        return promise.done(error,null);
-                                    }
-                                    else {
-                                        var Channel = mongoose.model('Channel');
-                                        Channel.parsepopulated(channel.id).then(function (error, result) {
-                                            if (error){
-                                                return promise.done(error,null);
-                                            }
-                                            else {
-                                                return promise.done(null, result);
-                                            }
-                                        });
-                                    }
-                                });
+                                if (channelType == "PRIVATE") {
+                                    channelservice.updateuserchannellist(userid,groupid, result._id,channelType).then(function(error,result){
+                                        if (error){
+                                            return promise.done(error,null);
+                                        }
+                                        else {
+                                            var Channel = mongoose.model('Channel');
+                                            Channel.parsepopulated(channel.id).then(function (error, result) {
+                                                if (error){
+                                                    return promise.done(error,null);
+                                                }
+                                                else {
+                                                    return promise.done(null, result);
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
                                 if (channelType == "DIRECT") {
                                     channelservice.updateuserchannellist(userid2,groupid, result._id,channelType).then(function(error,result){
                                         if (error){
@@ -666,6 +668,44 @@ exports.getallgroupschannellist = function getallgroupschannellist (userid) {
 
 
 
+exports.getallgroupschannellist = function getallgroupschannellist (userid) {
+
+    var promise = new Hope.Promise();
+
+    groupservice.getgrouplist(userid).then(function (error,groups){
+        if(error){
+            return promise.done(error,null);
+        }else{
+            var channels = []
+            async.each(groups, function (group, callback){
+                    groupservice.getinfo(group.id,userid).then(function (error, result){
+                        if(error){
+                            callback(error);
+                        }
+                        else{
+                            channels = channels
+                                .concat(result.publicChannels)
+                                .concat(result.privateChannels)
+                                .concat(result.directMessageChannels);
+                            callback();
+                        }
+                    });
+                }
+                ,function(error) {
+                    if(error) {
+                        return promise.done(error,null);
+                    }
+                    else {
+                        return promise.done(null,channels);
+                    }
+
+                }
+            );
+        }
+    });
+
+    return promise;
+};
 
 
 
