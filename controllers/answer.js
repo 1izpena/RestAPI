@@ -58,7 +58,7 @@ exports.deleteanswer = function deleteanswer(request, response){
 			{
 				if(error)
 				{
-					response.json({message:error,message});
+					response.json({message:error.message});
 							
 				}
 				else
@@ -67,7 +67,7 @@ exports.deleteanswer = function deleteanswer(request, response){
 					{
 						if(error)
 						{
-							response.json( {message: error});
+							response.json({message: error.message});
 						}
 						else
 						{
