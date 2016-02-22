@@ -67,7 +67,7 @@ exports.newmessage = function newmessage (request, response) {
                                                                     }
                                                                 }
                                                             }
-                                                        }if (channel.channelType == "PRIVATE"){
+                                                        }if (channel.channelType == "PRIVATE" || channel.channelType == "DIRECT"){
                                                             for (var j=0;j<channel.users.length;j++){
                                                                 roomName = 'US_'+ channel.users[j].id;
                                                                 for (socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
@@ -173,7 +173,7 @@ exports.newanswer = function newmessage (request, response) {
                                                                                 }
                                                                             }
                                                                         }
-                                                                    }if (channel.channelType == "PRIVATE"){
+                                                                    }if (channel.channelType == "PRIVATE" || channel.channelType == "DIRECT"){
                                                                         for (var j=0;j<channel.users.length;j++){
                                                                             roomName = 'US_'+ channel.users[j].id;
                                                                             for (socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
@@ -187,6 +187,7 @@ exports.newanswer = function newmessage (request, response) {
                                                                             }
                                                                         }
                                                                     }
+
 
                                                                 }
                                                             });
