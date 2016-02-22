@@ -495,7 +495,7 @@ exports.addusertogroup = function addusertogroup (request, response){
                                             }
                                             if (encontrado == false && grupo.users[i].id!=request.params.userid1){
                                                 console.log("Emit deletedMemberInGroup event");
-                                                socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('newGroupEvent', {groupid: grupo.id, message: grupo.groupName + ': user ' + emitUser.username + ' added'});
+                                                socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('newMemberInGroupEvent', {groupid: grupo.id, message: grupo.groupName + ': user ' + emitUser.username + ' added'});
                                             }
                                         }
 
