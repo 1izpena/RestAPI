@@ -248,7 +248,7 @@ exports.acceptinvitation = function acceptinvitation (request, response) {
 
 
                                             // Suscribimos al usuario a todos los canales del grupo a los que tiene acceso
-                                            socketio.manageGroupChannelRooms('JOIN',request.params.userid,request.params.groupid);
+                                            //socketio.manageGroupChannelRooms('JOIN',request.params.userid,request.params.groupid);
 
                                             response.json(result);
                                         }
@@ -436,7 +436,7 @@ exports.unsuscribefromgroup = function unsuscribefromgroup (request, response){
 
 
                                 // Cancelamos la suscripcion a todos los canales del grupo borrado
-                                socketio.manageGroupChannelRooms('LEAVE',request.params.userid,request.params.groupid);
+                                //socketio.manageGroupChannelRooms('LEAVE',request.params.userid,request.params.groupid);
 
                                 response.json(result);
                             }
@@ -497,7 +497,7 @@ exports.addusertogroup = function addusertogroup (request, response){
                                         socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newGroup', result);
 
                                         // A�adimos la suscripcion a todos los canales del grupo al que se ha a�adido
-                                        socketio.manageGroupChannelRooms('JOIN',request.params.userid1,request.params.groupid);
+                                        //socketio.manageGroupChannelRooms('JOIN',request.params.userid1,request.params.groupid);
 
                                         response.json(result);
                                     }
@@ -543,21 +543,9 @@ exports.updategroupinfo = function updategroupinfo (request, response){
                                                 }else{
                                                     var grupo = result;
                                                     var roomName = 'GR_'+request.params.groupid;
-                                                    socketio.getIO().sockets.to(roomName).emit('editedGroup', result);
                                                     for (var i=0;i<grupo.users.length;i++){
-                                                        var encontrado = false;
-                                                        for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                            if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                if (connectedUser && connectedUser == grupo.users[i].id) {
-                                                                    encontrado = true;
-                                                                }
-                                                            }
-                                                        }
-                                                        if (encontrado == false && grupo.users[i].id!=request.params.userid1){
-                                                            console.log("Emit editedGroupEvent event");
-                                                            socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('editedGroupEvent', {groupid: grupo.id, groupName: grupo.groupName, channelid:''});
-                                                        }
+                                                        socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('editedGroup', result);
+                                                        //socketio.getIO().sockets.to('US_'+ grupo.users[i].id).emit('editedGroupEvent', {groupid: grupo.id, groupName: grupo.groupName, channelid:''});
                                                     }
                                                     response.json(result);
                                                 }
