@@ -65,7 +65,7 @@ exports.newmessage = function newmessage (request, response) {
                                                                     }
                                                                 }
                                                             }
-                                                            if (encontrado == false && result.users[j].id!=request.params.userid){
+                                                            if (encontrado == false && channel.users[j].id!=request.params.userid){
                                                                 console.log("Emit newMessageEvent");
                                                                 socketio.getIO().sockets.to('US_'+ channel.users[j].id).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
                                                             }
@@ -149,7 +149,7 @@ exports.newanswer = function newmessage (request, response) {
                                                                 else {
                                                                     console.log("channelType: " + channel.channelType);
                                                                     var roomName = 'CH_'+channel.id;
-                                                                    for (var j=0;j<result.users.length;j++){
+                                                                    for (var j=0;j<channel.users.length;j++){
                                                                         var encontrado = false;
                                                                         for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                                             if ( socketio.getIO().sockets.connected[socketid]) {
