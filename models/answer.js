@@ -18,6 +18,10 @@ var answerSchema = new Schema({
 answerSchema.statics.createAnswer = function createAnswer (attributes) {
 var promise = new Hope.Promise();
 var Answer = mongoose.model('Answer', answerSchema);
+if(attributes.votes == undefined)
+{
+	attributes.votes =0;
+}
 Answer = new Answer(attributes);
 Answer.save(function (error, answer){
 	if(error)
@@ -40,8 +44,15 @@ Answer.save(function (error, answer){
 	}
 	else
 	{
+		User.populate(answer,{
+			path:'_user', 
+			select:'username'
+		},
+		function (error,populateanswer)
+		{
+			return promise.done(error,populateanswer);
+		});
 		
-		return promise.done(error,answer);
 	}
 
 });

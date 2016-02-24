@@ -31,6 +31,11 @@ questionSchema.plugin(mongoosastic);
 questionSchema.statics.createQuestion = function createQuestion (attributes) {
 var promise = new Hope.Promise();
 var Question = mongoose.model('Question', questionSchema);
+if(attributes.votes == undefined && attributes.views == undefined)
+{
+	attributes.votes = 0;
+	attributes.views = 0;
+}
 Question = new Question(attributes);
 Question.save(function (error, question){
 	if(error)
