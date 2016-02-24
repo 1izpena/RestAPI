@@ -54,34 +54,22 @@ exports.newmessage = function newmessage (request, response) {
                                                     }
                                                     else {
                                                         console.log("channelType: " + channel.channelType);
-                                                        if (channel.channelType == "PUBLIC"){
-                                                            for (var i=0;i<group.users.length;i++){
-                                                                var roomName = 'US_'+ group.users[i].id;
-                                                                for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                                    if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                        var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                        if (connectedUser && connectedUser == group.users[i].id && connectedUser!= request.params.userid) {
-                                                                            console.log("Emit newMessageEvent in public channel");
-                                                                            socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
-                                                                        }
+                                                        var roomName = 'CH_'+channel.id;
+                                                        for (var j=0;j<channel.users.length;j++){
+                                                            var encontrado = false;
+                                                            for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+                                                                if ( socketio.getIO().sockets.connected[socketid]) {
+                                                                    var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+                                                                    if (connectedUser && connectedUser == channel.users[j].id) {
+                                                                        encontrado = true;
                                                                     }
                                                                 }
                                                             }
-                                                        }if (channel.channelType == "PRIVATE" || channel.channelType == "DIRECT"){
-                                                            for (var j=0;j<channel.users.length;j++){
-                                                                roomName = 'US_'+ channel.users[j].id;
-                                                                for (socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                                    if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                        connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                        if (connectedUser && connectedUser == channel.users[j].id && connectedUser!= request.params.userid) {
-                                                                            console.log("Emit newMessageEvent in private channel");
-                                                                            socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
-                                                                        }
-                                                                    }
-                                                                }
+                                                            if (encontrado == false && result.users[j].id!=request.params.userid){
+                                                                console.log("Emit newMessageEvent");
+                                                                socketio.getIO().sockets.to('US_'+ channel.users[j].id).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
                                                             }
                                                         }
-
                                                     }
                                                 });
                                             }
@@ -160,31 +148,20 @@ exports.newanswer = function newmessage (request, response) {
                                                                 }
                                                                 else {
                                                                     console.log("channelType: " + channel.channelType);
-                                                                    if (channel.channelType == "PUBLIC"){
-                                                                        for (var i=0;i<group.users.length;i++){
-                                                                            var roomName = 'US_'+ group.users[i].id;
-                                                                            for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                                                if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                                    var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                                    if (connectedUser && connectedUser == group.users[i].id && connectedUser!= request.params.userid) {
-                                                                                        console.log("Emit newMessageEvent in public channel");
-                                                                                        socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message:result});
-                                                                                    }
+                                                                    var roomName = 'CH_'+channel.id;
+                                                                    for (var j=0;j<result.users.length;j++){
+                                                                        var encontrado = false;
+                                                                        for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+                                                                            if ( socketio.getIO().sockets.connected[socketid]) {
+                                                                                var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+                                                                                if (connectedUser && connectedUser == channel.users[j].id) {
+                                                                                    encontrado = true;
                                                                                 }
                                                                             }
                                                                         }
-                                                                    }if (channel.channelType == "PRIVATE" || channel.channelType == "DIRECT"){
-                                                                        for (var j=0;j<channel.users.length;j++){
-                                                                            roomName = 'US_'+ channel.users[j].id;
-                                                                            for (socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                                                if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                                    connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                                    if (connectedUser && connectedUser == channel.users[j].id && connectedUser!= request.params.userid) {
-                                                                                        console.log("Emit newMessageEvent in private channel");
-                                                                                        socketio.getIO().sockets.to(roomName).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message:result});
-                                                                                    }
-                                                                                }
-                                                                            }
+                                                                        if (encontrado == false && channel.users[j].id!=request.params.userid){
+                                                                            console.log("Emit newMessageEvent");
+                                                                            socketio.getIO().sockets.to('US_'+ channel.users[j].id).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
                                                                         }
                                                                     }
 
