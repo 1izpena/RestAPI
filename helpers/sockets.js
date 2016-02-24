@@ -185,7 +185,7 @@ module.exports = {
                     // Salimos del namespace asociado al canal si ya esta incluido en alguno
                     var roomName = 'CH_'+channelid;
                     for (var room in socket.adapter.rooms ) {
-                        if ((room.indexOf('CH_') == 0) && (room != roomName)) {
+                        if ((room.indexOf('CH_') == 0)) {
                             socket.leave(room);
                             console.log ("DISCONNECT FROM --->SOCKET(disconnectChannel):  "+socket.id+"(userid="+socket.userid+") leave room "+room);
                         }
@@ -202,7 +202,7 @@ module.exports = {
                     // Salimos del namespace asociado al canal si ya esta incluido en alguno
                     var roomName = 'GR_'+ groupid;
                     for (var room in socket.adapter.rooms) {
-                        if ((room.indexOf('GR_') == 0) && (room != roomName)) {
+                        if ((room.indexOf('GR_') == 0)) {
                             socket.leave(room);
                             console.log ("DISCONNECT FROM --->SOCKET(disconnectGroup):  "+socket.id+"(userid="+socket.userid+") leave room "+room);
                         }

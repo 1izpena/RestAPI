@@ -60,12 +60,12 @@ exports.newmessage = function newmessage (request, response) {
                                                             for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                                 if ( socketio.getIO().sockets.connected[socketid]) {
                                                                     var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                    if (connectedUser && connectedUser == channel.users[j].id) {
+                                                                    if (connectedUser && connectedUser == channel.users[j].id && channel.users[j].id==request.params.userid) {
                                                                         encontrado = true;
                                                                     }
                                                                 }
                                                             }
-                                                            if (encontrado == false && channel.users[j].id!=request.params.userid){
+                                                            if (encontrado == false ){
                                                                 console.log("Emit newMessageEvent");
                                                                 socketio.getIO().sockets.to('US_'+ channel.users[j].id).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
                                                             }
@@ -154,12 +154,12 @@ exports.newanswer = function newmessage (request, response) {
                                                                         for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                                             if ( socketio.getIO().sockets.connected[socketid]) {
                                                                                 var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                                if (connectedUser && connectedUser == channel.users[j].id) {
+                                                                                if (connectedUser && connectedUser == channel.users[j].id && channel.users[j].id==request.params.userid) {
                                                                                     encontrado = true;
                                                                                 }
                                                                             }
                                                                         }
-                                                                        if (encontrado == false && channel.users[j].id!=request.params.userid){
+                                                                        if (encontrado == false){
                                                                             console.log("Emit newMessageEvent");
                                                                             socketio.getIO().sockets.to('US_'+ channel.users[j].id).emit('newMessageEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: channel.channelName, channelid: channel.id, channelType: channel.channelType, message: result});
                                                                         }
