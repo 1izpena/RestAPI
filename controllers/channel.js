@@ -209,7 +209,7 @@ exports.addusertochannel = function addusertochannel (request, response){
                                                                                 }
                                                                             }
                                                                         }
-                                                                        if (encontrado == false){
+                                                                        if (encontrado == false && result.users[j].id!=request.params.userid){
                                                                             console.log("Emit newMemberInChannelEvent");
                                                                             socketio.getIO().sockets.to('US_'+ result.users[j].id).emit('newMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                                         }
@@ -302,12 +302,12 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                                                         for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                                             if ( socketio.getIO().sockets.connected[socketid]) {
                                                                                 var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                                if (connectedUser && connectedUser == result.users[j].id && result.users[j].id==request.params.userid1) {
+                                                                                if (connectedUser && connectedUser == result.users[j].id ) {
                                                                                     encontrado = true;
                                                                                 }
                                                                             }
                                                                         }
-                                                                        if (encontrado == false){
+                                                                        if (encontrado == false && result.users[j].id!=request.params.userid1){
                                                                             console.log("Emit deletedMemberInChannelEvent");
                                                                             socketio.getIO().sockets.to('US_'+result.users[j].id).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                                         }
@@ -385,12 +385,12 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                                             for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                 if ( socketio.getIO().sockets.connected[socketid]) {
                                                     var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                    if (connectedUser && connectedUser == result.users[j].id && result.users[j].id==request.params.userid) {
+                                                    if (connectedUser && connectedUser == result.users[j].id ) {
                                                         encontrado = true;
                                                     }
                                                 }
                                             }
-                                            if (encontrado == false){
+                                            if (encontrado == false&& result.users[j].id!=request.params.userid){
                                                 console.log("Emit deletedMemberInChannelEvent");
                                                 socketio.getIO().sockets.to('US_'+result.users[j].id).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                             }
