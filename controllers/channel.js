@@ -186,16 +186,18 @@ exports.addusertochannel = function addusertochannel (request, response){
                                                                 username: user.username,
                                                                 mail: user.mail
                                                             };
-                                                            socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('newMemberInChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
-                                                            if (result.channelType == "PRIVATE"){
-                                                                socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newPrivateChannel', result);
-                                                            }
+
                                                             var Group = mongoose.model('Group');
                                                             Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
                                                                 if (error){
                                                                     response.status(error.code).json({message: error.message});
                                                                 }
                                                                 else {
+                                                                    socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('newMemberInChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
+                                                                    if (result.channelType == "PRIVATE"){
+                                                                        socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newPrivateChannel', result);
+                                                                        socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: result.channelName, channelid: result.id, channelType: result.channelType});
+                                                                    }
                                                                     var roomName = 'CH_'+result.id;
                                                                     for (var j=0;j<result.users.length;j++){
                                                                         var encontrado = false;
@@ -283,8 +285,6 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                                                 username: user.username,
                                                                 mail: user.mail
                                                             };
-                                                            socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedUserFromChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
-                                                            socketio.getIO().sockets.to('US_'+request.params.userid1).emit('deletedPrivateChannel', result);
 
                                                             var Group = mongoose.model('Group');
                                                             Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
@@ -292,7 +292,11 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                                                     response.status(error.code).json({message: error.message});
                                                                 }
                                                                 else {
-                                                                    var roomName = 'CH_'+result.id;
+                                                                    socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
+                                                                    socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedUserFromChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
+                                                                    socketio.getIO().sockets.to('US_'+request.params.userid1).emit('deletedPrivateChannel', result);
+
+                                                                    var roomName = 'CH_'+request.params.channelid;
                                                                     for (var j=0;j<result.users.length;j++){
                                                                         var encontrado = false;
                                                                         for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
@@ -365,14 +369,17 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedUserFromChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
+
                                 var Group = mongoose.model('Group');
                                 Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
                                     if (error){
                                         response.status(error.code).json({message: error.message});
                                     }
                                     else {
-                                        var roomName = 'CH_'+result.id;
+                                        socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedUserFromChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
+                                        socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
+                                        socketio.getIO().sockets.to('US_'+request.params.userid).emit('deletedPrivateChannel', result);
+                                        var roomName = 'CH_'+request.params.channelid;
                                         for (var j=0;j<result.users.length;j++){
                                             var encontrado = false;
                                             for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
@@ -384,19 +391,26 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                                                 }
                                             }
                                             if (encontrado == false && result.users[j].id!=request.params.userid){
-                                                console.log("Emit deletedMemberInChannelEvent ");
+                                                console.log("Emit deletedMemberInChannelEvent");
                                                 socketio.getIO().sockets.to('US_'+result.users[j].id).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                             }
                                         }
+
+
+
                                     }
                                 });
-
-                                // Si el usuario esta conectado, lo sacamos de la sala del canal
-                                /*var userSocket = socketio.getUserSocket(request.params.userid);
-                                if (userSocket) {
-                                    userSocket.leave('MSGCH_'+request.params.channelid);
-                                    console.log ("========== SOCKET(unsuscribefromchannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
-                                }*/
+                                // Para todos los usuarios del canal, si esta conectado,
+                                // lo eliminamos de la sala del canal
+                                 console.log("canal eliminado. usuarios = ");
+                                 console.log(result.users);
+                                 for (var i=0;i<result.users.length;i++) {
+                                 var userSocket = socketio.getUserSocket(result.users[i].id);
+                                 if (userSocket) {
+                                 userSocket.leave('MSGCH_' + result.id);
+                                 console.log("========== SOCKET(deletechannelfromgroup):  " + userSocket.id + "(userid=" + userSocket.userid + ") leave room MSGCH_" + result.id);
+                                 }
+                                 }
 
                                 response.json(result);
                             }
