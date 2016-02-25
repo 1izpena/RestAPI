@@ -70,9 +70,6 @@ router.route('/:userid/chat/groups/:groupid/users').get(group.getgroupuserlist);
 /* DELETE elimina el usuario :userid al grupo */
 router.route('/:userid/chat/groups/:groupid/users/:userid1').delete(group.deleteuserfromgroup);
 
-/* POST Añade el usuario :userid al grupo */
-router.route('/:userid/chat/groups/:groupid/users/:userid1').post(group.addusertogroup);
-
 /* POST invita al usuario :userid al grupo */
 router.route('/:userid/chat/groups/:groupid/users/:userid1/invite').post(group.inviteusertogroup);
 

@@ -55,19 +55,14 @@ exports.newchannel = function newchannel (request, response) {
                                             else {
                                                 if (request.body.channelType == "PUBLIC"){
                                                     var roomName = 'CH_'+result.id;
-                                                    for (var j=0;j<channel.users.length;j++){
-                                                        var encontrado = false;
-                                                        for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                            if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                if (connectedUser && connectedUser == channel.users[j].id) {
-                                                                    encontrado = true;
-                                                                }
+                                                    var conectedUsers = socketio.getUsersInSocket(roomName);
+                                                    for (var i=0;i<channel.users.length;i++){
+                                                        if(channel.users[i].id != request.params.userid){
+                                                            if (conectedUsers.indexOf(channel.users[i]) == -1){
+                                                                console.log("Emit newChannelEvent for new public channel");
+                                                                socketio.getIO().sockets.to('US_'+channel.users[i].id).emit('newChannelEvent', {groupid: group.id, groupName: group.groupName, channelid: channel.id,channelName: channel.channelName, channelType:channel.channelType});
+
                                                             }
-                                                        }
-                                                        if (encontrado == false && channel.users[j].id!=request.params.userid){
-                                                            console.log("Emit newChannelEvent for new public channel");
-                                                            socketio.getIO().sockets.to('US_'+channel.users[j].id).emit('newChannelEvent', {groupid: group.id, groupName: group.groupName, channelid: channel.id,channelName: channel.channelName, channelType:channel.channelType});
                                                         }
                                                     }
                                                     socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('newPublicChannel', channel);
@@ -79,19 +74,6 @@ exports.newchannel = function newchannel (request, response) {
                                                 response.json(channel);
                                             }
                                         });
-
-                                        // Para todos los usuarios del canal, si esta conectado,
-                                        // lo incluimos en la sala del nuevo canal
-                                        // para recibir notificaciones de nuevos mensajes
-                                        /*for (var i=0;i<channel.users.length;i++) {
-                                            var userSocket = socketio.getUserSocket(channel.users[i].id);
-                                            if (userSocket) {
-                                                userSocket.join('MSGCH_' + channel.id);
-                                                console.log("========== SOCKET(newChannel):  " + userSocket.id + "(userid=" + userSocket.userid + ") join room MSGCH_" + channel.id);
-                                            }
-                                        }*/
-
-
                                     }
                                 });
                             }
@@ -188,7 +170,7 @@ exports.addusertochannel = function addusertochannel (request, response){
                                                             };
 
                                                             var Group = mongoose.model('Group');
-                                                            Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
+                                                            Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, grupo) {
                                                                 if (error){
                                                                     response.status(error.code).json({message: error.message});
                                                                 }
@@ -196,34 +178,23 @@ exports.addusertochannel = function addusertochannel (request, response){
                                                                     socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('newMemberInChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
                                                                     if (result.channelType == "PRIVATE"){
                                                                         socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newPrivateChannel', result);
-                                                                        //socketio.getIO().sockets.to('US_'+request.params.userid1).emit('newChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                                     }
                                                                     var roomName = 'CH_'+result.id;
-                                                                    for (var j=0;j<result.users.length;j++){
-                                                                        var encontrado = false;
-                                                                        for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                                            if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                                var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                                if (connectedUser && connectedUser == result.users[j].id) {
-                                                                                    encontrado = true;
-                                                                                }
+                                                                    var conectedUsers = socketio.getUsersInSocket(roomName);
+                                                                    for (var i=0;i<result.users.length;i++){
+                                                                        if(result.users[i].id != request.params.userid){
+                                                                            if (conectedUsers.indexOf(result.users[i]) == -1){
+                                                                                console.log("Emit newMemberInChannelEvent");
+                                                                                socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('newMemberInChannelEvent', {groupid: request.params.groupid,  groupName: grupo.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                                             }
                                                                         }
-                                                                        if (encontrado == false && result.users[j].id!=request.params.userid){
-                                                                            console.log("Emit newMemberInChannelEvent");
-                                                                            socketio.getIO().sockets.to('US_'+ result.users[j].id).emit('newMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
-                                                                        }
                                                                     }
+
+                                                                    response.json(result);
                                                                 }
                                                             });
-                                                            // Si el usuario esta conectado, lo incluimos en la sala del nuevo canal
-                                                            // para recibir notificaciones de nuevos mensajes
-                                                            /*var userSocket = socketio.getUserSocket(request.params.userid1);
-                                                            if (userSocket) {
-                                                                userSocket.join('MSGCH_'+request.params.channelid);
-                                                                console.log ("========== SOCKET(addusertochannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
-                                                            }*/
-                                                            response.json(result);
+
+
                                                         }else {
                                                             var err = {
                                                                 code   : 404,
@@ -287,50 +258,33 @@ exports.deleteuserfromchannel = function deleteuserfromchannel (request, respons
                                                             };
 
                                                             var Group = mongoose.model('Group');
-                                                            Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
+                                                            Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, grupo) {
                                                                 if (error){
                                                                     response.status(error.code).json({message: error.message});
                                                                 }
                                                                 else {
-                                                                    socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                                     socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedUserFromChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
                                                                     socketio.getIO().sockets.to('US_'+request.params.userid1).emit('deletedPrivateChannel', result);
-
                                                                     var roomName = 'CH_'+request.params.channelid;
-                                                                    for (var j=0;j<result.users.length;j++){
-                                                                        var encontrado = false;
-                                                                        for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                                            if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                                var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                                if (connectedUser && connectedUser == result.users[j].id ) {
-                                                                                    encontrado = true;
-                                                                                }
+                                                                    var conectedUsers = socketio.getUsersInSocket(roomName);
+                                                                    for (var i=0;i<result.users.length;i++){
+                                                                        if(result.users[i].id != request.params.userid1){
+                                                                            if (conectedUsers.indexOf(result.users[i]) == -1){
+                                                                                console.log("Emit deletedMemberInChannelEvent");
+                                                                                socketio.getIO().sockets.to('US_'+ result.users[i].id).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: grupo.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                                             }
                                                                         }
-                                                                        if (encontrado == false && result.users[j].id!=request.params.userid1){
-                                                                            console.log("Emit deletedMemberInChannelEvent");
-                                                                            socketio.getIO().sockets.to('US_'+result.users[j].id).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
-                                                                        }
                                                                     }
-
+                                                                    response.json(result);
                                                                 }
                                                             });
-
-                                                            // Si el usuario esta conectado, lo sacamos de la sala del canal
-                                                            var userSocket = socketio.getUserSocket(request.params.userid1);
-                                                            if (userSocket) {
-                                                                userSocket.leave('MSGCH_'+request.params.channelid);
-                                                                console.log ("========== SOCKET(deleteuserfromchannel):  "+userSocket.id+"(userid="+userSocket.userid+") join room MSGCH_"+request.params.channelid);
-                                                            }
-
-                                                            response.json(result);
                                                         }
                                                         else {
                                                             var err = {
                                                                 code   : 404,
                                                                 message: 'User not found'
                                                             };
-                                                            response.status(error.code).json({message: error.message});
+                                                            response.status(err.code).json({message: err.message});
                                                         }
                                                     }
                                                 });
@@ -371,48 +325,26 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                             }else{
 
                                 var Group = mongoose.model('Group');
-                                Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
+                                Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, grupo) {
                                     if (error){
                                         response.status(error.code).json({message: error.message});
                                     }
                                     else {
                                         socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedUserFromChannel', {groupid: request.params.groupid, channelid: request.params.channelid, user: vuelta});
-                                        //socketio.getIO().sockets.to('CH_'+request.params.channelid).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                         socketio.getIO().sockets.to('US_'+request.params.userid).emit('deletedPrivateChannel', result);
                                         var roomName = 'CH_'+request.params.channelid;
-                                        for (var j=0;j<result.users.length;j++){
-                                            var encontrado = false;
-                                            for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                if ( socketio.getIO().sockets.connected[socketid]) {
-                                                    var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                    if (connectedUser && connectedUser == result.users[j].id ) {
-                                                        encontrado = true;
-                                                    }
+                                        var conectedUsers = socketio.getUsersInSocket(roomName);
+                                        for (var i=0;i<grupo.users.length;i++){
+                                            if(grupo.users[i].id != request.params.userid){
+                                                if (conectedUsers.indexOf(grupo.users[i]) == -1){
+                                                    console.log("Emit deletedMemberInChannelEvent");
+                                                    socketio.getIO().sockets.to('US_'+result.users[i].id).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: grupo.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                 }
                                             }
-                                            if (encontrado == false&& result.users[j].id!=request.params.userid){
-                                                console.log("Emit deletedMemberInChannelEvent");
-                                                socketio.getIO().sockets.to('US_'+result.users[j].id).emit('deletedMemberInChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , userid: vuelta.id, username: vuelta.username, channelName: result.channelName, channelid: result.id, channelType: result.channelType});
-                                            }
                                         }
-
-
-
+                                        response.json(result);
                                     }
                                 });
-                                // Para todos los usuarios del canal, si esta conectado,
-                                // lo eliminamos de la sala del canal
-                                 console.log("canal eliminado. usuarios = ");
-                                 console.log(result.users);
-                                 for (var i=0;i<result.users.length;i++) {
-                                 var userSocket = socketio.getUserSocket(result.users[i].id);
-                                 if (userSocket) {
-                                 userSocket.leave('MSGCH_' + result.id);
-                                 console.log("========== SOCKET(deletechannelfromgroup):  " + userSocket.id + "(userid=" + userSocket.userid + ") leave room MSGCH_" + result.id);
-                                 }
-                                 }
-
-                                response.json(result);
                             }
                         });
                     }
@@ -458,25 +390,19 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
                                                     response.status(error.code).json({message: error.message});
                                                 }
                                                 else {
-                                                    var roomName = 'CH_'+result.id;
-                                                    for (var j=0;j<result.users.length;j++){
-                                                        var encontrado = false;
-                                                        for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                            if ( socketio.getIO().sockets.connected[socketid]) {
-                                                                var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                                if (connectedUser && connectedUser == result.users[j].id) {
-                                                                    encontrado = true;
-                                                                }
+                                                    var roomName = 'CH_'+request.params.channelid;
+                                                    var conectedUsers = socketio.getUsersInSocket(roomName);
+                                                    for (var i=0;i<result.users.length;i++){
+                                                        if(result.users[i].id != request.params.userid){
+                                                            if (conectedUsers.indexOf(result.users[i]) == -1){
+                                                                console.log("Emit editedChannelEvent");
+                                                                socketio.getIO().sockets.to('US_'+result.users[i].id).emit('editedChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                             }
                                                         }
-                                                        if (encontrado == false && result.users[j].id!=request.params.userid){
-                                                            console.log("Emit editedChannelEvent");
-                                                            socketio.getIO().sockets.to('US_'+result.users[j].id).emit('editedChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: result.channelName, channelid: result.id, channelType: result.channelType});
-                                                        }
                                                     }
+                                                    response.json(result);
                                                 }
                                             });
-                                            response.json(result);
                                         }
                                     });
                                 }
@@ -522,37 +448,18 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
                                             }
                                             else {
                                                 var roomName = 'CH_'+result.id;
-                                                for (var j=0;j<result.users.length;j++){
-                                                    var encontrado = false;
-                                                    for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
-                                                        if ( socketio.getIO().sockets.connected[socketid]) {
-                                                            var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
-                                                            if (connectedUser && connectedUser == result.users[j].id) {
-                                                                encontrado = true;
-                                                            }
+                                                var conectedUsers = socketio.getUsersInSocket(roomName);
+                                                for (var i=0;i<result.users.length;i++){
+                                                    if(result.users[i].id != request.params.userid){
+                                                        if (conectedUsers.indexOf(result.users[i]) == -1){
+                                                            console.log("Emit deletedChannelEvent");
+                                                            socketio.getIO().sockets.to('US_'+result.users[i].id).emit('deletedChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: result.channelName, channelid: result.id, channelType: result.channelType});
                                                         }
                                                     }
-                                                    if (encontrado == false && result.users[j].id!=request.params.userid){
-                                                        console.log("Emit deletedChannelEvent");
-                                                        socketio.getIO().sockets.to('US_'+result.users[j].id).emit('deletedChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: result.channelName, channelid: result.id, channelType: result.channelType});
-                                                    }
                                                 }
+                                                response.json(result);
                                             }
                                         });
-
-                                        // Para todos los usuarios del canal, si esta conectado,
-                                        // lo eliminamos de la sala del canal
-                                       /* console.log("canal eliminado. usuarios = ");
-                                        console.log(result.users);
-                                        for (var i=0;i<result.users.length;i++) {
-                                            var userSocket = socketio.getUserSocket(result.users[i].id);
-                                            if (userSocket) {
-                                                userSocket.leave('MSGCH_' + result.id);
-                                                console.log("========== SOCKET(deletechannelfromgroup):  " + userSocket.id + "(userid=" + userSocket.userid + ") leave room MSGCH_" + result.id);
-                                            }
-                                        }*/
-
-                                        response.json(result);
                                     }
                                 });
                             }
