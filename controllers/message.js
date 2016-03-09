@@ -1,6 +1,9 @@
 'use strict';
 
 var Auth  = require('../helpers/authentication');
+var thumbnail  = require('../helpers/getThumbnail');
+var http = require('http');
+
 var Message  = require('../models/message');
 var User  = require('../models/user');
 var QuestionService  = require('../services/question');
@@ -13,6 +16,9 @@ var mongoose = require('mongoose');
 exports.newmessage = function newmessage (request, response) {
 
     // Verificamos si el token es valido y corresponde a un usuario
+    console.log("esto vale request");
+    console.log(request.body);
+
     Auth(request, response).then(function(error, result) {
         if (error) {
             response.status(error.code).json({message: error.message});
@@ -33,11 +39,35 @@ exports.newmessage = function newmessage (request, response) {
                         else {
                             data.channelid = request.params.channelid;
                             data.userid = request.params.userid;
+
+                            console.log("esto le llega al servidor");
+                            console.log("************************");
+                            console.log(data.text);
+
+                            /* aqui podríamos mirar si es URL, coger los metadatos y guardarlo
+                            * va a tardar, de forma que quizas sea mejor hacer 1 path */
+
+
+
+
                             Message.newMessage(data).then(function newmessage(error, result) {
                                     if (error) {
                                         response.status(error.code).json({message: error.message});
                                     }
                                     else {
+                                        console.log("esto vale result");
+                                        console.log(result);
+
+
+                                        if(result.messageType == 'URL'){
+
+                                            /* lo modificamos con los metadatos y lo mandamos con ellos */
+                                        }
+
+
+
+
+
                                         // Notificamos al canal que hay nuevo mensaje
                                         //socketio.getIO().sockets.to('MSGCH_' + data.channelid).emit('newMessage', {groupid: request.params.groupid, message: result});
                                         socketio.getIO().sockets.to('CH_' + data.channelid).emit('newMessage', {groupid: request.params.groupid, message: result});
@@ -214,7 +244,109 @@ exports.getmessages = function getmessages (request, response) {
                                 response.status(error.code).json({message: error.message});
                             }
                             else {
+                                /* para cada mensaje de tipo 'TEXT' mirar si hay 1 url
+                                   si es asi, mandamos dentro del mensaje el html asociado
+                                   y lo separamos en el lado cliente
+                                */
+
+                                /*
+                                thumbnail(result).then(function(error, result2) {
+                                    if (error) {
+                                        response.status(error.code).json({message: error.message});
+                                    }
+                                    else {
+                                        /***********entro**************
+                                        console.log("******entro en else thumbanail********");
+
+                                        response.json(result);
+                                    }
+
+                                });
+
+                                //response.json(result);
+                                */
+
+
+/*
+                                var options = {
+                                    host: 'www.google.com',
+                                    port: 80,
+                                    path: '/index.html'
+                                };
+
+                                http.get(options, function(res) {
+                                    console.log("Got response: " + res.statusCode);
+                                    console.log("*****entro y tengo***********");
+                                    console.log(res);
+
+                                }).on('error', function(e) {
+                                    console.log("Got error: " + e.message);
+
+                                });
+
+
+*/
+
+                                var query = {
+                                    "url": "https://www.youtube.com/watch?v=jofNR_WkoCE",
+                                    "key": config.embedlyApiKey
+                                }
+
+
+/*
+
+                                var options = {
+                                    host: 'http://api.embedly.com',
+                                    path: '/1/oembed?url='+query.url+'&key=:'+query.key,
+                                    port: 80,
+                                    headers: {'user-agent': ''}
+
+
+                                };
+
+
+                            */
+                                var options = {
+                                    host: 'http://api.embedly.com/1/oembed?url='+query.url+'&key=:'+query.key
+
+
+                                };
+
+
+
+                                http.get(options, function(res) {
+                                    console.log("Got response: " + res.statusCode);
+                                    console.log("*****entro y tengo***********");
+                                    console.log(res);
+
+                                }).on('error', function(e) {
+                                    console.log("Got error: " + e.message);
+                                    console.log(e);
+
+                                });
+
+                                /*http.get(options, function(req, res) {
+
+                                    var url = 'https://www.youtube.com/watch?v=jofNR_WkoCE';
+                                    var key = ':' + config.embedlyApiKey;
+
+
+                                    res.send(url + ' ' + key);
+                                });
+                                */
+
+                               /* var p = $.getJSON('https://api.embedly.com/1/oembed' + $.param({
+                                        url: 'https://www.youtube.com/watch?v=jofNR_WkoCE',
+                                        key: ":"+config.embedlyApiKey
+                                    }));
+                                */
+
+
                                 response.json(result);
+
+
+
+
                             }
                         });
                     }
@@ -373,6 +505,12 @@ exports.publishQuestion = function publishQuestion (request, response) {
         }
     });
 };
+
+
+
+
+
+
 
 function checkNewMessageInput (data)
 {

@@ -26,7 +26,7 @@ var messageSchema   = new Schema({
 messageSchema.plugin(mongoosastic);
 
 messageSchema.path('messageType').validate(function(messageType){
-    var validTypes = ['FILE', 'TEXT', 'QUESTION'];
+    var validTypes = ['FILE', 'TEXT', 'QUESTION', 'URL'];
     var strValidTypes = "";
 
     var numTypes = validTypes.length;
@@ -73,6 +73,14 @@ messageSchema.statics.newMessage = function (data) {
             }
             data.content = { text: data.text}
         }
+        else if (data.messageType === 'URL') {
+            if (!data.text) {
+                error = { code: 400, message: 'text required.' };
+                return promise.done(error, null);
+            }
+            data.content = { text: data.text}
+        }
+
         else if (data.messageType === 'QUESTION') {
             if (!data.title) {
                 error = { code: 400, message: 'title required.' };
@@ -86,7 +94,9 @@ messageSchema.statics.newMessage = function (data) {
         }
 
         var Message = mongoose.model('Message', messageSchema);
+
         Message = new Message(data);
+
         Message.save(function (error, message) {
             if(error){
                 var messageError = '';

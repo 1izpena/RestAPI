@@ -9,6 +9,9 @@ module.exports = {
     'port': 3200,
     'internalUserMail': 'internalUser@localhost',
 
+    //embedly-api key
+    'embedlyApiKey':'64367659fc864cd6adc74bb031611c68',
+
     // AWS - S3 config
     'bucketName': 'dessi',
     'accessKeyId': 'AKIAIVCRPQRMVVLT5PLQ',

@@ -66,11 +66,11 @@ app.use(cookieParser());
 //Handler para peticiones de otros dominios
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
 
     res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token");
+    res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token, Origin, X-Requested-With, Accept");
 
     /* res.header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
      res.header('Access-Control-Allow-Headers: Content-Type, x-xsrf-token');
@@ -79,6 +79,9 @@ app.use(function(req, res, next) {
 
     next();
 });
+
+
+
 
 // De momento no enviamos estaticos a los usuarios
 //app.use(express.static(path.join(__dirname, 'public')));
@@ -116,6 +119,8 @@ swagger.setApiInfo({
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/dist/index.html');
 });
+
+
 
 // Set api-doc path
 swagger.configureSwaggerPaths('', 'api-docs', '');

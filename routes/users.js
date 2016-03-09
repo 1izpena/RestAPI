@@ -6,6 +6,9 @@ var channel = require('../controllers/channel');
 var message = require('../controllers/message');
 var elasticsearch = require('../controllers/elasticsearch');
 
+
+
+
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
     // Aqui podemos poner lo que queramos para tratar las rutas inicialmente
@@ -22,6 +25,11 @@ router.use(function(req, res, next) {
 
 router.route('/').get(session.userlist);
 
+/*
+router.route('/get_meta').post(session.userplaylist);
+*/
+
+
 /* GET selected user's public information */
 router.route('/:userid').get(session.publicprofile);
 
@@ -30,6 +38,11 @@ router.route('/:userid/profile').get(session.publicprofile);
 
 /* GET selected user's private information */
 router.route('/:userid/privateprofile').get(session.privateprofile);
+
+
+/* GET selected user's private information */
+router.route('/:userid/get_meta').post(session.userplaylist);
+
 
 /* GET Devuelve lista de grupos del usuario */
 router.route('/:userid/chat').get(group.getuserchatinfo);

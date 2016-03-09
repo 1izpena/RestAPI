@@ -8,6 +8,7 @@ module.exports = function(request, response, client) {
       body: {
         query: {
                     query_string: {
+
                     	query: "(content.title:"+request.body.key+
                     		" OR content.text:"+request.body.key+
                     		//" OR content.answers._user:"+request.body.key+
@@ -18,7 +19,8 @@ module.exports = function(request, response, client) {
                     }
 
                     	
-                }
+                },
+          sort: {datetime: {"order":"desc"}}
 
       		}
            

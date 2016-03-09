@@ -15,6 +15,12 @@ router.get('/', function(req, res, next) {
      res.json({ message: 'Accediendo a foro' });
 });
 
+
+
+
+
+
+
 /*POST Crea una pregunta nueva*/
 router.route('/question').post(question.newquestion);
 
