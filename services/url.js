@@ -22,6 +22,8 @@ exports.getMetaTags = function getMetaTags (url) {
         if (error){
             console.log("entro en error");
             console.log(error);
+            /* si la primera libreria no provee a esa url
+            * usamos la segunda,que nos da metatags */
 
             client.fetch();
         }
@@ -38,8 +40,7 @@ exports.getMetaTags = function getMetaTags (url) {
             else {
                 console.log("esto vale oembed: video,audio, rich..");
                 console.log(result);
-                /*res.json(result);*/
-                //return result;
+
                 return promise.done(null, result);
 
             }
@@ -62,17 +63,17 @@ exports.getMetaTags = function getMetaTags (url) {
         };
 
 
-        //res.json(metatags);
-        //return result;
+
         return promise.done(null, metatags);
 
 
     });
 
     client.on("error", function(err){
+        console.log("esto vale error en url.js con la libreria metainspector");
+        /* el error que devuelve es nulo */
         console.log(err);
-        /*res.status(404).json({message: err.message});*/
-        //return err;
+
         return promise.done(err, null);
     });
 

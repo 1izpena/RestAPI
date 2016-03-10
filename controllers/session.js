@@ -8,8 +8,6 @@ var LoginErrorsHandler = require('../helpers/loginErrorsHandler');
   var URLService = require('../services/url');
 
 
- /* var oembed = require('oembed-auto');
-  var MetaInspector = require('node-metainspector');*/
 
 
 
@@ -139,10 +137,6 @@ exports.userlist = function userlist (request, response) {
                           }
                       });
 
-
-
-
-
               }
 
 
@@ -150,94 +144,6 @@ exports.userlist = function userlist (request, response) {
       });
 
   };
-
-
-
-  /*
-
-
-   exports.userplaylist = function userplaylist (req, res) {
-
-   console.log("entro en userplaylist");
-   console.log("esto vale url");
-   console.log(req.body.data);
-
-   Auth(req, res).then(function(error, result) {
-   if (error) {
-   response.status(error.code).json({message: error.message});
-
-   } else {
-
-   var url = req.body.data;
-
-
-   var client = new MetaInspector(url, { timeout: 5000 });
-
-   oembed(url, function(error, result) {
-
-   if (error){
-   console.log("entro en error");
-   console.log(error);
-
-   client.fetch();
-   }
-
-   else{
-   console.log("entro en NO error");
-   console.log(result);
-
-
-   /* si la result es de tipo link, hacemos con la otra librería *
-  if(result.type == 'link' || typeof (result.type) == 'undefined'){
-      client.fetch();
-  }
-  else {
-      console.log("esto vale oembed: video,audio, rich..");
-      console.log(result);
-      res.json(result);
-
-  }
-
-
-  }
-
-  });
-
-
-  client.on("fetch", function(){
-
-      var metatags = {
-          host: client.host,
-          title: client.title,
-          description: client.description,
-          author: client.author,
-          keywords: client.keywords,
-          image: client.image
-      };
-
-
-      res.json(metatags);
-
-
-  });
-
-  client.on("error", function(err){
-      console.log(err);
-      res.status(404).json({message: err.message});
-  });
-
-
-  }/* end else if(error) *
-  });
-
-  };
-
-
-
-
-   */
-
-
 
 
 

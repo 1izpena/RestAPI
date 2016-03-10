@@ -25,11 +25,6 @@ router.use(function(req, res, next) {
 
 router.route('/').get(session.userlist);
 
-/*
-router.route('/get_meta').post(session.userplaylist);
-*/
-
-
 /* GET selected user's public information */
 router.route('/:userid').get(session.publicprofile);
 
@@ -40,7 +35,7 @@ router.route('/:userid/profile').get(session.publicprofile);
 router.route('/:userid/privateprofile').get(session.privateprofile);
 
 
-/* GET selected user's private information */
+/* POST metatags of url which user sends */
 router.route('/:userid/get_meta').post(session.userplaylist);
 
 
