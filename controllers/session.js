@@ -128,7 +128,7 @@ exports.userlist = function userlist (request, response) {
                   URLService.getMetaTags(url)
                       .then(function (error,result) {
                           if (error) {
-                              response.status(404).json(error);
+                              res.status(404).json(error);
                           }
                           else {
                               console.log("esto me devuelve el servicio url");

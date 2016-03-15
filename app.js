@@ -126,11 +126,16 @@ app.get('/', function (req, res) {
 swagger.configureSwaggerPaths('', 'api-docs', '');
 
 // Configure the API domain
-var domain = 'localhost';
+//var domain = 'localhost';
+//var domain = '192.168.0.15';
+var domain = '192.168.0.103';
+
 if(argv.domain !== undefined)
     domain = argv.domain;
-else
+else{
     console.log('No --domain=xxx specified, taking default hostname "localhost".');
+    console.log('Conect with domain:'+domain);
+}
 
 // Configure the API port
 /*var port = 8080;
