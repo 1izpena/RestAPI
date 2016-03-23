@@ -15,7 +15,7 @@ var mongoose = require('mongoose');
 exports.newmessage = function newmessage (request, response) {
 
     // Verificamos si el token es valido y corresponde a un usuario
-    console.log("esto vale request");
+    console.log("esto vale request en newmessage");
     console.log(request.body);
 
     Auth(request, response).then(function(error, result) {

@@ -16,6 +16,7 @@ var messageSchema   = new Schema({
         title: String,
         text: String,
         filename: String,
+        //fileType: String,
         answers: [{
             _user: {type: Schema.ObjectId, ref: 'User'},
             datetime: { type: Date, required: true },
@@ -61,7 +62,15 @@ messageSchema.statics.newMessage = function (data) {
                 error = { code: 400, message: 'filename required.' };
                 return promise.done(error, null);
             }
-            data.content = { filename: data.filename};
+            /*
+             if (!data.fileType) {
+             error = { code: 400, message: 'fileType required.' };
+             return promise.done(error, null);
+             }
+
+
+             */
+            data.content = { filename: data.filename /*, fileType: data.fileType*/};
             if (data.comment) {
                 data.content.text = data.comment;
             }
@@ -317,6 +326,7 @@ messageSchema.methods.parse = function parse () {
 
     if (message.messageType == 'FILE') {
         parseMessage.filename = message.content.filename;
+        /*parseMessage.fileType = message.content.fileType;*/
     }
 
     if (message.messageType == 'QUESTION') {

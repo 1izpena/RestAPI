@@ -126,9 +126,9 @@ app.get('/', function (req, res) {
 swagger.configureSwaggerPaths('', 'api-docs', '');
 
 // Configure the API domain
-//var domain = 'localhost';
+var domain = 'localhost';
 //var domain = '192.168.0.15';
-var domain = '192.168.0.103';
+//var domain = '192.168.0.105';
 
 if(argv.domain !== undefined)
     domain = argv.domain;
