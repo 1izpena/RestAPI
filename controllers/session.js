@@ -31,6 +31,67 @@ var GitHubApi = require("github");
 
 
 
+  exports.pruebaGithub3 = function pruebaGithub3 (request, response) {
+
+      var repo = "RestAPI";
+      var user = "1izpena";
+      var github = new GitHubApi({
+          // required
+          version: "3.0.0",
+          // optional
+          debug: true,
+          protocol: "https",
+          host: "api.github.com", // should be api.github.com for GitHub
+          timeout: 5000,
+          headers: {
+              "user-agent": "Meanstack" // GitHub is happy with a unique user agent
+          }
+      });
+
+      github.authenticate({
+          type: "token",
+          token: config.githubtokenrestapi
+      });
+
+
+      github.repos.getHooks({
+
+          user: user,
+          repo: repo,
+          headers: {
+              "X-GitHub-OTP": "two-factor-code"
+          }
+      }, function(err, res) {
+          if (err) {
+              console.log("error al get hook");
+              console.log(err);
+              response.status(404).json(err);
+
+          }
+          else {
+              console.log("esto vale res en get hook");
+              console.log(res);
+
+
+
+
+
+
+              response.json({message: 'Funciona3.'});
+
+
+
+              /* cuando esto funcione quiero hacer 1 get del hooks haber si lo ha creado */
+
+
+               }
+
+               });
+
+
+  }
+
+
   exports.pruebaGithub2 = function pruebaGithub2 (request, response) {
 
 
@@ -83,17 +144,16 @@ var GitHubApi = require("github");
         var repo = "RestAPI";
         var user = "1izpena";
 
-      /*
+
       github.repos.createHook({
 
           user: user,
           repo: repo,
           name: "web",
           config: {
-              url: "http://9c0cbf31.ngrok.io/api/v1/callback",
+              url: "http://a95bf9e1.ngrok.io/api/v1/callback",
               content_type: "json"
           },
-          /* secret: res.token,*
            events: ["*"],
            active:true,
 
@@ -141,7 +201,7 @@ var GitHubApi = require("github");
                 etag: '"6e12440237398754c7b3b6965a5c8bac"',
                 status: '201 Created' } }
 
-           ************************
+           ************************/
 
 
 
@@ -155,6 +215,8 @@ var GitHubApi = require("github");
           else {
               console.log("esto vale resen create hook");
               console.log(res);
+          }
+      });
 
               /*
               github.repos.getHooks({
@@ -219,7 +281,7 @@ var GitHubApi = require("github");
       });
       */
 
-
+/*
       github.repos.getHooks({
 
           user: user,
@@ -244,7 +306,7 @@ var GitHubApi = require("github");
           }
       });
 
-
+*/
 
 
               /* intentamos acceder al hook *
@@ -320,6 +382,9 @@ exports.pruebaGithub = function pruebaGithub (request, response) {
     });
 
 
+
+
+    /* tiene que ser del usuario de meanstack, para que me de permisos */
     github.authenticate({
         type: "basic",
         username: config.usernamegithub,
@@ -327,14 +392,6 @@ exports.pruebaGithub = function pruebaGithub (request, response) {
     });
 
 
-
-    /**
-    github.authenticate({
-        type: "oauth",
-        key: config.CLIENT_ID,
-        secret: config.CLIENT_SECRET
-    });
-**/
 
     github.authorization.create({
         scopes: ["user", "public_repo", "repo", "repo:status", "gist", "write:repo_hook"],
@@ -355,17 +412,8 @@ exports.pruebaGithub = function pruebaGithub (request, response) {
         else if (res.token) {
             console.log("NO error al en authorizacion al repo?? hook");
             console.log(res.token);
-            response.json(res.token.parse());
+            response.json(res.token);
 
-            /* ahora se autentifica asi
-            *
-            * github.authenticate({
-             type: "token",
-             token: token
-             });
-            *
-            *
-            * */
 
         }
         else{
@@ -376,9 +424,6 @@ exports.pruebaGithub = function pruebaGithub (request, response) {
             response.status(404).json({message: 'Error in authorized.'});
 
 
-            /*ya tengo el token */
-            /* 32631cf7a674463b04433d496d2a04933caa2eb8
-             */
 
 
         }
@@ -500,33 +545,10 @@ exports.pruebaGithub = function pruebaGithub (request, response) {
         }
     });
 
-/*
+*/
 
 
 
-
-   /* Auth(request, response).then(function(error, result) {
-        if (error) {
-            response.status(error.code).json({message: error.message});
-
-        } else {
-
-            var limit = request.query.limit;
-            var page = request.query.page;
-
-
-            var filter = {active: true};
-            User.search(filter, limit, page).then(function(error, user) {
-                if (user === null) {
-                    response.status(400).json({message: 'User not found.'});
-
-                } else {
-
-                    response.json(user);
-                }
-            })
-        }
-    })*/
 };
 
 

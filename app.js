@@ -73,7 +73,7 @@ app.use(function(req, res, next) {
     /* new PATH */
     res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, PATH, OPTIONS");
     /* new X-GitHub-OTP*/
-    res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token, Origin, X-Requested-With, Accept, X-GitHub-OTP");
+    res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token, Origin, X-Requested-With, Accept, X-GitHub-OTP, X-GitHub-Event, X-GitHub-Delivery, X-Hub-Signature");
 
     /* res.header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
      res.header('Access-Control-Allow-Headers: Content-Type, x-xsrf-token');
@@ -186,8 +186,7 @@ app.get('/', function (req, res) {
 swagger.configureSwaggerPaths('', 'api-docs', '');
 
 // Configure the API domain
-
-var domain = '192.168.1.33';
+var domain = config.domain;
 
 
 //var domain = 'localhost';
