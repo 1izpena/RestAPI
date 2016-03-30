@@ -15,6 +15,7 @@
     "ejs": "~2.3.3",
     "elasticsearch": "^10.1.2",
     "express": "~4.13.1",
+    "github": "^0.2.4",
     "hope": "^1.0.3",
     "jsonwebtoken": "^5.0.4",
     "kerberos": "0.0.17",

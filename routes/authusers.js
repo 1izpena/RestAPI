@@ -38,5 +38,8 @@ router.route('/social')
     .post(session.social);
 
 
+/******** new *********/
+router.route('/pruebaGithub')
+    .get(session.pruebaGithub2);
 
 module.exports = router;

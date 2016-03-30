@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var User   = require('./models/user'); // Modelo user
 var config = require('./config'); // archivo de configuración
+
 //swagger - inicio
 var argv = require('minimist')(process.argv.slice(2));
 var swagger = require("swagger-node-express");
@@ -69,8 +70,10 @@ app.use(function(req, res, next) {
    // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
 
-    res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token, Origin, X-Requested-With, Accept");
+    /* new PATH */
+    res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, PATH, OPTIONS");
+    /* new X-GitHub-OTP*/
+    res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token, Origin, X-Requested-With, Accept, X-GitHub-OTP");
 
     /* res.header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
      res.header('Access-Control-Allow-Headers: Content-Type, x-xsrf-token');
@@ -98,12 +101,69 @@ var forum = require('./routes/foro.js');
 //Elastic
 var elasticsearch = require('./routes/elasticsearch');
 
+
+var github = require('./routes/github');
+
+/*********** new **********/
+
+
+
+    /*
+var GithubWebHook = require('express-github-webhook');
+var webhookHandler = GithubWebHook({ path: '/api/v1/callback', secret: config.CLIENT_SECRET });
+
+*/
+
 /******* RUTAS DEL API *******/
 app.use('/api/v1/auth', authusers);
 app.use('/api/v1/file', file);
 app.use('/api/v1/users', users);
 app.use('/api/v1/forum', forum);
 app.use('/api/v1/', elasticsearch);
+
+
+
+
+app.use('/api/v1/callback', github);
+
+/************* new *****************/
+/*
+app.use('/api/v1/callback', webhookHandler);
+
+
+
+*/
+
+/*
+app.use(webhookHandler); // use our middleware
+
+// Now could handle following events
+webhookHandler.on('*', function (event, repo, data) {
+    console.log("entro en encontrar el evento");
+});
+
+/*
+webhookHandler.on('event', function (repo, data) {
+    console.log("entro en encontrar el evento");
+});
+*
+
+webhookHandler.on('push', function (repo, data) {
+    console.log("entro en encontrar el evento");
+});
+
+
+webhookHandler.on('reponame', function (event, data) {
+    console.log("entro en encontrar el evento");
+});
+
+webhookHandler.on('error', function (err, req, res) {
+    console.log("entro en error");
+});
+
+*/
+
+
 
 
 //swagger - inicio
@@ -126,7 +186,11 @@ app.get('/', function (req, res) {
 swagger.configureSwaggerPaths('', 'api-docs', '');
 
 // Configure the API domain
-var domain = 'localhost';
+
+var domain = '192.168.1.33';
+
+
+//var domain = 'localhost';
 //var domain = '192.168.0.15';
 //var domain = '192.168.0.105';
 
