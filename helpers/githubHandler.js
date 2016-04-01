@@ -943,12 +943,10 @@ function getFieldsEvents (event, body) {
              **/
 
             if(body.commits !== undefined && body.commits !== null){
-                if(body.commits.length > 0){
 
-                    obj.commits = getFieldsCommitsArray(body.commits);
+                obj.commits = getFieldsCommitsArray(body.commits);
 
 
-                }
 
             }
 
