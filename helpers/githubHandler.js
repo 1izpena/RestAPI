@@ -292,7 +292,7 @@ function getFieldsCommitsArray (commits) {
 
     /* esto si que hay que convertirlo ha string */
     /* si solo es 1 commit hay que mirar que pasa */
-    var commitsTemps = {};
+    var commitsTemps = [];
     var objTemp = {};
 
     for(var i = 0; i < commits.length && i<5; i++){
