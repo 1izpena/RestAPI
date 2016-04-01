@@ -67,12 +67,14 @@ exports.callbackPOST = function callbackPOST (request, response) {
                 var message4= JSON.parse(obj.message);
                 console.log(message4.repository.name);
 
-
-
-
-
-
-
+                if(message4.event == "push"){
+                    console.log("Esto vale commits");
+                    console.log("como json");
+                    console.log(message4.commits)
+                    console.log("como string");
+                    console.log(JSON.stringify(message4.commits));
+                }
+            
 
 
                 //console.log("esto vale el objeto parseado en controller/github");
