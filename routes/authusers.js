@@ -45,6 +45,7 @@ router.route('/pruebaGithub')
 
     */
 
+/* igual cambiar el controller */
 router.route('/pruebaGithub')
     .get(session.pruebaGithub3);
 

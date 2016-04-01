@@ -16,18 +16,7 @@ var GitHubApi = require("github");
 
 
 
-  exports.callback2 = function callback2 (request, response) {
-      console.log("esto valeresponseee callback2");
-        console.log(response);
-      response.json({message: 'Fu4ciona2.'});
-  };
 
-  exports.callback3 = function callback3 (request, response) {
-      console.log("esto valeresponseee callback3");
-      console.log(response);
-
-      response.json({message: 'Fu4ciona3****.'});
-  };
 
 
 

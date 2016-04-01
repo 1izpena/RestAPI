@@ -75,10 +75,6 @@ app.use(function(req, res, next) {
     /* new X-GitHub-OTP*/
     res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token, Origin, X-Requested-With, Accept, X-GitHub-OTP, X-GitHub-Event, X-GitHub-Delivery, X-Hub-Signature");
 
-    /* res.header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
-     res.header('Access-Control-Allow-Headers: Content-Type, x-xsrf-token');
-     res.header('Access-Control-Allow-Headers: Content-Type, x-access-token');*/
-
 
     next();
 });
@@ -122,46 +118,14 @@ app.use('/api/v1/forum', forum);
 app.use('/api/v1/', elasticsearch);
 
 
-
-
+/************* new *****************/
 app.use('/api/v1/callback', github);
 
-/************* new *****************/
-/*
-app.use('/api/v1/callback', webhookHandler);
+/* ahi que mirar donde poner las validaciones para crear el canal de github */
+/* ahora en session y auth*/
 
 
 
-*/
-
-/*
-app.use(webhookHandler); // use our middleware
-
-// Now could handle following events
-webhookHandler.on('*', function (event, repo, data) {
-    console.log("entro en encontrar el evento");
-});
-
-/*
-webhookHandler.on('event', function (repo, data) {
-    console.log("entro en encontrar el evento");
-});
-*
-
-webhookHandler.on('push', function (repo, data) {
-    console.log("entro en encontrar el evento");
-});
-
-
-webhookHandler.on('reponame', function (event, data) {
-    console.log("entro en encontrar el evento");
-});
-
-webhookHandler.on('error', function (err, req, res) {
-    console.log("entro en error");
-});
-
-*/
 
 
 

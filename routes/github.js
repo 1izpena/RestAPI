@@ -8,18 +8,13 @@ var router = express.Router();
 
 var config = require('../config'); // archivo de configuración
 
-var session = require('../controllers/session');
-
-
 /*
+var session = require('../controllers/session');*/
 
-var githubMiddleware = require('github-webhook-middleware')({
-    secret: config.CLIENT_SECRET
-});
+var github = require('../controllers/github');
 
 
-/*var GithubWebHook = require('express-github-webhook');
-*/
+
 
 //Handler inicial para las rutas
 router.use(function(req, res, next) {
@@ -29,8 +24,8 @@ router.use(function(req, res, next) {
 });
 
 
-router.route('/').post(session.callback2);
-router.route('/').get(session.callback3);
+router.route('/').post(github.callbackPOST);
+router.route('/').get(github.callbackGET);
 
 /*router.route('/').get(session.userlist);
 router.post('/', githubMiddleware, function(req, res) {
