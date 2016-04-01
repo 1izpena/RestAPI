@@ -381,7 +381,16 @@ exports.pruebaGithub = function pruebaGithub (request, response) {
     });
 
 
+/*
+    http.get(options, function(data) {
+        res.render('template', data);
+    });
 
+
+    */
+
+
+    /* meter esto :: admin:org_hook*/
     github.authorization.create({
         scopes: ["user", "public_repo", "repo", "repo:status", "gist", "write:repo_hook"],
         note: "what this auth is for",
@@ -407,7 +416,7 @@ exports.pruebaGithub = function pruebaGithub (request, response) {
         }
         else{
 
-
+                /* este token hay que guardarlo en la bd, en el canal */
                 console.log("hay erroe en authorization create en response ");
                 console.log(res);
             response.status(404).json({message: 'Error in authorized.'});

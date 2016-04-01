@@ -98,11 +98,12 @@ var forum = require('./routes/foro.js');
 var elasticsearch = require('./routes/elasticsearch');
 
 
-var github = require('./routes/github');
+
 
 /*********** new **********/
 
-
+var github = require('./routes/github');
+var githubapi = require('./routes/githubapi');
 
     /*
 var GithubWebHook = require('express-github-webhook');
@@ -120,6 +121,11 @@ app.use('/api/v1/', elasticsearch);
 
 /************* new *****************/
 app.use('/api/v1/callback', github);
+
+app.use('/api/v1/githubapi', githubapi);
+
+
+
 
 /* ahi que mirar donde poner las validaciones para crear el canal de github */
 /* ahora en session y auth*/
