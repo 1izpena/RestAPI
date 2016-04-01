@@ -66,12 +66,12 @@ exports.callbackPOST = function callbackPOST (request, response) {
                 if(message4.event == "push"){
                     console.log("Esto vale commits");
                     console.log("como json");
-                    console.log(message4.commits)
+                    console.log(message4)
                     console.log("como string");
                     console.log(JSON.stringify(message4));
                 }
 
-                
+
 
             }
 
