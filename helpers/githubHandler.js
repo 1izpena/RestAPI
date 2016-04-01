@@ -925,13 +925,7 @@ function getFieldsEvents (event, body) {
             if(body.ref !== undefined && body.ref !== null){
                 /* aqui podríamos paresear, pero quiero mirar como sale */
                 /*obj.ref = body.ref;*/
-                var temp = body.ref.split("/");
-                if(temp.length > 0){
-                    obj.ref = temp[length-1];
-                    console.log("esto vale la rama");
-                    console.log(obj.ref);
-                }
-
+                obj.ref = body.ref;
 
             }
 
