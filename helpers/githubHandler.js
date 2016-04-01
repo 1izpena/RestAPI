@@ -41,13 +41,7 @@ function getFieldsRepositoryForPush (repository) {
 }
 
 
-
-
-
-/*****************************/
 function getFieldsRepository (repository) {
-
-
 
     if(repository.id !== undefined &&
         repository.id !== null &&
@@ -354,179 +348,6 @@ function getFieldsCommitsArray (commits) {
 
 
 
-
-
-
-
-/**************************************/
-function getFieldsCommits (commits) {
-
-    /* esto si que hay que convertirlo ha string */
-    /* si solo es 1 commit hay que mirar que pasa */
-    var commitsTemps = "";
-    if(commits.length == 1){
-
-
-        commitsTemps = "commits: {";
-
-        for(var i = 0; i < commits.length; i++){
-
-                console.log("esto vale commits[0]");
-                console.log(JSON.stringify(commits[i]));
-                if(commits[i].id !== undefined && commits[i].id !== null){
-                    commitsTemps = commitsTemps+ "id: " + commits[i].id;
-                }
-                else {
-                    return null
-                }
-
-            }
-
-            if(commits[i].url !== undefined && commits[i].url !== null){
-                commitsTemps = commitsTemps+ ",url:" + commits[i].url;
-            }
-            else {
-                return null
-            }
-            if(commits[i].author !== undefined && commits[i].author !== null){
-                if(commits[i].author.username !== undefined && commits[i].author.username !== null){
-                    commitsTemps = commitsTemps+ ",author:" + commits[i].author.username;
-                }
-                else {
-                    return null
-                }
-
-            }
-            else {
-                return null
-            }
-            if(commits[i].message !== undefined && commits[i].message !== null){
-                commitsTemps = commitsTemps+ ",message:" + commits[i].message + "}";
-
-            }
-
-    }
-    /* si es array tiene mas de 1 commit */
-    else{
-        commitsTemps = "commits: [{";
-
-        for(var i = 0; i < commits.length; i++){
-
-            if(i> 0){
-                if(commits[i].id !== undefined && commits[i].id !== null){
-                    commitsTemps = commitsTemps+ ",{id: " + commits[i].id;
-                }
-                else {
-                    return null
-                }
-
-            }
-            else{
-                if(commits[i].id !== undefined && commits[i].id !== null){
-                    commitsTemps = commitsTemps+ "id: " + commits[i].id;
-                }
-                else {
-                    return null
-                }
-
-            }
-
-            if(commits[i].url !== undefined && commits[i].url !== null){
-                commitsTemps = commitsTemps+ ",url:" + commits[i].url;
-            }
-            else {
-                return null
-            }
-            if(commits[i].author !== undefined && commits[i].author !== null){
-                if(commits[i].author.username !== undefined && commits[i].author.username !== null){
-                    commitsTemps = commitsTemps+ ",author:" + commits[i].author.username;
-                }
-                else {
-                    return null
-                }
-
-            }
-            else {
-                return null
-            }
-            if(commits[i].message !== undefined && commits[i].message !== null){
-                commitsTemps = commitsTemps+ ",message:" + commits[i].message;
-
-            }
-
-
-            if(i == commits.length-1){
-                commitsTemps = commitsTemps + "}]"
-
-            }
-            else{
-                commitsTemps = commitsTemps + "}"
-
-
-            }
-
-
-        }
-
-
-    }
-    return commitsTemps;
-
-
-
-
-
-
-}
-
-
-
-
-/******* Quitar *********/
-
-function getFieldsHeadCommit (headcommit) {
-
-    /* creo que asi es undefined */
-    var headcommitTemp = {};
-
-    if(headcommit.id !== undefined &&
-        headcommit.id !== null &&
-        headcommit.url !== undefined &&
-        headcommit.url !== null){
-
-
-        headcommitTemp.id = headcommit.id;
-        headcommitTemp.url = headcommit.url;
-
-
-
-        if(headcommit.message !== undefined && headcommit.message !== null){
-            headcommitTemp.message = headcommit.message;
-
-        }
-
-        if(headcommit.author !== undefined && headcommit.author !== null){
-            if(headcommit.author.username !== undefined && headcommit.author.username !== null){
-                headcommitTemp.author.username = headcommit.author.username;
-
-            }
-
-        }
-
-
-        return headcommitTemp;
-
-
-    }
-    else{
-        return null;
-    }
-
-}
-
-
-
-
 function getFieldsCommentCommit (comment) {
 
     /* creo que asi es undefined */
@@ -584,109 +405,6 @@ function getFieldsSender (sender) {
 }
 
 
-
-/* issues*/
-function createResponseIssues (obj) {
-    var obj2 = {};
-
-    var mensaje;
-    var state = "";
-    var milestone = "";
-
-    if(obj.issue.state !== undefined){
-        state = "<state>" + obj.issue.state;
-
-    }
-    if(obj.issue.milestone !== undefined){
-        milestone = "<br>#" +
-            obj.milestone.number + "Milestone: " + obj.milestone.title;
-
-    }
-
-
-
-    if(obj.action == "assigned"){
-        /* cambiamos el mensaje poniendo assignee */
-
-
-
-        mensaje=  obj.assignee.html_url +
-                "<url>"+ obj.sender.html_url +
-                "<url>"+ obj.issue.html_url +
-                "<url>[" + obj.repository.name + ":" +
-
-                obj.repository.default_branch + "] Issue "+ obj.action +
-                " to <a>" + obj.assignee.login +
-                "<a> (by<a>" + obj.sender.login + "<a>)" +
-                "<br><a>#" + obj.issue.number + " " + obj.issue.title +
-                " <a> " + obj.issue.body + milestone +
-                state;
-
-
-
-
-
-    }
-    else{
-
-            mensaje= obj.sender.html_url +
-                "<url>"+ obj.issue.html_url +
-                "<url>[" + obj.repository.name + ":" +
-                obj.repository.default_branch + "] Issue "+ obj.action +
-                " by <a>" + obj.sender.login + "<a>" +
-                "<br><a>#" + obj.issue.number + " " + obj.issue.title +
-                " <a> " + obj.issue.body + milestone + state;
-
-
-    }
-    obj2.message = mensaje;
-    obj2.repoId = obj.repository.id;
-
-    return obj2;
-
-
-}
-
-
-/* comment_issue */
-
-
-
-
-/* issues*/
-function createResponseCommentIssue (obj) {
-    var obj2 = {};
-
-    /* tenemos: siempre y no pueden ser vacios
-    * action
-    * issue
-    * comment
-    * repository
-    * sender
-    * */
-    var mensaje;
-
-
-        mensaje= obj.comment.html_url +
-            "<url>"+ obj.sender.html_url +
-            "<url>[" + obj.repository.name + ":" +
-            obj.repository.default_branch + "] Comment "+ obj.action +
-            " on issue <a>#" + obj.issue.number +
-            + " " + obj.issue.title +
-            " by<a>" + obj.sender.login + "<a><br>" +
-            obj.comment.body;
-
-
-    obj2.message = mensaje;
-    obj2.repoId = obj.repository.id;
-
-    return obj2;
-
-
-}
-
-
-/*****************************************/
 
 
 
@@ -859,10 +577,7 @@ function getFieldsEvents (event, body) {
                 obj.comment !== null && obj.comment !== undefined &&
                 obj.sender !== null && obj.sender !== undefined){
 
-                /* crear el mensaje y el id_repo */
-                /*
-                obj2 = createResponseCommentIssue(obj);
-                */
+
 
                 /* lo hace bien, lo convierte en string */
                 console.log("convert JSON to String");
@@ -929,12 +644,6 @@ function getFieldsEvents (event, body) {
 
             }
 
-            /** esto me sobraría hay que quitarlo
-            if(body.head_commit !== undefined && body.head_commit !== null){
-                obj.head_commit = getFieldsHeadCommit(body.head_commit);
-
-            }
-             **/
 
             if(body.commits !== undefined && body.commits !== null){
 
@@ -1066,44 +775,5 @@ module.exports = {
 
 };
 
-
-
-//exports.checkgroupnameunique = function checkgroupnameunique(userid,groupname){
-
-    /* check objects' fields of github POST */
-
-
-
-
-    /* var User = mongoose.model('User');
-    var promise = new Hope.Promise();
-    User.findOne({ _id: userid}).populate('groups._group').exec(function (error, user) {
-        if (error){
-            return promise.done(error,null);
-        }
-        else if (user){
-            var encontrado = false;
-            var i = 0;
-            var listaGrupos = user.groups;
-            while (encontrado === false && i<listaGrupos.length){
-                if (listaGrupos[i]._group.groupName === groupname){
-                    encontrado = true;
-                }
-                i++;
-            }
-            if (encontrado === true){
-                var err = {
-                    code   : 400,
-                    message: 'The user already has a group with that name'
-                };
-                console.log("Error 401 - the user already has a group with that name");
-                return promise.done(err, null);
-            }else {
-                return promise.done(null, user);
-            }
-        }
-    }); */
-   // return promise;
-//};
 
 

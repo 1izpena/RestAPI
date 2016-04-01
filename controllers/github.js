@@ -43,14 +43,10 @@ exports.callbackPOST = function callbackPOST (request, response) {
         if(request.headers['x-github-event'] !== undefined){
 
 
-            /*console.log("esto vale body");
-            console.log(request.body);*/
-
-
 
 
             /* parsear en el helper: githubHandler */
-            /* tiene que devolver el msg y el id del repo, que es el id del canal */
+            /* devuelve el msg y el id del repo, que es el id del canal */
             var obj = githubHandler.getFieldsEvents(request.headers['x-github-event'], request.body);
 
 
@@ -72,60 +68,9 @@ exports.callbackPOST = function callbackPOST (request, response) {
                     console.log("como json");
                     console.log(message4.commits)
                     console.log("como string");
-                    console.log(JSON.stringify(message4.commits));
+                    console.log(JSON.stringify(message4));
                 }
-            
 
-
-                //console.log("esto vale el objeto parseado en controller/github");
-                /* obj.repository.id para busquedas */
-
-
-
-
-                //var prueba = JSON.stringify(obj.message);
-                /* esto esta bien */
-                //console.log(obj.message);
-
-
-
-
-                //var json = JSON.stringify(eval('(' + obj.message + ')'));
-
-                /*var json = JSON.parse(obj.message);
-
-
-                 console.log("vamos a ver si podemos acceder desde detro");
-                console.log("me devuelve el evento");
-
-                console.log(JSON.parse(obj.message));
-
-                eval("var x = " + obj.message + ";");
-
-                console.log(JSON.stringify(x));
-
-                /*console.log(json.message.event);
-                console.log("y elid del repo");
-                console.log(json.message.repository.name);
-
-                if(json.event == "push"){
-
-                    console.log("esto vale commits en json");
-                    console.log(json.commits);
-                    if(json.commits.length){
-                        console.log("tiene length");
-                    }
-                    else{
-                        console.log("tiene length");
-
-                    }
-
-
-                }*/
-
-
-                /* aqui parseo el obj y lo combierto en
-                * msg, id_repo(para buscar canal)*/
 
 
             }
