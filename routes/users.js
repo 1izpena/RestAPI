@@ -5,6 +5,7 @@ var group = require('../controllers/group');
 var channel = require('../controllers/channel');
 var message = require('../controllers/message');
 var elasticsearch = require('../controllers/elasticsearch');
+var githubapi = require('../controllers/githubapi');
 
 
 
@@ -37,6 +38,26 @@ router.route('/:userid/privateprofile').get(session.privateprofile);
 
 /* POST metatags of url which user sends */
 router.route('/:userid/get_meta').post(session.userplaylist);
+
+
+/*************** new ****************/
+/* GET return Github accounts metatags of url which user sends */
+router.route('/:userid/github/accounts').get(githubapi.getAccountsGithub);
+
+
+/* aqui logueamos,
+ mandamos aoa id, username y pass
+ creamos token y recogemos los repos validos sin webhooks asociados */
+router.route('/:userid/github/auth').post(githubapi.auth);
+
+/* esto igual debería ir en canal
+ * para hacer validaciones y mandar ala bd, de momento usuario
+ * luego grupo/channels*/
+/*puedo hacer dos peticiones desde angular, esta y una para crear el canal, cuando tenga la respuesta */
+router.route('/:userid/github/createHooks').post(githubapi.createHooks);
+
+
+
 
 
 /* GET Devuelve lista de grupos del usuario */

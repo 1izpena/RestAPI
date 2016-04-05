@@ -103,7 +103,6 @@ var elasticsearch = require('./routes/elasticsearch');
 /*********** new **********/
 
 var github = require('./routes/github');
-var githubapi = require('./routes/githubapi');
 
     /*
 var GithubWebHook = require('express-github-webhook');
@@ -122,7 +121,6 @@ app.use('/api/v1/', elasticsearch);
 /************* new *****************/
 app.use('/api/v1/callback', github);
 
-app.use('/api/v1/githubapi', githubapi);
 
 
 

@@ -8,8 +8,6 @@ var router = express.Router();
 
 var config = require('../config'); // archivo de configuración
 
-/*
-var session = require('../controllers/session');*/
 
 var github = require('../controllers/github');
 

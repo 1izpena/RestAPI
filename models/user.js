@@ -19,6 +19,8 @@ var userSchema = new Schema({
     required: true,
     validate: validators.isEmail({message: 'Mail format is invalid'}) 
   },
+  githubtoken: [ { username: {type: String, required: false },
+                   token: {type: String, required: false}  }],
   social: [],
   groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
                       privateChannels: [{type: Schema.ObjectId, ref: 'Channel'}],
@@ -175,6 +177,56 @@ userSchema.statics.search = function search (query, limit, page) {
   });
   return promise;
 };
+
+
+userSchema.statics.searchConToken = function searchConToken (query, limit, page) {
+
+    /* skip is number of results that not show */
+    if(typeof page === "undefined") {
+        page = 0;
+    }
+
+    if(typeof limit === "undefined") {
+        limit = 0;
+    }
+
+    var skip = (page * limit);
+
+
+    var promise = new Hope.Promise();
+    var value2 = [];
+
+    this.find(query).skip(skip).limit(limit).exec(function(error, value) {
+        if (limit === 1 && !error) {
+            if (value.length === 0) {
+                error = {
+                    code: 402,
+                    message: "User not found."
+                };
+            }
+            value = value[0];
+
+        } else {
+
+            value.forEach(function(user){
+
+                user = user.parseConToken();
+                value2.push(user);
+
+            });
+            value= value2;
+        } /* end else:: want multiple values & parse this values */
+
+
+
+        return promise.done(error, value);
+    });
+    return promise;
+};
+
+
+
+
 
 userSchema.statics.searchpopulated = function searchpopulated (query,populate) {
     var promise = new Hope.Promise();
@@ -374,6 +426,16 @@ userSchema.methods.parse = function parse () {
   };
 };
 
+userSchema.methods.parseConToken = function parseConToken () {
+    var user = this;
+    return {
+        id          : user._id,
+        username    : user.username,
+        mail        : user.mail,
+        githubtoken : user.githubtoken
+
+    };
+};
 
 
 
