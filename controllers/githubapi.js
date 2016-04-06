@@ -101,20 +101,14 @@ exports.auth = function auth (request, response) {
 
                         else{
 
-                            /* puede ser nulo o no */
-                            console.log("esto vale result en getusertoken");
 
                             /* aqui tengo el objeto entero */
-                            console.log(result);
-
-
                             /* mirar si es nulo, hay que crear el token
                              * */
                             var newResult = {};
 
                             if(result == null){
 
-                                console.log(" getusertoken:: result es nulo");
 
                                 githubapiservice.createToken(userid,username,pass).then(function (error,result){
                                     if(error){
@@ -134,9 +128,6 @@ exports.auth = function auth (request, response) {
                                         }
                                         else{
 
-                                            console.log(" createToken:: result no es nulo");
-
-                                            console.log(result);
                                             /* solo el token */
                                             usertoken = result;
 
@@ -154,19 +145,8 @@ exports.auth = function auth (request, response) {
                                                     /* puede ser vacio o null */
 
 
-
-                                                    console.log(" saveusertoken en controller:: result no es nulo");
-
-
-                                                    /* me esta devolviendo otro result*/
-                                                    console.log(result);
-
-
                                                     if(result !== null){
 
-                                                            console.log(" antes de getrepos en controller:: result vale");
-
-                                                            console.log(result);
                                                             newResult.githubtoken = result;
 
                                                             githubapiservice.getRepositories(result).then(function (error,result){
@@ -268,15 +248,8 @@ exports.auth = function auth (request, response) {
                             /* aqui la result es solo el token */
                             else {
 
-                                console.log("en elelse result");
-                                console.log(result);
-
-
                                 /* es el tokengithub con token/username/_id */
                                 newResult.githubtoken = result;
-
-                                console.log("esto vale sino es nulo el token");
-                                console.log(newResult.githubtoken);
 
 
                                 githubapiservice.getRepositories(newResult.githubtoken).then(function (error, result) {
@@ -417,8 +390,6 @@ exports.createHooks = function createHooks (request, response) {
 
                 if (userid == result._id) {
 
-
-
                     /* lo que devuelve puede ser vacio o nulo, hay que mirarlo en angular */
                     /* no deberia pero si es vacio o nulo, devolvemos error */
                     githubapiservice.getUserToken(userid, username).then(function (error, result) {
@@ -487,9 +458,6 @@ exports.createHooks = function createHooks (request, response) {
                                             /* solo mandamos el primer error */
 
 
-
-
-
                                     }
 
                                     else {
@@ -505,7 +473,9 @@ exports.createHooks = function createHooks (request, response) {
                                         /* hay que crear el canal y asignar al idgithub los repos
                                          * nunca va a ser nulo yo creo */
                                         else{
-                                            response.status(201).json(result);
+
+
+                                            response.status(result.code).json(result);
 
                                         }
 

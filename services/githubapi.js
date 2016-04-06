@@ -499,8 +499,7 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
     var arrOk = [];
 
     var githuberror = false;
-    var githubMessageErrors = {};
-    var githubMessageOk = {};
+
 
     /* es el nombre del repo, asique guay */
     async.each(arrRepos,
@@ -530,6 +529,9 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
                     console.log(err);
                     console.log(item);
 
+
+                    var githubMessageErrors = {};
+
                     githubMessageErrors.item = item;
                     githubMessageErrors.code = err.code;
                     githubMessageErrors.message = err.message;
@@ -544,7 +546,7 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
                     console.log("dentro del foreach sine rror");
                     console.log(res);
 
-
+                    var githubMessageOk = {};
 
                     githubMessageOk.item = item;
                     githubMessageOk.obj= res;
@@ -578,18 +580,39 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
                     /* tengo que mirar en github los posibles errores */
                     /* solo piya 1error*/
 
-                    if(arrOk.length > 0){
+
+
+                    var errores = {};
+
+                    errores.code = 200;
+                    errores.arrReposError = arrErrors;
+                    errores.arrReposOk = arrOk;
+                    return promise.done(null,errores);
+
+
+                    /* estaria bien pasar los 2 arrays */
+
+
+                    /*if(arrOk.length > 0){
                         return promise.done(null,arrOk);
 
                     }
                     else{
                         return promise.done(githubMessageErrors,null);
-                    }
+                    }*/
 
 
                 }
                 else{
-                    return promise.done(null,arrOk);
+
+                    var ok = {};
+
+                    ok.code = 201;
+                    ok.arrReposOk = arrOk;
+
+
+
+                    return promise.done(null,ok);
 
                 }
 
