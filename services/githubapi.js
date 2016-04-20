@@ -13,6 +13,67 @@ var config = require('../config');
 
 
 
+
+
+exports.getUserAccounts = function getUserAccounts (userid) {
+
+
+    var User = mongoose.model('User');
+    var promise = new Hope.Promise();
+    var query = { _id: userid };
+
+    /* solo tiene que ser 1 */
+    User.searchConToken(query).then(function(error, user) {
+        if (user === null) {
+            return promise.done(error,null);
+
+
+        } else {
+
+            console.log("esto vale user");
+            console.log(user);
+
+            /* es 1 array de usuarios, siempre solo 1 */
+            if(user.length !== undefined){
+                var user = user[0];
+
+
+                console.log("esto vale user en searchcontoken");
+                console.log(user);
+
+                /* devolvemos array con tokens o null */
+                if(user.githubtoken !== undefined && user.githubtoken !== null){
+                    if(user.githubtoken[0] !== undefined){
+
+                        return promise.done(null,user.githubtoken);
+
+                    }
+                    else{
+                        /* no hay token */
+                        return promise.done(null,null);
+                    }
+
+                }
+                else{
+                    return promise.done(null,null);
+
+                }
+            }
+            /* el array de usuarios es vacio */
+            else{
+                return promise.done(null,null);
+            }
+
+        }
+    });
+
+    return promise;
+
+};
+
+
+
+
 exports.createToken = function createToken (userid, username, pass) {
 
     var promise = new Hope.Promise();
@@ -150,12 +211,6 @@ exports.saveUserToken = function saveUserToken(userid, username, token){
 
 
 /* devuelve 1 array con 1 tokens */
-
-
-
-
-
-
 exports.getUserToken = function getUserToken(userid, username){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
@@ -243,8 +298,9 @@ exports.getUserToken = function getUserToken(userid, username){
 };
 
 
-/* queremos miras los hooks que ya estan asociados alos repos, para no ponerlos */
-exports.getWebHooks = function getWebHooks (githubtoken, arrRepos){
+/* queremos mirar los hooks que ya estan asociados alos repos, para no ponerlos */
+/* este ahora no se usa */
+exports.getWebHooks2 = function getWebHooks2 (githubtoken, arrRepos){
 
 
 
@@ -274,6 +330,8 @@ exports.getWebHooks = function getWebHooks (githubtoken, arrRepos){
 
     console.log("entro en webhooks, despues de authen");
 
+
+
     async.each(arrRepos,
         // 2nd param is the function that each item is passed to
         function(item, callback){
@@ -297,7 +355,7 @@ exports.getWebHooks = function getWebHooks (githubtoken, arrRepos){
 
                  else{
 
-                    var enc = false;
+
                     console.log("entro en webhooks, no hay errores");
 
                     /* no tiene length sino tiene hooks asociados */
@@ -309,8 +367,11 @@ exports.getWebHooks = function getWebHooks (githubtoken, arrRepos){
                         console.log("entro en webhooks, en if");
 
                     }
+                    /*
 
                     else{
+                        var enc = false;
+
                         for(var i = 0; i< res.length; i++){
                             if(res[i].config !== undefined && res[i].config !== null){
                                 if(res[i].config.url !== undefined && res[i].config.url !== null){
@@ -318,23 +379,27 @@ exports.getWebHooks = function getWebHooks (githubtoken, arrRepos){
                                     console.log("esto vale res[i].config.url");
                                     console.log(res[i].config.url);
                                     if(res[i].config.url !== config.githubcallback){
-                                        /* si no coincide se mete en el array el repo */
-                                         enc= true;
+                                        /* si no coincide se mete en el array el repo *
+                                         enc = true;
+                                        console.log("**************enc**********");
+                                        console.log(enc);
 
-                                         }
+                                    }
                                 }
 
                             }
                         }
-                        if(!enc) {
+                        if(enc) {
 
+                            console.log("entro en el if !enc con ");
+                            console.log(item.name);
                             arrReposDef.push(item);
 
 
                         }
 
                         console.log("entro en webhooks, en else");
-                    }
+                    }*/
 
 
 
@@ -367,7 +432,123 @@ exports.getWebHooks = function getWebHooks (githubtoken, arrRepos){
 
 };
 
+/***************** new change ***********************/
 
+
+
+exports.getWebHooks = function getWebHooks (githubtoken, arrRepos){
+
+
+
+    console.log("entro en webhooks");
+    var promise = new Hope.Promise();
+
+    var arrReposDef = [];
+
+    var github = new GitHubApi({
+        // required
+        version: "3.0.0",
+        // optional
+        debug: true,
+        protocol: "https",
+        host: "api.github.com", // should be api.github.com for GitHub
+        timeout: 5000,
+        headers: {
+            "user-agent": "Meanstack" // GitHub is happy with a unique user agent
+        }
+    });
+
+
+    github.authenticate({
+        type: "oauth",
+        token: githubtoken.token
+    });
+
+    console.log("entro en webhooks, despues de authen");
+
+
+
+    async.each(arrRepos,
+        // 2nd param is the function that each item is passed to
+        function (item, callback){
+            // Call an asynchronous function,
+            console.log("entro en webhooks, dentro del callback");
+
+
+
+            github.repos.getHooks({
+
+                user: githubtoken.username,
+                repo: item.name,
+
+                headers: {
+                    "X-GitHub-OTP": "two-factor-code"
+                }
+
+            }, function(err, res) {
+                if (err) {
+                    console.log(err);
+                    githuberror = true;
+
+                }
+
+                else{
+
+
+                    console.log("entro en webhooks, no hay errores");
+
+                    /* no tiene length sino tiene hooks asociados */
+                    if(!res.length){
+                        /* para cada posicion mirar si config.url coincide con lo nuestro */
+
+                        arrReposDef.push(item);
+
+                        console.log("entro en webhooks, en if");
+
+                    }
+
+
+
+
+                }
+                callback(); //required
+            });
+
+
+
+
+
+
+
+        },
+
+        // 3rd param is the function to call when everything's done
+        function(err){
+
+            if(err){
+                console.log('Error:' + err);
+                return promise.done(err,null);
+            }
+
+            // All tasks are done now
+            else{
+
+                return promise.done(null,arrReposDef);
+
+
+            }
+        }
+    );
+
+    return promise;
+
+
+
+};
+
+
+
+/******************** end new change *********************************/
 
 
 
@@ -408,6 +589,7 @@ exports.getRepositories = function getRepositories(githubtoken){
     });
 
 
+    /* me da 1 time out */
     github.repos.getAll({
 
         type: "owner",
@@ -501,15 +683,42 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
     var githuberror = false;
 
 
-    /* es el nombre del repo, asique guay */
+
+
+/*
     async.each(arrRepos,
         // 2nd param is the function that each item is passed to
-        function(item, callback){
+        function(item, callback) {
+            // Call an asynchronous function,
+            console.log("****** item.name ********");
+            console.log(item.name);
+
+            console.log("********* item id *********");
+            console.log(item.id);
+
+            /* realmente es esto lo que necesitamos devolver *
+
+
+            callback(); //required
+        }
+    );
+
+
+*/
+
+
+
+
+
+    /* item.name item.id necesarios */
+    async.each(arrRepos,
+        // 2nd param is the function that each item is passed to
+        function (item, callback){
             // Call an asynchronous function,
             github.repos.createHook({
 
                 user: githubtoken.username,
-                repo: item,
+                repo: item.name,
                 name: "web",
                 config: {
 
@@ -534,7 +743,23 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
 
                     githubMessageErrors.item = item;
                     githubMessageErrors.code = err.code;
-                    githubMessageErrors.message = err.message;
+
+                    if(err.code == '504'){
+
+                        githubMessageErrors.message = "Gateway Timeout";
+
+
+
+                    }
+                    else{
+                        githubMessageErrors.message = JSON.parse(err.message);
+
+
+
+                    }
+
+
+
 
 
                     arrErrors.push(githubMessageErrors);
@@ -580,6 +805,7 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
                     /* tengo que mirar en github los posibles errores */
                     /* solo piya 1error*/
 
+                    /* 504 para gateway time out */
 
 
                     var errores = {};

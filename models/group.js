@@ -132,6 +132,9 @@ groupSchema.methods.parse = function parse () {
 };
 
 
+
+
+
 groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
     var query = { _id: groupid};
     var populate = 'channels users _admin';
@@ -159,7 +162,12 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                     }if (group.channels[i].channelType == "PRIVATE"){
                         var encontrado = false;
                         var j = 0;
+
+                        /* mira si lo encuentra y sale del while */
                         while (encontrado == false && j<group.channels[i].users.length){
+
+                            /* igual esto se puede quitar */
+
                             if (userid == group.channels[i].users[j]._id){
                                 var usuariosCanal = [];
                                 for (var l=0;l<group.channels[i].users.length;l++){

@@ -53,7 +53,7 @@ router.route('/:userid/github/auth').post(githubapi.auth);
 /* esto igual debería ir en canal
  * para hacer validaciones y mandar ala bd, de momento usuario
  * luego grupo/channels*/
-/*puedo hacer dos peticiones desde angular, esta y una para crear el canal, cuando tenga la respuesta */
+/* puedo hacer dos peticiones desde angular, esta y una para crear el canal, cuando tenga la respuesta */
 router.route('/:userid/github/createHooks').post(githubapi.createHooks);
 
 
@@ -105,6 +105,9 @@ router.route('/:userid/chat/groups/:groupid/users/:userid1/invite').post(group.i
 /* POST Crea y guarda un nuevo canal, dentro del grupo con el groupid, actualiza referencias en grupo y usuario */
 router.route('/:userid/chat/groups/:groupid/channels').post(channel.newchannel);
 
+
+
+/************************************************/
 /* GET Devuelve la lista de canales que tenga el usuario en ese grupo */
 router.route('/:userid/chat/groups/:groupid/channels').get(channel.getgroupchannellist);
 

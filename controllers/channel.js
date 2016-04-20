@@ -12,7 +12,25 @@ var config  = require('../config');
 //var channelCtrl = require('../controllers/message');
 
 
+
+/* "mail": "internalUser@localhost",
+ "password": "",
+ "active": false,
+ "username": "internalUser",
+ */
+
+
+
+
 exports.newchannel = function newchannel (request, response) {
+
+
+
+    console.log("esto vale el request.body");
+    console.log(request.body);
+
+
+
     Auth(request, response).then(function(error, result) {
         if (error) {
             response.status(error.code).json({message: error.message});
@@ -30,7 +48,7 @@ exports.newchannel = function newchannel (request, response) {
                                 var userid2 = request.body.secondUserid;
                                 User.search({_id: userid2}, 1).then(function(error, user) {
                                     if (user === null) {
-                                        response.status(401).json({message: 'SecondUserid not valid.'});
+                                        response.status(401).json({message: 'Second Userid not valid.'});
 
                                     } else {
                                         channelservice.createnewchannel(result._id, request.params.groupid, request.body.channelName, request.body.channelType, userid2).then(function (error, channel) {
@@ -57,7 +75,10 @@ exports.newchannel = function newchannel (request, response) {
                                             }
                                             else {
                                                 if (request.body.channelType == "PUBLIC"){
-                                                    var roomName = 'CH_'+result.id;
+                                                    /*
+                                                    var roomName = 'CH_'+result.id;*/
+                                                    var roomName = 'CH_'+channel.id;
+
                                                     var conectedUsers = socketio.getUsersInSocket(roomName);
                                                     for (var i=0;i<channel.users.length;i++){
                                                         if(channel.users[i].id != request.params.userid){
@@ -511,6 +532,7 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
                                         /**************** new *********************/
 
                                         /* tenemos al usuario interno */
+
                                         User.search({mail: config.internalUserMail}, 1).then(function(error, internalUser) {
                                             var messageData = {
                                                 channelid: request.params.channelid,

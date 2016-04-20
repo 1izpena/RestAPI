@@ -20,6 +20,12 @@ var uriUtil = require('mongodb-uri');
 
 //mongoose.connect("mongodb://dessiuser:dessi2015@ds063134.mongolab.com:63134/dessi");
 
+
+var timeout = require('connect-timeout');
+
+
+
+
 var port = process.env.PORT || config.port; //3200
 app.set('superSecret', config.phrase); // setear frase secreta
 
@@ -59,10 +65,20 @@ app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+app.use(timeout('15s'));
+
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
+
+//app.use(haltOnTimedout);
+
 app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(haltOnTimedout);
+
 app.use(cookieParser());
+//app.use(haltOnTimedout);
 
 //Handler para peticiones de otros dominios
 app.use(function(req, res, next) {
@@ -115,14 +131,24 @@ app.use('/api/v1/auth', authusers);
 app.use('/api/v1/file', file);
 app.use('/api/v1/users', users);
 app.use('/api/v1/forum', forum);
-app.use('/api/v1/', elasticsearch);
+
 
 
 /************* new *****************/
 app.use('/api/v1/callback', github);
 
 
+/************* end new ********************/
+app.use('/api/v1/', elasticsearch);
 
+
+
+
+/*
+function haltOnTimedout(req, res, next){
+    if (!req.timedout) next();
+};
+*/
 
 
 /* ahi que mirar donde poner las validaciones para crear el canal de github */

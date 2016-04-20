@@ -10,7 +10,8 @@ var channelSchema   = new Schema({
     channelType: { type: String, required: true },
     users:  [ { type: Schema.ObjectId, ref: 'User' }],
     group:  { type: Schema.ObjectId, ref: 'Group' },
-    _admin:  { type: Schema.ObjectId, ref: 'User' }
+    _admin:  { type: Schema.ObjectId, ref: 'User' },
+    githubRepositories: [Number]
 });
 
 channelSchema.path('channelType').validate(function(channelType){
@@ -26,13 +27,52 @@ channelSchema.path('channelType').validate(function(channelType){
 /* static methods */
 /* NUEVO CANAL , guarda el nuevo grupo y hace el populate a grupo */
 
-channelSchema.statics.createchannel = function createchannel (attributes) {
+channelSchema.statics.createchannel = function createchannel (attributes, repositories) {
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel', channelSchema);
+
     console.log("ha entrado a crear canal");
+
+    /* hay que mirar como guardar 1 array de ids de repos */
+
+/*
+    if(attributes.repositories !== undefined && attributes.repositories !== null){
+        if(attributes.repositories.length >0){
+
+        }
+    }*/
+
+
+    var m = new Channel(attributes);
+
+    if(repositories !== null && repositories !== undefined){
+        if(repositories.length >0){
+
+            for(var i = 0; i< repositories.length; i++){
+                m.githubrepositories.push(repositories[i].id);
+
+            }
+
+
+        }
+
+    }
+
+
+/*
+    console.log("esto vale attributes.githubrepositories[0] ");
+    console.log(attributes.githubrepositories[0].id);
+    */
+
+    /*
     Channel = new Channel(attributes).save(function (error, result) {
+    */
+    m.save(function (error, result) {
 
         if(error){
+
+            console.log("creando canal peta");
+            console.log(error);
             var messageError = '';
             if (error.errors.channelName != undefined)
                 messageError = 'channel name is required';
@@ -41,10 +81,15 @@ channelSchema.statics.createchannel = function createchannel (attributes) {
             error = { code: 400, message: messageError };
             return promise.done(error, null);
         }else {
+
             if (result === null) {
+                console.log("creando canal peta con null");
+
                 error = { code: 400, message: 'Channel not found.' };
                 return promise.done(error, null);
             }else {
+                console.log("no null, con result =");
+                console.log(result);
                 return promise.done (null,result);
             }
         }

@@ -10,7 +10,12 @@ var chatErrors  = require('../helpers/chatErrorsHandler');
 var channelservice  = require('../services/channel');
 var groupservice  = require('../services/group');
 
-exports.updateuserchannellist = function updateuserchannellist(userid,groupid,channelid,channelType){
+
+
+
+
+
+    exports.updateuserchannellist = function updateuserchannellist(userid,groupid,channelid,channelType){
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
     var query = { _id: userid};
@@ -124,11 +129,15 @@ exports.updatechannelpublicuserlist = function updatechannelpublicuserlist(group
     return promise;
 };
 
-exports.createnewchannel = function createnewchannel(userid,groupid,channelName,channelType, userid2){
+exports.createnewchannel = function createnewchannel(userid,groupid,channelName,channelType, userid2, repositories){
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
     var Group = mongoose.model('Group');
+
+    console.log("esto vale channelName");
+    console.log(channelName);
+
     chatErrors.checkchannelnameunique(userid,groupid,channelName,channelType).then(function (error,result){
         if (error){
             return promise.done(error,null);
@@ -140,6 +149,9 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
             else {
                 users = [userid];
             }
+
+            /* mandar ya el array con repos.id  */
+
             var ats = {
                 channelName: channelName,
                 channelType: channelType,
@@ -147,10 +159,21 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
                 users: users,
                 group: groupid
             };
-            Channel.createchannel (ats).then(function (error, result){
+
+
+            Channel.createchannel (ats, repositories).then(function (error, result){
                 if (error){
                     return promise.done(error,null);
                 } else {
+
+
+                    console.log("esto vale en services channel channel");
+                    console.log(channel.githubRepositories[0]);
+
+                    if(channel.githubRepositories[0] == 53012902){
+                        console.log("el id de rest api es 1 number");
+                    }
+
                     var channel = result;
                     var updateQuery = { $push: { channels: channel.id} };
                     var options = {new: true};
