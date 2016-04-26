@@ -125,7 +125,7 @@ function newEventGithub (obj) {
                 * los webhooks lo haga bien, elmeter en el canal
                 * el id del repo correcto */
 
-                var query = {"githubRepositories.name":messageJSON.repository.id};
+                var query = {"githubRepositories.id":messageJSON.repository.id};
                 var Channel = mongoose.model('Channel');
 
                 Channel.search(query, 1).then(function(error, channel) {
