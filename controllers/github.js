@@ -53,6 +53,20 @@ var Message  = require('../models/message');
 /* mirar como coger al internal user o meter otro que sea github */
 /* no estaria mal que de gravatar saliera el de github */
 
+
+/* para meter nuevos id de repositorios en mongo
+
+
+db.channels.update({},{$addToSet: {githubrepositories:53012875}},false,true)
+*
+*
+*
+*
+* */
+
+
+/* importante:: revisar que tengo bien que al añadir un repo al canal
+* el id coincide con el del webhook, ahora esta raro */
 function newEventGithub (obj) {
 
 
@@ -86,6 +100,9 @@ function newEventGithub (obj) {
     /* mirar que devuelve obj.message */
     var messageJSON= JSON.parse(obj.message);
 
+    console.log("entro en controllers/github con newEventGithub");
+
+
 
     var User = mongoose.model('User');
 
@@ -93,23 +110,48 @@ function newEventGithub (obj) {
         .then(function(error, internalUser) {
             if(!error){
 
-                /* buscar el canal
-                *
+                console.log("entro en user.search !error");
+
+                /*
                 * messageJSON.repository.id
-                *
                 * {githubrepositories:messageJSON.repository.id}
-                *
-                *
-                * */
+                 */
 
-                var query = {githubrepositories:messageJSON.repository.id};
+                console.log(" antes de channel search la query vale:");
+                console.log(messageJSON.repository.id);
+                /* 53012875 angular */
 
+                /* queda mirar que al crear
+                * los webhooks lo haga bien, elmeter en el canal
+                * el id del repo correcto */
+
+                var query = {"githubRepositories.name":messageJSON.repository.id};
                 var Channel = mongoose.model('Channel');
 
                 Channel.search(query, 1).then(function(error, channel) {
                         if (!error) {
 
+                            console.log("entro en channel search !error");
+                            console.log("esto vale channel");
+                            console.log(channel);
+
+                            /***
+                             * vuelta, la bd en este momento corrompida:
+                             * tiene: users [ids]
+                             *          githubRepositories [ids ]
+                             *          _admin: id
+                             *          group: id
+                             *          channelType: 'PUBLIC',
+                                        channelName: 'General',
+                                        _id: 56cb893773da764818ec5df1
+                             *
+                             */
+
+
                             /* tengo el user y el canal */
+
+                            console.log("esto vale channel.id");
+                            console.log(channel.id);
 
                             var messageData = {
                                 channelid: channel.id,
@@ -120,15 +162,13 @@ function newEventGithub (obj) {
 
 
 
-                            /******************* new ***********************************/
+                            /******************* new tareas ***********************************/
                                 /* me queda hacer 1 push,
-                                ver que se guarda el mensaje en la bd
+                                ver que se guarda el mensaje en la bd (hecho)
                                 y que se envia por sockets,
-                                 luego falta parsearlo en el cliente y xultimo en ionic
+                                 luego falta parsearlo en el cliente y xultimo en ionic (mirar que lo hace en angular)
                                  ademas borrar las variables de los del canal y ver que se muestra al final
                                  tambien si se borra el canal eliminar los webhooks
-
-                                 estamos a lunes, para el miercoles tiene que estar terminado
 
                                  */
 
@@ -136,14 +176,46 @@ function newEventGithub (obj) {
                             Message.newMessage(messageData).then(function newmessage(error, result) {
                                 if (!error) {
 
-                                    // Notificamos al canal que hay nuevo mensaje
 
+                                    /* que esta mal */
                                     console.log("esto vale el id del grupo ");
                                     console.log(channel.group);
+                                    /* lo hace bien
+                                     *
+                                     * 56cb893773da764818ec5df0
+                                     *
+                                     * */
 
 
+                                    console.log("esto vale el result de newMessage");
+                                    console.log(result);
+
+
+                                    /*
+ { id: 5717ee444763d6341548220f,
+  channel:
+   { id: 56cb893773da764818ec5df1,
+     channelName: 'General',
+     channelType: 'PUBLIC' },
+  user:
+   { id: 56cb8a1c63202f68056c1196,
+     username: 'meanstack',
+     mail: 'internalUser@localhost' },
+  date: Wed Apr 20 2016 23:01:56 GMT+0200 (CEST),
+  messageType: 'TEXT',
+  text: '"{\\"event\\":\\"push\\",\\"repository\\":
+  {\\"id\\":53012875,\\"name\\":\\"angularProject\\"},
+  \\"ref\\":\\"refs/heads/master\\",\\"commits\\":[
+  {\\"id\\":\\"63dfa554e5e35e08e555fa6450d85df00342a1cf\\",\\"url\\":\\
+  "https://github.com/1izpena/angularProject/commit/63dfa554e5e35e08e555fa6450d85df00342a1cf\\",
+  \\"author\\":\\"1izpena\\"}],\\"sender\\":{\\"login\\":\\"1izpena\\",\\"html_url\\":\\"https://github.com/1izpena\\"}}"' }
+
+                                     *
+                                     * *************/
+
+
+                                    // Hay que notificar al canal de que hay nuevo mensaje
                                     socketio.getIO().sockets.to('CH_' + messageData.channelid).emit('newMessage', {groupid: channel.group,message: result});
-
 
 
                                     Channel.parsepopulated(messageData.channelid).then(function (error, channel) {
@@ -154,22 +226,110 @@ function newEventGithub (obj) {
                                         else {
 
                                             /* tengo que conseguir en nombre del grupo */
-
                                             var Group = mongoose.model('Group');
 
-                                            query = {_id: channel.group};
+
+                                            /* esto me esta petando */
+                                            console.log("peta esta query con channel.group");
+                                            console.log(channel);
+
+                                            /**
+                                             * esto vale channel:
+                                             { id: 56cb893773da764818ec5df1,
+                                               channelName: 'General',
+                                               channelType: 'PUBLIC',
+
+                                               /* esta parte cambia, ahora group tiene tambien el nombre *
+                                               group: { groupId: 56cb893773da764818ec5df0, groupName: 'Dessi' },
+
+
+                                               admin:
+                                                { id: 56cb873c73da764818ec5dea,
+                                                  username: 'amaia',
+                                                  mail: 'amaia@mail.es' },
+                                               users:
+                                                [ { id: 56cb873c73da764818ec5dea,
+                                                    username: 'amaia',
+                                                    mail: 'amaia@mail.es' },
+                                                  ... ] }
+                                             ***/
+
+
+
+
+
+                                            console.log("channelType: " + channel.channelType);
+                                            var roomName = 'CH_'+channel.id;
+
+                                                     /* cogemos a los usuarios del canal */
+                                            for (var j=0;j<channel.users.length;j++){
+
+                                                var encontrado = false;
+
+                                                for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
+
+                                                    if ( socketio.getIO().sockets.connected[socketid]) {
+                                                        var connectedUser = socketio.getIO().sockets.connected[socketid].userid;
+
+                                                        if (connectedUser && connectedUser == channel.users[j].id ) {
+                                                            encontrado = true;
+                                                        }
+                                                    }
+                                                }
+
+
+                                                     /********************************/
+                                                if (encontrado == false ){
+                                                    console.log("Emit newMessageEvent");
+
+                                                    socketio.getIO().sockets.to('US_'+ channel.users[j].id).emit('newMessageEvent',
+                                                         {groupid: channel.group.groupId,  groupName: channel.group.groupName ,
+                                                         channelName: channel.channelName, channelid: channel.id,
+                                                         channelType: channel.channelType, message: result});
+                                                }
+                                            }
+
+                                            return result;
+
+
+
+                                        }
+
+                                    });  /* channel parse populated */
+
+
+
+
+
+
+
+
+
+
+                                            //query = {_id: channel.group.groupId};
+
+                                            /* no se porque hace esto, no haria falta creo */
+
+
+                                            /*
                                             Group.search(query, 1).then(function(error, group) {
                                                 if (error) {
+                                                    console.log("hay error en search group ");
+                                                    console.log(error);
 
                                                     return null;
                                                 }
 
 
                                                 else{
+                                                    /* esto para que ??*
 
                                                     console.log("channelType: " + channel.channelType);
                                                     var roomName = 'CH_'+channel.id;
+
+                                                    /* cogemos a los usuarios del canal *
                                                     for (var j=0;j<channel.users.length;j++){
+
                                                         var encontrado = false;
                                                         for (var socketid in socketio.getIO().sockets.adapter.rooms[roomName]) {
                                                             if ( socketio.getIO().sockets.connected[socketid]) {
@@ -180,11 +340,11 @@ function newEventGithub (obj) {
                                                             }
                                                         }
 
-                                                        /********************************/
+                                                        /********************************
                                                         if (encontrado == false ){
                                                             console.log("Emit newMessageEvent");
                                                             socketio.getIO().sockets.to('US_'+ channel.users[j].id).emit('newMessageEvent',
-                                                                {groupid: group.id,  groupName: group.groupName ,
+                                                                {groupid: channel.group.groupId,  groupName: channel.group.groupName ,
                                                                     channelName: channel.channelName, channelid: channel.id,
                                                                     channelType: channel.channelType, message: result});
                                                         }
@@ -196,7 +356,7 @@ function newEventGithub (obj) {
 
                                                 }
 
-                                            }); /***** end search group ****/
+                                            }); /***** end search group ****
 
 
                                         }
@@ -204,6 +364,8 @@ function newEventGithub (obj) {
                                 }
 
                                 else{
+                                    console.log("entro en guardar mensaje:: newmessage:: con error");
+                                    console.log(error);
                                     return null;
                                 }
 
@@ -218,6 +380,10 @@ function newEventGithub (obj) {
 
 
                         else {
+
+                            console.log("entro en channel search con error");
+                            console.log(error);
+
                             return null;
                         }
 
@@ -227,6 +393,9 @@ function newEventGithub (obj) {
 
             } /* end if user.search !error */
             else{
+
+                console.log("entro en user search con error");
+                console.log(error);
                 return null;
             }
 
@@ -247,7 +416,8 @@ function newEventGithub (obj) {
 
 
     /* buscar channel */
-    User.search({mail: config.internalUserMail}, 1)
+    /*
+    User.search({mail: config.internalUserMail}, 1)*/
 
     /***********************
      *
@@ -284,6 +454,38 @@ exports.callbackPOST = function callbackPOST (request, response) {
      * que queremos parsear
      * */
 
+
+
+
+    /**********
+     *
+     *entro en 3
+     esto vale commits[0]
+     {"id":"ca92ef20e459fb7313d1e4a0a6ce5c11993e6003","tree_id":"ee8822df911ce5fc6d761153946f57c2bcd06b55","distinct":true,"message":"Añadida funcionalidad de crear canal y asociar los webhooks","timestamp":"2016-04-20T20:34:51+02:00","url":"https://github.com/1izpena/angularProject/commit/ca92ef20e459fb7313d1e4a0a6ce5c11993e6003","author":{"name":"1izpena","email":"1izpena@opendeusto.es","username":"1izpena"},"committer":{"name":"1izpena","email":"1izpena@opendeusto.es","username":"1izpena"},"added":["app/scripts/services/githubservice.js"],"removed":[],"modified":["app/index.html","app/scripts/app.js","app/scripts/controllers/chat2.js","app/scripts/services/channelservice.js","app/scripts/services/chatservice.js","app/styles/chat2.css","app/views/chat2.html","bower.json","test/karma.conf.js"]}
+     hacemos lo mismo en el CONTROLLER
+     convert String to JSON
+     angularProject
+     Esto vale commits
+     como json
+     { event: 'push',
+       repository: { id: 53012875, name: 'angularProject' },
+       ref: 'refs/heads/master',
+       commits:
+        [ { id: 'ca92ef20e459fb7313d1e4a0a6ce5c11993e6003',
+            url: 'https://github.com/1izpena/angularProject/commit/ca92ef20e459fb7313d1e4a0a6ce5c11993e6003',
+            author: '1izpena' } ],
+       sender: { login: '1izpena', html_url: 'https://github.com/1izpena' } }
+     como string
+     {"event":"push","repository":{"id":53012875,"name":"angularProject"},"ref":"refs/heads/master","commits":[{"id":"ca92ef20e459fb7313d1e4a0a6ce5c11993e6003","url":"https://github.com/1izpena/angularProject/commit/ca92ef20e459fb7313d1e4a0a6ce5c11993e6003","author":"1izpena"}],"sender":{"login":"1izpena","html_url":"https://github.com/1izpena"}}
+     vale null el neweventgithub
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     * *****************/
 
 
 

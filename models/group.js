@@ -44,7 +44,30 @@ groupSchema.statics.search = function search (query, limit, page) {
     }
     var skip = (page * limit);
     var value2 = [];
+
+
+    console.log("esto vale query");
+
+
+    /*************
+     *
+     * { _id: { groupId: 56cb893773da764818ec5df0, groupName: 'Dessi' } }
+     *
+     *
+     * *****************/
+
+    console.log(query);
+
     this.find(query).skip(skip).limit(limit).exec(function(error, value) {
+
+        /* value me da undefined */
+
+        console.log("esto vale value + error groupschema search");
+        console.log(value);
+        console.log(error);
+
+
+
         if (limit === 1 && !error) {
             if (value.length === 0) {
                 error = {
@@ -54,11 +77,19 @@ groupSchema.statics.search = function search (query, limit, page) {
             }
             value = value[0];
         }else {
-            value.forEach(function(group){
-                group = group.parse();
-                value2.push(group);
-            });
-            value= value2;
+
+
+            if(value !== undefined && value !== null){
+                value.forEach(function(group){
+                    group = group.parse();
+                    value2.push(group);
+                });
+                value= value2;
+
+            }
+
+
+
         } /* end else:: want multiple values & parse this values */
         return promise.done(error, value);
     });

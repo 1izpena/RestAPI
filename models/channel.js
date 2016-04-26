@@ -5,13 +5,23 @@ var Hope = require('hope');
 var Schema = mongoose.Schema;
 
 
+
+var Repositories = new Schema({
+    id     : Number
+    , name      : String
+    , hookid      : Number
+});
+
+
+
+
 var channelSchema   = new Schema({
     channelName: { type: String, required: true },
     channelType: { type: String, required: true },
     users:  [ { type: Schema.ObjectId, ref: 'User' }],
     group:  { type: Schema.ObjectId, ref: 'Group' },
     _admin:  { type: Schema.ObjectId, ref: 'User' },
-    githubRepositories: [Number]
+    githubRepositories: [Repositories]
 });
 
 channelSchema.path('channelType').validate(function(channelType){
@@ -45,11 +55,14 @@ channelSchema.statics.createchannel = function createchannel (attributes, reposi
 
     var m = new Channel(attributes);
 
+    /* ahora repositories es arrReposOk, nos interesa .item (.id,.name .hookid */
+
     if(repositories !== null && repositories !== undefined){
         if(repositories.length >0){
 
             for(var i = 0; i< repositories.length; i++){
-                m.githubrepositories.push(repositories[i].id);
+                /* intentamos meter directamente el objeto */
+                m.githubRepositories.push(repositories[i].item);
 
             }
 
@@ -60,8 +73,8 @@ channelSchema.statics.createchannel = function createchannel (attributes, reposi
 
 
 /*
-    console.log("esto vale attributes.githubrepositories[0] ");
-    console.log(attributes.githubrepositories[0].id);
+    console.log("esto vale attributes.githubRepositories[0] ");
+    console.log(attributes.githubRepositories[0].id);
     */
 
     /*

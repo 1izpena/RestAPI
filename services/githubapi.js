@@ -773,6 +773,19 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
 
                     var githubMessageOk = {};
 
+                    /* tenemos que añadir a item, el id asociado al webhook
+                    * de momento tiene id y nombre del repo */
+                    if(res !== null && res !== undefined ){
+                        if(res.id !== null && res.id !== undefined){
+                            item.hookid = res.id;
+
+                        }
+                    }
+
+
+
+                    console.log("esto vale item");
+                    console.log(item);
                     githubMessageOk.item = item;
                     githubMessageOk.obj= res;
 

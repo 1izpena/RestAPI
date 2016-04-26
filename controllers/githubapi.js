@@ -38,7 +38,7 @@ var config  = require('../config');
 * */
 
 
-    function newchannelGithub (userid, groupid, channelGithub, repositories) {
+    function newchannelGithub (userid, groupid, channelGithub, arrReposOk) {
 
 
     /* repositories es 1 array con item.id*/
@@ -48,7 +48,7 @@ var config  = require('../config');
     channelservice.createnewchannel(userid, groupid,
         channelGithub.channelName, channelGithub.channelType,
         null,
-        repositories)
+        arrReposOk)
         .then(function (error,channel){
             if (error){
                 /*response.status(error.code).json({message: error.message});*/
@@ -680,7 +680,14 @@ exports.createHooks = function createHooks (request, response) {
 
                                 if(result.arrReposOk !== undefined && result.arrReposOk !== null){
                                     if(result.arrReposOk.length >0 ){
+                                        /*
+                                        con esto funcionaba
                                         result.reschannel =  newchannelGithub(userid, groupid, githubchannel, repositories);
+                                        */
+                                        result.reschannel =  newchannelGithub(userid, groupid, githubchannel, result.arrReposOk);
+
+
+
 
 
 

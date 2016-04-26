@@ -167,14 +167,24 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
                 } else {
 
 
-                    console.log("esto vale en services channel channel");
-                    console.log(channel.githubRepositories[0]);
 
-                    if(channel.githubRepositories[0] == 53012902){
-                        console.log("el id de rest api es 1 number");
-                    }
 
                     var channel = result;
+
+                    /*
+                    console.log("esto vale en services channel channel");
+                    console.log(channel.githubRepositories[0]);
+                    */
+
+                    /* devuelve :: number
+
+                    console.log("tipo del id de channel.githubrepositories");
+                    console.log(typeof (channel.githubRepositories[0] ));
+                    */
+
+
+
+
                     var updateQuery = { $push: { channels: channel.id} };
                     var options = {new: true};
                     Group.updategroup(groupid,updateQuery,options).then(function (error){
