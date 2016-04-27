@@ -3,13 +3,7 @@
  */
 
 
-
-var User = require('../models/user');
-var Group = require('../models/group');
-var Channel = require('../models/channel');
 var mongoose = require('mongoose');
-var Hope  = require('hope');
-
 
 
 
@@ -75,7 +69,7 @@ function getFieldsRepository (repository) {
 
 function getFieldsIssueForComment (issue) {
 
-    /* solo quiero id, title y number */
+    /* solo quiero title y number */
     var issueTemp = {};
 
     if(issue.number !== undefined &&
@@ -328,7 +322,7 @@ function getFieldsCommitsArray (commits) {
             return null
         }
         if(commits[i].message !== undefined && commits[i].message !== null){
-            objTemp.message = commits[i].author.message;
+            objTemp.message = commits[i].message;
 
         }
 
@@ -410,6 +404,10 @@ function getFieldsSender (sender) {
 
 function getFieldsEvents (event, body) {
 
+    console.log("entro en controlar evento");
+    console.log(event);
+    console.log(body);
+
     var obj = {};
     var obj2 = {};
     message = "";
@@ -441,10 +439,10 @@ function getFieldsEvents (event, body) {
 
             /* antes de parsear el repository hay que mirar action */
             if(body.action !== undefined && body.action !== null){
-                if( body.action !== "assigned" ||
-                    body.action !== "unassigned" ||
-                    body.action !== "opened" ||
-                    body.action !== "closed" ||
+                if( body.action !== "assigned" &&
+                    body.action !== "unassigned" &&
+                    body.action !== "opened" &&
+                    body.action !== "closed" &&
                     body.action !== "reopened" )
                 {
                     return null;

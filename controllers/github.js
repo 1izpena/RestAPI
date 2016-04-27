@@ -215,6 +215,13 @@ function newEventGithub (obj) {
 
 
                                     // Hay que notificar al canal de que hay nuevo mensaje
+
+                                    console.log("esto vale groupid que vamos a mandar : ");
+                                    console.log(channel.group);
+
+                                    console.log("esto vale el channelid que vamos a mandar :");
+                                    console.log(messageData.channelid);
+
                                     socketio.getIO().sockets.to('CH_' + messageData.channelid).emit('newMessage', {groupid: channel.group,message: result});
 
 
@@ -230,7 +237,7 @@ function newEventGithub (obj) {
 
 
                                             /* esto me esta petando */
-                                            console.log("peta esta query con channel.group");
+                                            console.log("esto vale channel channel.group");
                                             console.log(channel);
 
                                             /**
@@ -255,6 +262,7 @@ function newEventGithub (obj) {
                                              ***/
 
 
+                                            /* no me funcionan los sockets */
 
 
 
@@ -493,7 +501,13 @@ exports.callbackPOST = function callbackPOST (request, response) {
     var body;
     */
 
+
     if(request.headers !== undefined && request.body !== undefined){
+        //console.log("entra en request.headers !== undefined");
+        //console.log(request.headers);
+        //console.log("esto vale la cabecera que quermos");
+        //console.log(request.headers['x-github-event']);
+
         if(request.headers['x-github-event'] !== undefined){
 
 
