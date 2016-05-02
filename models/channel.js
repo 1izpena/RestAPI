@@ -10,6 +10,11 @@ var Repositories = new Schema({
     id     : Number
     , name      : String
     , hookid      : Number
+    , githubtoken : {
+            token: String,
+            username: String
+    }
+
 });
 
 
@@ -55,7 +60,12 @@ channelSchema.statics.createchannel = function createchannel (attributes, reposi
 
     var m = new Channel(attributes);
 
-    /* ahora repositories es arrReposOk, nos interesa .item (.id,.name .hookid */
+    /* ahora repositories es arrReposOk, nos interesa .item (.id,.name .hookid y
+     * githubtoken con
+     * { "token" : "120dbe14caca8f6efb2e2b54597ae49ec557e5e1", "username" : "1izpena" },
+     * ahora token seria token.token && token.authid
+     * no necesito mas o si para saber si esta ready
+      * porque el token tambien lo uso para borrar webhooks y si no esta vigente no me vale */
 
     if(repositories !== null && repositories !== undefined){
         if(repositories.length >0){

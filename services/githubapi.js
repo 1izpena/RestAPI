@@ -353,7 +353,7 @@ exports.getWebHooks2 = function getWebHooks2 (githubtoken, arrRepos){
 
                 }
 
-                 else{
+                else{
 
 
                     console.log("entro en webhooks, no hay errores");
@@ -368,38 +368,29 @@ exports.getWebHooks2 = function getWebHooks2 (githubtoken, arrRepos){
 
                     }
                     /*
-
-                    else{
-                        var enc = false;
-
-                        for(var i = 0; i< res.length; i++){
-                            if(res[i].config !== undefined && res[i].config !== null){
-                                if(res[i].config.url !== undefined && res[i].config.url !== null){
-
-                                    console.log("esto vale res[i].config.url");
-                                    console.log(res[i].config.url);
-                                    if(res[i].config.url !== config.githubcallback){
-                                        /* si no coincide se mete en el array el repo *
-                                         enc = true;
-                                        console.log("**************enc**********");
-                                        console.log(enc);
-
-                                    }
-                                }
-
-                            }
-                        }
-                        if(enc) {
-
-                            console.log("entro en el if !enc con ");
-                            console.log(item.name);
-                            arrReposDef.push(item);
-
-
-                        }
-
-                        console.log("entro en webhooks, en else");
-                    }*/
+                     else{
+                     var enc = false;
+                     for(var i = 0; i< res.length; i++){
+                     if(res[i].config !== undefined && res[i].config !== null){
+                     if(res[i].config.url !== undefined && res[i].config.url !== null){
+                     console.log("esto vale res[i].config.url");
+                     console.log(res[i].config.url);
+                     if(res[i].config.url !== config.githubcallback){
+                     /* si no coincide se mete en el array el repo *
+                     enc = true;
+                     console.log("**************enc**********");
+                     console.log(enc);
+                     }
+                     }
+                     }
+                     }
+                     if(enc) {
+                     console.log("entro en el if !enc con ");
+                     console.log(item.name);
+                     arrReposDef.push(item);
+                     }
+                     console.log("entro en webhooks, en else");
+                     }*/
 
 
 
@@ -645,7 +636,6 @@ exports.getRepositories = function getRepositories(githubtoken){
       location: 'https://api.github.com/repos/1izpena/RestAPI/hooks/7861014',
       etag: '"6e12440237398754c7b3b6965a5c8bac"',
       status: '201 Created' } }
-
  ************************/
 
 
@@ -685,26 +675,20 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
 
 
 
-/*
-    async.each(arrRepos,
-        // 2nd param is the function that each item is passed to
-        function(item, callback) {
-            // Call an asynchronous function,
-            console.log("****** item.name ********");
-            console.log(item.name);
-
-            console.log("********* item id *********");
-            console.log(item.id);
-
-            /* realmente es esto lo que necesitamos devolver *
-
-
-            callback(); //required
-        }
-    );
-
-
-*/
+    /*
+     async.each(arrRepos,
+     // 2nd param is the function that each item is passed to
+     function(item, callback) {
+     // Call an asynchronous function,
+     console.log("****** item.name ********");
+     console.log(item.name);
+     console.log("********* item id *********");
+     console.log(item.id);
+     /* realmente es esto lo que necesitamos devolver *
+     callback(); //required
+     }
+     );
+     */
 
 
 
@@ -774,7 +758,7 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
                     var githubMessageOk = {};
 
                     /* tenemos que añadir a item, el id asociado al webhook
-                    * de momento tiene id y nombre del repo */
+                     * de momento tiene id y nombre del repo */
                     if(res !== null && res !== undefined ){
                         if(res.id !== null && res.id !== undefined){
                             item.hookid = res.id;
@@ -833,12 +817,188 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
 
 
                     /*if(arrOk.length > 0){
-                        return promise.done(null,arrOk);
+                     return promise.done(null,arrOk);
+                     }
+                     else{
+                     return promise.done(githubMessageErrors,null);
+                     }*/
+
+
+                }
+                else{
+
+                    var ok = {};
+
+                    ok.code = 201;
+                    ok.arrReposOk = arrOk;
+
+
+
+                    return promise.done(null,ok);
+
+                }
+
+
+
+
+            }
+        }
+    );
+
+
+
+    return promise;
+};
+
+
+
+exports.deleteHooks = function deleteHooks(arrRepos){
+
+    var promise = new Hope.Promise();
+
+    var github = new GitHubApi({
+        // required
+        version: "3.0.0",
+        // optional
+        debug: true,
+        protocol: "https",
+        host: "api.github.com", // should be api.github.com for GitHub
+        timeout: 5000,
+        headers: {
+            "user-agent": "Meanstack" // GitHub is happy with a unique user agent
+        }
+    });
+
+
+
+
+
+    var arrErrors = [];
+    var arrOk = [];
+
+    var githuberror = false;
+
+
+
+
+
+    /* item.name item.id necesarios */
+    async.each(arrRepos,
+        // 2nd param is the function that each item is passed to
+        function (item, callback){
+            // Call an asynchronous function,
+
+            github.authenticate({
+                type: "oauth",
+                token: item.githubtoken.token
+            });
+
+
+
+            github.repos.deleteHook({
+
+                user: item.githubtoken.username,
+                repo: item.name,
+                id: item.hookid,
+                headers: {
+                    "X-GitHub-OTP": "two-factor-code"
+                }
+
+            }, function(err, res) {
+                if (err) {
+                    console.log("dentro del foreach de delete con rror");
+                    console.log(err);
+                    console.log(item);
+
+
+                    var githubMessageErrors = {};
+
+                    githubMessageErrors.item = item;
+                    githubMessageErrors.code = err.code;
+
+                    if(err.code == '504'){
+
+                        githubMessageErrors.message = "Gateway Timeout";
+
+
 
                     }
                     else{
-                        return promise.done(githubMessageErrors,null);
-                    }*/
+                        githubMessageErrors.message = JSON.parse(err.message);
+
+
+
+                    }
+
+                    arrErrors.push(githubMessageErrors);
+                    githuberror = true;
+
+
+                }
+                else{
+
+                    /* si all va bien no tienes porque devolver nada */
+                    console.log("dentro del foreach de delete sine rror");
+                    console.log(res);
+
+                    var githubMessageOk = {};
+
+
+                    console.log("esto vale item");
+                    console.log(item);
+                    githubMessageOk.item = item;
+                    githubMessageOk.obj= res;
+
+                    arrOk.push(githubMessageOk);
+
+                }
+                callback(); //required
+            });
+        },
+
+        // 3rd param is the function to call when everything's done
+        function(err){
+
+            if(err){
+                console.log('Error:' + err);
+
+
+                /* esta bien saber cuales estan bien creados y cuales no */
+                /* hay que controlarlo en angular */
+                err.arrReposError = arrErrors;
+                err.arrReposOk = arrOk;
+                return promise.done(err,null);
+            }
+
+            // All tasks are done now
+            else{
+
+                if(githuberror){
+                    /* 422 Hook already exists on this repository */
+                    /* tengo que mirar en github los posibles errores */
+                    /* solo piya 1error*/
+
+                    /* 504 para gateway time out */
+
+
+                    var errores = {};
+
+                    errores.code = 200;
+                    errores.arrReposError = arrErrors;
+                    errores.arrReposOk = arrOk;
+                    return promise.done(null,errores);
+
+
+                    /* estaria bien pasar los 2 arrays */
+
+
+                    /*if(arrOk.length > 0){
+                     return promise.done(null,arrOk);
+
+                     }
+                     else{
+                     return promise.done(githubMessageErrors,null);
+                     }*/
 
 
                 }

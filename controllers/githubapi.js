@@ -4,6 +4,18 @@
 
 
 
+
+
+
+
+
+/************** new *************/
+
+
+
+
+
+
 /****** new ******/
 var config = require('../config');
 var Auth  = require('../helpers/authentication');
@@ -13,7 +25,7 @@ var githubapiservice = require('../services/githubapi');
 var channelcontroller = require('../controllers/channel');
 
 /*
-var util = require('util');*/
+ var util = require('util');*/
 
 
 
@@ -30,15 +42,107 @@ var config  = require('../config');
 
 
 
+function getRepositoriesWithoutWebHooks (githubtoken) {
+
+    /********** *Githubtoken tiene  username y
+     token : {
+        token: String,
+        authid: Number
+    }**********/
+    /* antes de hacer la llamada nos aseguramos que githubtoken tiene token y .token
+     * ya sabemos que no es undefined */
+
+
+            githubapiservice.getRepositories(githubtoken.token).then(function (error,result){
+
+                /* result tiene */
+
+                var resp = {};
+
+                if(!error) {
+                    /*es 1 array */
+                    /* result[0]. */
+                    /* hacemos 1 array con el nombre de los repos */
+
+
+                    if(result !== undefined && result !== null){
+                        if(result.length){
+
+
+                            /* mirar para cada uno si tiene 1 hook asociado */
+                            /* me devuelve 1 lista de repos sin webhook */
+
+                            githubapiservice.getWebHooks(githubtoken, result).then(function (error,result) {
+                                if (error) {
+
+                                    resp.error = error;
+                                    return resp;
+
+
+                                }
+                                else {
+
+                                    resp.arrRepos = result;
+                                    return resp;
+
+
+
+                                }
+                            });
+
+
+
+
+                        }
+                        else{
+
+                            return null;
+                        }
+
+                    }
+                    else{
+
+                        return null;
+
+                    }
+                    /* else array vacio */
+
+                }
+                /* hay error */
+
+                else{
+                    console.log("hay error en controller al coger los repos");
+                    resp.error = error;
+                    return resp;
+
+
+                }
+
+            }); /* end getrepositories */
+
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
 /* cuando cree 1 canal
-* hay que meter en grupo y en canal el usuario interno */
+ * hay que meter en grupo y en canal el usuario interno */
 /*
-*
-*
-* */
+ *
+ *
+ * */
 
 
-    function newchannelGithub (userid, groupid, channelGithub, arrReposOk) {
+function newchannelGithub (userid, groupid, channelGithub, arrReposOk) {
 
 
     /* repositories es 1 array con item.id*/
@@ -165,12 +269,12 @@ exports.getAccountsGithub = function getAccountsGithub (request, response) {
 
 exports.auth = function auth (request, response) {
 
-/* para borrar token de la bd;
-* db.users.update({},{$unset: {githubtoken:1}},false,true)
- */
+    /* para borrar token de la bd;
+     * db.users.update({},{$unset: {githubtoken:1}},false,true)
+     */
 
     /* habría que meter token, username, mail y mirar en ambos campos
-    * si dejamos que lo haga xmail */
+     * si dejamos que lo haga xmail */
 
     var userid= request.params.userid;
     var username = request.body.username;
@@ -197,8 +301,8 @@ exports.auth = function auth (request, response) {
 
 
                     /* podemos probar si coincide
-                    con el username y sino coincide
-                    le borramos el que tiene y le metemos otro */
+                     con el username y sino coincide
+                     le borramos el que tiene y le metemos otro */
                     githubapiservice.getUserToken(userid, username).then(function (error,result){
                         if(error){
 
@@ -268,97 +372,40 @@ exports.auth = function auth (request, response) {
                                                         /* puede ser vacio o null */
 
 
-                                                        if(result !== null){
+                                                        if(result !== null && result !== undefined){
 
                                                             newResult.githubtoken = result;
+                                                            var resp = getRepositoriesWithoutWebHooks(result);
 
-                                                            githubapiservice.getRepositories(result).then(function (error,result){
+                                                            if (resp == null || resp == undefined){
 
-                                                                if(!error) {
-                                                                    /*es 1 array */
-                                                                    /* result[0]. */
-                                                                    /* hacemos 1 array con el nombre de los repos */
+                                                                newResult.arrRepos = [];
+                                                                response.json(newResult);
+                                                                response.end();
+                                                                return;
 
+                                                            }
+                                                            else {
+                                                                if(resp.arrRepos !== undefined && resp.arrRepos !== null){
+                                                                    newResult.arrRepos = resp.arrRepos;
 
-                                                                    if(result !== undefined && result !== null){
-                                                                        if(result.length){
-
-
-                                                                            newResult.arrRepos = result;
-
-
-
-                                                                            /* mirar para cada uno si tiene 1 hook asociado */
-                                                                            /* me devuelve 1 lista de repos sin webhook */
-
-                                                                            githubapiservice.getWebHooks(newResult.githubtoken, result).then(function (error,result) {
-                                                                                if (error) {
-
-                                                                                    console.log("error en controller githubapi getwebhooks");
-                                                                                    /* viene stringifiao ay que hacer el parse al reves */
-                                                                                    var messageJSON = JSON.parse(error.message);
-                                                                                    response.status(error.code).json({message: messageJSON.message});
-                                                                                    response.end();
-                                                                                    return;
-                                                                                }
-                                                                                else {
-
-
-                                                                                    /* me los devuelve enteros, solo quiero el name y el id
-                                                                                     * para angular*/
-
-                                                                                    //newResult.githubtoken = usertoken;
-                                                                                    newResult.arrRepos = result;
-
-                                                                                    /* hay que coger los repos asociados */
-                                                                                    response.json(newResult);
-                                                                                    response.end();
-                                                                                    return;
-
-                                                                                }
-                                                                            });
-
-
-
-
-                                                                        }
-                                                                        else{
-
-
-                                                                            newResult.arrRepos = arrRepos;
-                                                                            response.json(newResult);
-                                                                            response.end();
-                                                                            return;
-                                                                        }
-
-                                                                    }
-                                                                    else{
-
-                                                                        newResult.arrRepos = arrRepos;
-                                                                        response.json(newResult);
-                                                                        response.end();
-                                                                        return;
-                                                                    }
-                                                                    /* else array vacio */
+                                                                    response.json(newResult);
+                                                                    response.end();
+                                                                    return;
 
                                                                 }
-                                                                /* hay error */
-
-                                                                else{
-                                                                    console.log("hay error en controller al coger los repos");
-
-                                                                   //
-                                                                    if(error.code == '504'){
+                                                                else if(resp.error !== undefined && resp.error !== null ){
+                                                                    if(resp.error.code == '504'){
 
                                                                         console.log("hay error en controller al coger los repos 1");
-                                                                        response.status(error.code).json({message: "Gateway Timeout"});
+                                                                        response.status(resp.error.code).json({message: "Gateway Timeout"});
 
 
                                                                     }
                                                                     else{
-                                                                        var messageJSON= JSON.parse(error.message);
+                                                                        var messageJSON= JSON.parse(resp.error.message);
                                                                         console.log("hay error en controller al coger los repos 1");
-                                                                        response.status(error.code).json({message: messageJSON.message});
+                                                                        response.status(resp.error.code).json({message: messageJSON.message});
 
 
                                                                     }
@@ -366,10 +413,14 @@ exports.auth = function auth (request, response) {
                                                                     return;
 
                                                                 }
+                                                                else{
+                                                                    response.json(newResult);
+                                                                    response.end();
+                                                                    return;
 
-                                                            }); /* end getrepositories */
+                                                                }
 
-
+                                                            }
 
 
 
@@ -403,106 +454,61 @@ exports.auth = function auth (request, response) {
                             else {
 
                                 /* es el tokengithub con token/username/_id */
+
                                 newResult.githubtoken = result;
 
 
-                                githubapiservice.getRepositories(newResult.githubtoken).then(function (error, result) {
+                                var resp = getRepositoriesWithoutWebHooks(result);
+                                if (resp == null || resp == undefined){
 
-                                    if (!error) {
+                                    newResult.arrRepos = [];
+                                    response.json(newResult);
+                                    response.end();
+                                    return;
 
-                                        /*
-                                         /* hacemos 1 array con el nombre de los repos */
-                                        if (result !== undefined && result !== null) {
-                                            if (result.length) {
+                                }
+                                else {
+                                    if(resp.arrRepos !== undefined && resp.arrRepos !== null){
+                                        newResult.arrRepos = resp.arrRepos;
 
+                                        response.json(newResult);
+                                        response.end();
+                                        return;
 
-                                                githubapiservice.getWebHooks(newResult.githubtoken, result).then(function (error,result) {
-                                                    if (error) {
+                                    }
+                                    else if(resp.error !== undefined && resp.error !== null ){
+                                        if(resp.error.code == '504'){
 
-                                                        console.log("error en controller githubapi getwebhooks");
-                                                        /* viene stringifiao ay que hacer el parse al reves */
-                                                        var messageJSON = JSON.parse(error.message);
-                                                        response.status(error.code).json({message: messageJSON.message});
-                                                        response.end();
-                                                        return;
-
-                                                    }
-                                                    else {
-
-                                                        newResult.arrRepos = result;
-
-                                                        response.json(newResult);
-                                                        response.end();
-                                                        return;
-
-
-                                                    }
-                                                });
-
-
-                                            }
-                                            /* aqui sería vacio */
-                                            else{
-
-                                                newResult.arrRepos = arrRepos;
-                                                response.json(newResult);
-                                                response.end();
-                                                return;
-                                            }
-
-                                        }
-                                        /* else array vacio */
-                                        else{
-
-                                            newResult.arrRepos = arrRepos;
-                                            response.json(newResult);
-                                            response.end();
-                                            return;
-
-                                        }
-
-
-
-
-                                    }/* si hay error deberiamos notificar??, en este caso si
-                                     xq es que tenemos mal las credenciales del usuario, el token que esta guardado en la bd
-                                     se esta intentando autenticar y no funciona
-                                     */
-                                    else{
-
-
-                                        if(error.code == '504'){
                                             console.log("hay error en controller al coger los repos 1");
-                                            response.status(error.code).json({message: "Gateway Timeout"});
+                                            response.status(resp.error.code).json({message: "Gateway Timeout"});
 
 
                                         }
                                         else{
-                                            var messageJSON= JSON.parse(error.message);
-                                            response.status(error.code).json({message: messageJSON.message});
+                                            var messageJSON= JSON.parse(resp.error.message);
+                                            console.log("hay error en controller al coger los repos 1");
+                                            response.status(resp.error.code).json({message: messageJSON.message});
 
 
                                         }
                                         response.end();
                                         return;
 
-
+                                    }
+                                    else{
+                                        response.json(newResult);
+                                        response.end();
+                                        return;
 
                                     }
 
-
-                                    /*si las credenciales son erroneas deberia petar
-                                     * error code 401
-                                     * mensaje = message.message
-                                     * aunque esto no debería pasar */
-                                    /* puede pasar si tenemos 1 token que ha sido borrado
-                                     * luego, lo creamos otra vez t updateamos el token */
+                                }
 
 
 
 
-
-                                });
+                                /********************************/
+                                /*********************************/
                             }/* end else:: result no es null de getUserToken */
 
                         } /* no hay error en getUserToken*/
@@ -584,139 +590,147 @@ exports.createHooks = function createHooks (request, response) {
 
 
     if (userid !== undefined && userid !== null &&
-        account.token !== undefined && account.token !== null &&
+        account !== undefined && account !== null &&
         repositories !== undefined && repositories !== null &&
         githubchannel !== undefined && githubchannel !== null &&
         groupid !== undefined && groupid !== null) {
 
-
-        Auth(request, response).then(function (error, result) {
-            if (error) {
-                response.status(error.code).json({message: error.message});
-                response.end();
-                return;
-            }
-
-            else {
-                /* si es el mismo seguimos */
-                if (userid == result._id) {
-
-                    /* creamos los hooks, ya tenemos el token */
-                    githubapiservice.createHooks(account, repositories).then(function (error, result) {
-                        if (error) {
-
-                            console.log("error en controller githubapi creando hooks");
-
-
-                            if (error.message !== undefined || error.message !== null) {
-                                console.log("error en controller githubapi creando hooks1");
-                                /* entra xaqui */
-                                error.message = JSON.parse(error.message);
-
-
-                            }
-
-                            /*
-                             * 422 unprocesable entity::
-                             * Hook already exists on this repository :: ya tiene el hook creado
-                             * 404 not found:: no existe
-                             *
-                             * */
-
-                           /* var res = newchannelGithub(result._id, groupid, githubchannel, repositories);
-
-*/
-                            /* hay que mirar si entra x aqui
-                            * */
-
-                            console.log("antes de enviar eerror en controller/github api");
-
-                            response.status(error.code).json(error);
-                            /* esto tiene el error */
-                            /* githubMessageErrors.item = item;
-                             githubMessageErrors.code = err.code
-                             githubMessageErrors.message = err.message*/
-                            /* solo mandamos el primer error */
-                            response.end();
-                            return;
-
-
-                        }
-
-                        /* si no hay error */
-                        else {
-                            /* esto luego hay que cambiarlo para el canal, crearlo y asociarlo */
-
-                            if (result == null) {
-
-                                /* en este caso no se crearía el canal y se mostraria */
-                                response.status(204).json({message: "No webhooks created"});
-                                response.end();
-                                return;
-
-                            }
-
-                            /* hay que crear el canal y asignar al idgithub los repos
-                             * nunca va a ser nulo yo creo */
-                            else {
-
-                                /* antes de contestar creamos el canal */
-
-                                /*if(result.)*/
-                                console.log("esto vale result");
-                                console.log(result);
-
-                                /*
-                                *
-                                * esto vale result
-                                 { code: 201, arrReposOk: [ { item: [Object], obj: [Object] } ] }
-                                 POST /api/v1/users/56cb877e73da764818ec5ded/github/createHooks 201 1965.175 ms - 5449
-                                 Error 401 - the user already has a public channel with that name
-                                 accediendo a la ruta /api/v1/callback/
-                                 esto valeresponseee callback2
-
-                                 *
-                                * */
-
-                                if(result.arrReposOk !== undefined && result.arrReposOk !== null){
-                                    if(result.arrReposOk.length >0 ){
-                                        /*
-                                        con esto funcionaba
-                                        result.reschannel =  newchannelGithub(userid, groupid, githubchannel, repositories);
-                                        */
-                                        result.reschannel =  newchannelGithub(userid, groupid, githubchannel, result.arrReposOk);
-
-
-
-
-
-
-                                    }
-                                }
-
-
-
-
-                                /* debe entrar x aqui creamos el canal */
-                                response.status(result.code).json(result);
-                                response.end();
-                                return;
-                            }
-                        }
-
-
-                    });
-                }
-
-                else{
-                    response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+        if(account.token !== undefined && account.token !== null ){
+            Auth(request, response).then(function (error, result) {
+                if (error) {
+                    response.status(error.code).json({message: error.message});
                     response.end();
                     return;
-
-
                 }
-            }
-        });
+
+                else {
+                    /* si es el mismo seguimos */
+                    if (userid == result._id) {
+
+                        /* creamos los hooks, ya tenemos el token */
+                        githubapiservice.createHooks(account, repositories).then(function (error, result) {
+                            if (error) {
+
+                                console.log("error en controller githubapi creando hooks");
+
+
+                                if (error.message !== undefined || error.message !== null) {
+                                    console.log("error en controller githubapi creando hooks1");
+                                    /* entra xaqui */
+                                    error.message = JSON.parse(error.message);
+
+
+                                }
+
+                                /*
+                                 * 422 unprocesable entity::
+                                 * Hook already exists on this repository :: ya tiene el hook creado
+                                 * 404 not found:: no existe
+                                 *
+                                 * */
+
+                                /* var res = newchannelGithub(result._id, groupid, githubchannel, repositories);
+                                 */
+                                /* hay que mirar si entra x aqui
+                                 * */
+
+                                console.log("antes de enviar eerror en controller/github api");
+
+                                response.status(error.code).json(error);
+                                /* esto tiene el error */
+                                /* githubMessageErrors.item = item;
+                                 githubMessageErrors.code = err.code
+                                 githubMessageErrors.message = err.message*/
+                                /* solo mandamos el primer error */
+                                response.end();
+                                return;
+
+
+                            }
+
+                            /* si no hay error */
+                            else {
+                                /* esto luego hay que cambiarlo para el canal, crearlo y asociarlo */
+
+                                if (result == null) {
+
+                                    /* en este caso no se crearía el canal y se mostraria */
+                                    response.status(204).json({message: "No webhooks created"});
+                                    response.end();
+                                    return;
+
+                                }
+
+                                /* hay que crear el canal y asignar al idgithub los repos
+                                 * nunca va a ser nulo yo creo */
+                                else {
+
+                                    /* antes de contestar creamos el canal */
+
+                                    /*if(result.)*/
+                                    console.log("esto vale result");
+                                    console.log(result);
+
+                                    /*
+                                     *
+                                     * esto vale result
+                                     { code: 201, arrReposOk: [ { item: [Object], obj: [Object] } ] }
+                                     POST /api/v1/users/56cb877e73da764818ec5ded/github/createHooks 201 1965.175 ms - 5449
+                                     Error 401 - the user already has a public channel with that name
+                                     accediendo a la ruta /api/v1/callback/
+                                     esto valeresponseee callback2
+                                     *
+                                     * */
+
+                                    if(result.arrReposOk !== undefined && result.arrReposOk !== null){
+                                        if(result.arrReposOk.length >0 ){
+                                            /*
+                                             con esto funcionaba
+                                             result.reschannel =  newchannelGithub(userid, groupid, githubchannel, repositories);
+                                             */
+                                            result.reschannel =  newchannelGithub(userid, groupid, githubchannel, result.arrReposOk);
+
+
+
+
+
+
+                                        }
+                                    }
+
+
+
+
+                                    /* debe entrar x aqui creamos el canal */
+                                    response.status(result.code).json(result);
+                                    response.end();
+                                    return;
+                                }
+                            }
+
+
+                        });
+                    }
+
+                    else{
+                        response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                        response.end();
+                        return;
+
+
+                    }
+                }
+            });
+        }
+        else{
+            response.status(400).json({message: 'Bad Request. Missing required parameters: Token account'});
+            response.end();
+            return;
+
+        }
+
+
+
     }
 
     else{
@@ -725,6 +739,17 @@ exports.createHooks = function createHooks (request, response) {
         return;
     }
 };
+
+/************** end of new *****************/
+
+
+
+
+
+
+
+
+
 
 
 

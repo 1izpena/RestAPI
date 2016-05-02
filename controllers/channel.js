@@ -604,28 +604,12 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
 
 
 
-
-
-
-
-
                                         /********************* end of new *************************************/
-
-
 
 
 
                                         var roomName = 'CH_'+request.params.channelid;
                                         var conectedUsers = socketio.getUsersInSocket(roomName);
-
-                                        console.log("peta en lo de laiene");
-
-                                        console.log("¿cual sera el undefined 2222??");
-                                        console.log("los convertimos a string");
-
-
-
-
 
 
 
@@ -718,24 +702,56 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
     });
 };
 
+
+
+/* si el canal esta asociado al servicio de github hay que borrar los webhooks primero, todos ellos */
 exports.deletechannelfromgroup = function deletechannelfromgroup (request, response){
     Auth(request, response).then(function(error, result) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
+
             if (request.params.userid == result._id){
                 chatErrors.checkuserinchannel(request.params.channelid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
                     }else{
+
                         chatErrors.checkischanneladmin(request.params.channelid,request.params.userid).then(function (error,result){
                             if(error){
                                 response.status(error.code).json({message: error.message});
                             }else{
-                                channelservice.removechannel(request.params.userid,request.params.groupid,request.params.channelid).then(function (error,result){
+
+                                /* en el result tenemos el id del user, pero tambien el su token
+                                *
+                                * githubtoken" : [ { "token" : "120dbe14caca8f6efb2e2b54597ae49ec557e5e1", "username" : "1izpena",
+                                * antes de remove channel lo buscamos y vemos si tiene
+                                *
+                                * "githubRepositories" : [ { "id" : 53012875, "name" : "angularProject",
+                                 * "hookid" : 8188275, "_id" : ObjectId("571ecef3cf02b1c75ba3d44c") },
+                                 * { "id" : 53012902, "name" : "RestAPI", "hookid" : 8188274,
+                                *
+                                *
+                                * */
+
+                                console.log("esto vale result en deletechannelfromgroup");
+                                console.log(result);
+
+
+                                /* buscamos el canal ,quizas se ouede hacer en el servicio */
+                                /*Channel.search(query,limit).then(function (error, user) {
+                                    if (error){
+                                        response.status(error.code).json({message: error.message});
+                                    }
+                                    else {*/
+
+                                /****************/
+                                channelservice.removechannel(request.params.userid, request.params.groupid, request.params.channelid).then(function (error,result){
                                     if(error){
                                         response.status(error.code).json({message: error.message});
                                     }else{
+
+
                                         if (result.channelType === "PRIVATE"){
                                             socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPrivateChannel', result);
                                         }
@@ -763,6 +779,7 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
                                         });
                                     }
                                 });
+                                /***********************/
                             }
                         });
                     }
