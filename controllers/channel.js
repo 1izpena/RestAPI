@@ -51,7 +51,7 @@ exports.newchannel = function newchannel (request, response) {
                                         response.status(401).json({message: 'Second Userid not valid.'});
 
                                     } else {
-                                        channelservice.createnewchannel(result._id, request.params.groupid, request.body.channelName, request.body.channelType, userid2).then(function (error, channel) {
+                                        channelservice.createnewchannel(result._id, request.params.groupid, request.body.channelName, request.body.channelType, userid2, null).then(function (error, channel) {
                                             if (error) {
                                                 response.status(error.code).json({message: error.message});
                                             } else {
@@ -63,7 +63,7 @@ exports.newchannel = function newchannel (request, response) {
                                 });
                             }
                             else {
-                                channelservice.createnewchannel(result._id,request.params.groupid,request.body.channelName,request.body.channelType).then(function (error,channel){
+                                channelservice.createnewchannel(result._id,request.params.groupid,request.body.channelName,request.body.channelType, null, null).then(function (error,channel){
                                     if (error){
                                         response.status(error.code).json({message: error.message});
                                     }else {

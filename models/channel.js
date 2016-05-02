@@ -72,6 +72,8 @@ channelSchema.statics.createchannel = function createchannel (attributes, reposi
 
             for(var i = 0; i< repositories.length; i++){
                 /* intentamos meter directamente el objeto */
+                console.log("esto vale repositories[i].item");
+                console.log(repositories[i].item);
                 m.githubRepositories.push(repositories[i].item);
 
             }

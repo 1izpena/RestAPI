@@ -662,7 +662,7 @@ exports.getRepositories = function getRepositories(githubtoken){
 
 
 
-
+/* undefined gestionado en controller */
 exports.createHooks = function createHooks(githubtoken, arrRepos){
 
     var promise = new Hope.Promise();
@@ -691,25 +691,6 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
     var arrOk = [];
 
     var githuberror = false;
-
-
-
-
-    /*
-     async.each(arrRepos,
-     // 2nd param is the function that each item is passed to
-     function(item, callback) {
-     // Call an asynchronous function,
-     console.log("****** item.name ********");
-     console.log(item.name);
-     console.log("********* item id *********");
-     console.log(item.id);
-     /* realmente es esto lo que necesitamos devolver *
-     callback(); //required
-     }
-     );
-     */
-
 
 
 
@@ -745,25 +726,20 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
 
                     var githubMessageErrors = {};
 
+
                     githubMessageErrors.item = item;
+                    githubMessageErrors.item.githubtoken = githubtoken;
                     githubMessageErrors.code = err.code;
 
                     if(err.code == '504'){
 
                         githubMessageErrors.message = "Gateway Timeout";
 
-
-
                     }
                     else{
                         githubMessageErrors.message = JSON.parse(err.message);
 
-
-
                     }
-
-
-
 
 
                     arrErrors.push(githubMessageErrors);
@@ -788,10 +764,12 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
 
 
 
+                    githubMessageOk.item = item;
+                    githubMessageOk.item.githubtoken = githubtoken;
+                    githubMessageOk.obj= res;
+
                     console.log("esto vale item");
                     console.log(item);
-                    githubMessageOk.item = item;
-                    githubMessageOk.obj= res;
 
                     arrOk.push(githubMessageOk);
 
@@ -807,8 +785,6 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
                 console.log('Error:' + err);
 
 
-                /* esta bien saber cuales estan bien creados y cuales no */
-                /* hay que controlarlo en angular */
                 err.arrReposError = arrErrors;
                 err.arrReposOk = arrOk;
                 return promise.done(err,null);
@@ -833,15 +809,7 @@ exports.createHooks = function createHooks(githubtoken, arrRepos){
                     return promise.done(null,errores);
 
 
-                    /* estaria bien pasar los 2 arrays */
 
-
-                    /*if(arrOk.length > 0){
-                     return promise.done(null,arrOk);
-                     }
-                     else{
-                     return promise.done(githubMessageErrors,null);
-                     }*/
 
 
                 }
@@ -908,72 +876,120 @@ exports.deleteHooks = function deleteHooks(arrRepos){
         function (item, callback){
             // Call an asynchronous function,
 
-            github.authenticate({
-                type: "oauth",
-                token: item.githubtoken.token
-            });
+            console.log("esto vale item");
+            console.log(item.githubtoken);
+
+
+            /* antes de esto mirar que githubtoken exista, para todos lo que se haga de repos */
+
+            if(item.githubtoken !== undefined && item.githubtoken !== null){
+                if(item.githubtoken.token !== undefined && item.githubtoken.token !== null &&
+                    item.githubtoken.username !== undefined && item.githubtoken.username !== null){
+
+
+                    github.authenticate({
+                        type: "oauth",
+                        token: item.githubtoken.token
+                    });
 
 
 
-            github.repos.deleteHook({
 
-                user: item.githubtoken.username,
-                repo: item.name,
-                id: item.hookid,
-                headers: {
-                    "X-GitHub-OTP": "two-factor-code"
+                    github.repos.deleteHook({
+
+                        user: item.githubtoken.username,
+                        repo: item.name,
+                        id: item.hookid,
+                        headers: {
+                            "X-GitHub-OTP": "two-factor-code"
+                        }
+
+                    }, function(err, res) {
+                        if (err) {
+                            console.log("dentro del foreach de delete con rror");
+                            console.log(err);
+                            console.log(item);
+
+
+                            var githubMessageErrors = {};
+
+                            githubMessageErrors.item = item;
+                            githubMessageErrors.code = err.code;
+
+                            if(err.code == '504'){
+
+                                githubMessageErrors.message = "Gateway Timeout";
+
+
+
+                            }
+                            else{
+                                githubMessageErrors.message = JSON.parse(err.message);
+
+
+
+                            }
+
+                            arrErrors.push(githubMessageErrors);
+                            githuberror = true;
+
+
+                        }
+                        else{
+
+                            /* si all va bien no tienes porque devolver nada */
+                            console.log("dentro del foreach de delete sine rror");
+                            console.log(res);
+
+                            var githubMessageOk = {};
+
+
+                            console.log("esto vale item");
+                            console.log(item);
+                            githubMessageOk.item = item;
+                            githubMessageOk.obj= res;
+
+                            arrOk.push(githubMessageOk);
+
+                        }
+                        callback(); //required
+                    });
+
                 }
 
-            }, function(err, res) {
-                if (err) {
-                    console.log("dentro del foreach de delete con rror");
-                    console.log(err);
-                    console.log(item);
 
-
-                    var githubMessageErrors = {};
-
-                    githubMessageErrors.item = item;
-                    githubMessageErrors.code = err.code;
-
-                    if(err.code == '504'){
-
-                        githubMessageErrors.message = "Gateway Timeout";
-
-
-
-                    }
-                    else{
-                        githubMessageErrors.message = JSON.parse(err.message);
-
-
-
-                    }
-
-                    arrErrors.push(githubMessageErrors);
-                    githuberror = true;
-
+                else {
+                    var err = {
+                        code   : 400,
+                        message: 'Bad Request. Missing required parameters: Token account foreach repository.'
+                    };
+                    err.arrReposError = arrErrors;
+                    err.arrReposOk = arrOk;
+                    return promise.done(err,null);
 
                 }
-                else{
 
-                    /* si all va bien no tienes porque devolver nada */
-                    console.log("dentro del foreach de delete sine rror");
-                    console.log(res);
+            }
+            else {
+                var err = {
+                    code   : 400,
+                    message: 'Bad Request. Missing required parameters: Token account foreach repository.'
+                };
 
-                    var githubMessageOk = {};
 
 
-                    console.log("esto vale item");
-                    console.log(item);
-                    githubMessageOk.item = item;
-                    githubMessageOk.obj= res;
 
-                    arrOk.push(githubMessageOk);
+                err.arrReposError = arrErrors;
+                err.arrReposOk = arrOk;
+                return promise.done(err,null);
 
-                }
-                callback(); //required
-            });
+            }
+
+
+
+
+
+
         },
 
         // 3rd param is the function to call when everything's done
