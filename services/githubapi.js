@@ -101,8 +101,8 @@ exports.createToken = function createToken (userid, username, pass) {
 
     github.authorization.create({
         scopes: ["user", "public_repo", "repo", "repo:status", "gist", "write:repo_hook"],
-        note: "what this auth is for",
-        note_url: "http://url-to-this-auth-app",
+        note: "Meanstack App",
+        note_url: config.meanstackUrl,
         headers: {
             "X-GitHub-OTP": "two-factor-code"
         }
@@ -524,6 +524,9 @@ exports.getWebHooks = function getWebHooks (githubtoken, arrRepos){
             // All tasks are done now
             else{
 
+                console.log("esto vale arrReposDef");
+                console.log(arrReposDef[0].name);
+
                 return promise.done(null,arrReposDef);
 
 
@@ -568,7 +571,7 @@ exports.getRepositories = function getRepositories(githubtoken){
     });
 
 
-    console.log("esto avle token para coger los repos");
+    console.log("esto vale token para coger los repos");
     /* es un array si lo coje de la bd
      * no lo es si lo ha creado */
     console.log(githubtoken);
@@ -576,8 +579,25 @@ exports.getRepositories = function getRepositories(githubtoken){
 
     github.authenticate({
         type: "oauth",
-        token: githubtoken.token
+        token: githubtoken
+
+    }, function(err, res) {
+        if (err) {
+            console.log("error al autentificarse");
+            console.log(err);
+            return promise.done(err,null);
+
+        }
+        else {
+            console.log("salgo de autentificarme sin problema");
+
+            return promise.done(null,res);
+
+
+        }
+
     });
+
 
 
     /* me da 1 time out */

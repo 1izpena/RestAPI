@@ -42,7 +42,7 @@ var config  = require('../config');
 
 
 
-function getRepositoriesWithoutWebHooks (githubtoken) {
+function getRepositoriesWithoutWebHooks (githubtoken, newResult, response) {
 
     /********** *Githubtoken tiene  username y
      token : {
@@ -52,6 +52,8 @@ function getRepositoriesWithoutWebHooks (githubtoken) {
     /* antes de hacer la llamada nos aseguramos que githubtoken tiene token y .token
      * ya sabemos que no es undefined */
 
+
+            newResult.arrRepos = [];
 
             githubapiservice.getRepositories(githubtoken.token).then(function (error,result){
 
@@ -72,18 +74,46 @@ function getRepositoriesWithoutWebHooks (githubtoken) {
                             /* mirar para cada uno si tiene 1 hook asociado */
                             /* me devuelve 1 lista de repos sin webhook */
 
+
+
+
+
+                            /******************************/
+
                             githubapiservice.getWebHooks(githubtoken, result).then(function (error,result) {
                                 if (error) {
 
-                                    resp.error = error;
-                                    return resp;
+                                    if(error.code == '504'){
+
+                                        console.log("hay error en controller al coger los repos 1");
+                                        response.status(error.code).json({message: "Gateway Timeout"});
+
+
+                                    }
+                                    else{
+                                        var messageJSON= JSON.parse(error.message);
+                                        console.log("hay error en controller al coger los repos 1");
+                                        response.status(error.code).json({message: messageJSON.message});
+
+
+                                    }
+                                    response.end();
+                                    return;
 
 
                                 }
                                 else {
 
-                                    resp.arrRepos = result;
-                                    return resp;
+                                    console.log("*********************************");
+                                    console.log("esto vale resp");
+
+                                    newResult.arrRepos = result;
+
+
+
+                                    response.json(newResult);
+                                    response.end();
+                                    return;
 
 
 
@@ -96,13 +126,17 @@ function getRepositoriesWithoutWebHooks (githubtoken) {
                         }
                         else{
 
-                            return null;
+
+                            response.json(newResult);
+                            response.end();
+                            return;
                         }
 
                     }
                     else{
-
-                        return null;
+                        response.json(newResult);
+                        response.end();
+                        return;
 
                     }
                     /* else array vacio */
@@ -111,9 +145,26 @@ function getRepositoriesWithoutWebHooks (githubtoken) {
                 /* hay error */
 
                 else{
-                    console.log("hay error en controller al coger los repos");
-                    resp.error = error;
-                    return resp;
+
+
+                    if(error.code == '504'){
+
+                        console.log("hay error en controller al coger los repos 1");
+                        response.status(error.code).json({message: "Gateway Timeout"});
+
+
+                    }
+                    else{
+                        var messageJSON= JSON.parse(error.message);
+                        console.log("hay error en controller al coger los repos 1");
+                        response.status(error.code).json({message: messageJSON.message});
+
+
+                    }
+                    response.end();
+                    return;
+
+
 
 
                 }
@@ -375,52 +426,9 @@ exports.auth = function auth (request, response) {
                                                         if(result !== null && result !== undefined){
 
                                                             newResult.githubtoken = result;
-                                                            var resp = getRepositoriesWithoutWebHooks(result);
-
-                                                            if (resp == null || resp == undefined){
-
-                                                                newResult.arrRepos = [];
-                                                                response.json(newResult);
-                                                                response.end();
-                                                                return;
-
-                                                            }
-                                                            else {
-                                                                if(resp.arrRepos !== undefined && resp.arrRepos !== null){
-                                                                    newResult.arrRepos = resp.arrRepos;
-
-                                                                    response.json(newResult);
-                                                                    response.end();
-                                                                    return;
-
-                                                                }
-                                                                else if(resp.error !== undefined && resp.error !== null ){
-                                                                    if(resp.error.code == '504'){
-
-                                                                        console.log("hay error en controller al coger los repos 1");
-                                                                        response.status(resp.error.code).json({message: "Gateway Timeout"});
+                                                            getRepositoriesWithoutWebHooks(result, newResult, response);
 
 
-                                                                    }
-                                                                    else{
-                                                                        var messageJSON= JSON.parse(resp.error.message);
-                                                                        console.log("hay error en controller al coger los repos 1");
-                                                                        response.status(resp.error.code).json({message: messageJSON.message});
-
-
-                                                                    }
-                                                                    response.end();
-                                                                    return;
-
-                                                                }
-                                                                else{
-                                                                    response.json(newResult);
-                                                                    response.end();
-                                                                    return;
-
-                                                                }
-
-                                                            }
 
 
 
@@ -458,51 +466,11 @@ exports.auth = function auth (request, response) {
                                 newResult.githubtoken = result;
 
 
-                                var resp = getRepositoriesWithoutWebHooks(result);
-                                if (resp == null || resp == undefined){
 
-                                    newResult.arrRepos = [];
-                                    response.json(newResult);
-                                    response.end();
-                                    return;
-
-                                }
-                                else {
-                                    if(resp.arrRepos !== undefined && resp.arrRepos !== null){
-                                        newResult.arrRepos = resp.arrRepos;
-
-                                        response.json(newResult);
-                                        response.end();
-                                        return;
-
-                                    }
-                                    else if(resp.error !== undefined && resp.error !== null ){
-                                        if(resp.error.code == '504'){
-
-                                            console.log("hay error en controller al coger los repos 1");
-                                            response.status(resp.error.code).json({message: "Gateway Timeout"});
+                                getRepositoriesWithoutWebHooks(result, newResult, response);
 
 
-                                        }
-                                        else{
-                                            var messageJSON= JSON.parse(resp.error.message);
-                                            console.log("hay error en controller al coger los repos 1");
-                                            response.status(resp.error.code).json({message: messageJSON.message});
 
-
-                                        }
-                                        response.end();
-                                        return;
-
-                                    }
-                                    else{
-                                        response.json(newResult);
-                                        response.end();
-                                        return;
-
-                                    }
-
-                                }
 
 
 
