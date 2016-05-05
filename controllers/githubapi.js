@@ -52,124 +52,149 @@ function getRepositoriesWithoutWebHooks (githubtoken, newResult, response) {
     /* antes de hacer la llamada nos aseguramos que githubtoken tiene token y .token
      * ya sabemos que no es undefined */
 
-
-            newResult.arrRepos = [];
-
-            githubapiservice.getRepositories(githubtoken.token).then(function (error,result){
-
-                /* result tiene */
-
-                var resp = {};
-
-                if(!error) {
-                    /*es 1 array */
-                    /* result[0]. */
-                    /* hacemos 1 array con el nombre de los repos */
+    console.log("dentro de getRepositoriesWithoutWebHooks esto vale githubtoken");
+    console.log(githubtoken);
 
 
-                    if(result !== undefined && result !== null){
-                        if(result.length){
-
-
-                            /* mirar para cada uno si tiene 1 hook asociado */
-                            /* me devuelve 1 lista de repos sin webhook */
+    newResult.arrRepos = [];
 
 
 
+    githubapiservice.getRepositories(githubtoken.token).then(function (error,result){
 
-
-                            /******************************/
-
-                            githubapiservice.getWebHooks(githubtoken, result).then(function (error,result) {
-                                if (error) {
-
-                                    if(error.code == '504'){
-
-                                        console.log("hay error en controller al coger los repos 1");
-                                        response.status(error.code).json({message: "Gateway Timeout"});
-
-
-                                    }
-                                    else{
-                                        var messageJSON= JSON.parse(error.message);
-                                        console.log("hay error en controller al coger los repos 1");
-                                        response.status(error.code).json({message: messageJSON.message});
-
-
-                                    }
-                                    response.end();
-                                    return;
-
-
-                                }
-                                else {
-
-                                    console.log("*********************************");
-                                    console.log("esto vale resp");
-
-                                    newResult.arrRepos = result;
+        /* result tiene */
 
 
 
-                                    response.json(newResult);
-                                    response.end();
-                                    return;
+        var resp = {};
+
+        if(!error) {
+            /*es 1 array */
+            /* result[0]. */
+            /* hacemos 1 array con el nombre de los repos */
 
 
+            if(result !== undefined && result !== null){
+                if(result.length){
+
+
+                    /* mirar para cada uno si tiene 1 hook asociado */
+                    /* me devuelve 1 lista de repos sin webhook */
+
+
+
+
+
+                    /******************************/
+
+                    githubapiservice.getWebHooks(githubtoken, result).then(function (error,result) {
+                        if (error) {
+
+                            if(error.code == '504'){
+
+                                console.log("hay error en controller al coger los repos 1");
+                                response.status(error.code).json({message: "Gateway Timeout"});
+
+
+                            }
+                            else{
+                                var messageJSON= JSON.parse(error.message);
+
+                                if(error.code == 401){
+                                    /* esto es lo que devolvería el checkauthorization */
+                                    error.code = 404;
+                                    messageJSON.message = "Access Token not found. Login Again or choose another account."
 
                                 }
-                            });
+                                response.status(error.code).json({message: messageJSON.message});
 
 
+                            }
+                            response.end();
+                            return;
 
 
                         }
-                        else{
+                        else {
+
+                            console.log("*********************************");
+                            console.log("esto vale resp");
+
+                            newResult.arrRepos = result;
+
 
 
                             response.json(newResult);
                             response.end();
                             return;
+
+
+
                         }
+                    });
 
-                    }
-                    else{
-                        response.json(newResult);
-                        response.end();
-                        return;
 
-                    }
-                    /* else array vacio */
+
 
                 }
-                /* hay error */
-
                 else{
 
 
-                    if(error.code == '504'){
-
-                        console.log("hay error en controller al coger los repos 1");
-                        response.status(error.code).json({message: "Gateway Timeout"});
-
-
-                    }
-                    else{
-                        var messageJSON= JSON.parse(error.message);
-                        console.log("hay error en controller al coger los repos 1");
-                        response.status(error.code).json({message: messageJSON.message});
-
-
-                    }
+                    response.json(newResult);
                     response.end();
                     return;
+                }
+
+            }
+            else{
+                response.json(newResult);
+                response.end();
+                return;
+
+            }
+            /* else array vacio */
+
+        }
+        /* hay error */
+
+        else{
 
 
+            if(error.code == '504'){
 
+                console.log("hay error en controller al coger los repos 1");
+                response.status(error.code).json({message: "Gateway Timeout"});
+
+
+            }
+            else{
+                var messageJSON= JSON.parse(error.message);
+                console.log("hay error en controller al coger los repos 1");
+                /* entra por aqui y dice bad credentials, 401 cuando se ha borrado el token manualmente */
+
+                console.log("hay error en controller al coger los repos 1");
+
+                if(error.code == 401){
+                    /* esto es lo que devolvería el checkauthorization */
+                    error.code = 404;
+                    messageJSON.message = "Access Token not found. Login Again or choose another account."
 
                 }
 
-            }); /* end getrepositories */
+
+                response.status(error.code).json({message: messageJSON.message});
+
+
+            }
+            response.end();
+            return;
+
+
+
+
+        }
+
+    }); /* end getrepositories */
 
 
 
@@ -333,8 +358,22 @@ exports.auth = function auth (request, response) {
     /*la pass puede ir vacia si ya tiene la cuenta */
     var pass = request.body.pass;
 
+    /* meter flag y asi hacemos lomismo */
+    var rebuildAuth = request.body.rebuildAuth;
+    if(rebuildAuth == 'true'){
+        rebuildAuth = true;
+    }
+    else{
+        rebuildAuth = false;
+
+    }
+
+
     var arrRepos = [];
-    var usertoken = "";
+    var oldToken = null;
+
+    console.log("esto vale request.body.rebuildAuth");
+    console.log(request.body.rebuildAuth);
 
     if(userid !== undefined && userid !== null &&
         username !== undefined && username !== null ){
@@ -354,7 +393,17 @@ exports.auth = function auth (request, response) {
                     /* podemos probar si coincide
                      con el username y sino coincide
                      le borramos el que tiene y le metemos otro */
+
+                    /*si el flag es 1, tengo que recogerlo de la bd para luego
+                    * modificar tods los que tengan ese token,
+                    * pero tenemos que crearlo
+                    * la result no debería ser null */
+
+
                     githubapiservice.getUserToken(userid, username).then(function (error,result){
+
+                        console.log("entra en getusertoken");
+
                         if(error){
 
                             /* aqui solo bd, no llamadas al api */
@@ -365,6 +414,7 @@ exports.auth = function auth (request, response) {
 
                         else{
 
+                            console.log("entra en getusertoken sin error");
 
                             /* aqui tengo el objeto entero */
                             /* mirar si es nulo, hay que crear el token
@@ -372,13 +422,33 @@ exports.auth = function auth (request, response) {
                             var newResult = {};
 
                             // si no lo encuentra si que hay que decir que la pass tiene que estar
-                            if(result == null){
+                            console.log("antes del if que me incha");
+                            console.log("result");
+                            console.log(result);
+                            console.log("rebuildAuth");
+                            console.log(rebuildAuth);
+
+
+
+
+                        if((result == null && rebuildAuth == false) || (result !== null && rebuildAuth == true)){
+
+                                console.log("entra en getusertoken result == null || rebuildAuth == true");
 
                                 if(pass == undefined || pass == null || pass == ''){
                                     response.status(400).json({message: 'Bad Request. Missing required parameters'});
 
                                 }
                                 else{
+                                    console.log("entra en getusertoken pass == undefined || pass == null || pass == ''");
+
+                                    if(rebuildAuth == true){
+                                        oldToken = result;
+                                    }
+                                    console.log("esto vale oldtoken con result");
+                                    console.log(oldToken);
+
+                                    /* si result es !== null update token y fuera */
 
                                     githubapiservice.createToken(userid,username,pass).then(function (error,result){
                                         if(error){
@@ -386,6 +456,8 @@ exports.auth = function auth (request, response) {
                                             console.log("error en controller githubapi creando token");
                                             /* viene stringifiao ay que hacer el parse al reves */
                                             var messageJSON= JSON.parse(error.message);
+
+
                                             response.status(error.code).json({message: messageJSON.message});
                                             response.end();
                                             return;
@@ -404,12 +476,15 @@ exports.auth = function auth (request, response) {
                                             }
                                             else{
 
-                                                /* solo el token */
-                                                usertoken = result;
+                                                /* si rebuildAuth a ido bien guardamos updateamos el nuevo token en user
+                                                * y repositories */
+
+
+
 
                                                 /* solo llamada a la bd */
                                                 /* hay que guardar el token */
-                                                githubapiservice.saveUserToken(userid, username, result).then(function (error,result){
+                                                githubapiservice.saveUserToken(userid, username, result, oldToken).then(function (error,result){
                                                     if(error){
                                                         response.status(error.code).json({message: error.message});
                                                         response.end();
@@ -424,9 +499,19 @@ exports.auth = function auth (request, response) {
 
 
                                                         if(result !== null && result !== undefined){
+                                                            if(result.token !== null && result.token !== undefined){
+                                                                newResult.githubtoken = result;
+                                                                getRepositoriesWithoutWebHooks(result, newResult, response);
 
-                                                            newResult.githubtoken = result;
-                                                            getRepositoriesWithoutWebHooks(result, newResult, response);
+                                                            }
+                                                            else{
+                                                                response.status(422).json({message: "Validation Failed sin .token"});
+                                                                response.end();
+                                                                return;
+
+                                                            }
+
+
 
 
 
@@ -435,7 +520,9 @@ exports.auth = function auth (request, response) {
                                                         }
                                                         /* no hay token, si lo hay siempre pos de 0 */
                                                         else{
-                                                            response.status(422).json({message: "Validation Failed"});
+
+                                                            /* se mete xaui */
+                                                            response.status(422).json({message: "Validation Failed result es null"});
                                                             response.end();
                                                             return;
 
@@ -461,14 +548,27 @@ exports.auth = function auth (request, response) {
                             /* aqui la result es solo el token */
                             else {
 
+                                /*la result puede no ser nula, pero si el username.flag existe
+                                * hay que generar el token
+                                * y hacer el mismo proceso de arriba */
+
                                 /* es el tokengithub con token/username/_id */
 
-                                newResult.githubtoken = result;
+                                /* lo cogemos de la bd y miramos si existe, si hago getrepos me da badcredentials, vamos a intentar que no lo haga */
 
 
 
-                                getRepositoriesWithoutWebHooks(result, newResult, response);
+                                if(result.token !== null && result.token !== undefined){
+                                    newResult.githubtoken = result;
+                                    getRepositoriesWithoutWebHooks(result, newResult, response);
 
+                                }
+                                else{
+                                    response.status(422).json({message: "Validation Failed"});
+                                    response.end();
+                                    return;
+
+                                }
 
 
 

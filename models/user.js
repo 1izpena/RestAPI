@@ -295,6 +295,54 @@ userSchema.statics.reset = function reset(attributes){
 
 
 /*ACTUALIZAR */
+
+/* esto es xsi funciona -----
+userSchema.statics.social = function social (attributes) {
+
+    var promise = new Hope.Promise();
+    this.findOneAndUpdate({mail: attributes.mail}, {$addToSet: {social:{'network': attributes.network, 'uid': attributes.uid }}}, {}, function(err,user) {
+        if(user){
+            return  promise.done(null,user);
+        }
+        else{
+            attributes.social={'network': attributes.network, 'uid': attributes.uid };
+            attributes.username=attributes.uid;
+            var User = mongoose.model('User', userSchema);
+            User = new User(attributes);
+
+            User.save(function (err){
+                if(err) return promise.done(err,null);
+            });
+        };
+    });
+    return promise;
+};
+
+*/
+
+
+/*****************************************/
+userSchema.statics.updateusergithubtoken = function updateusergithubtoken (query, update, options) {
+
+    console.log("entro en updateusergithubtoken dentro de user.js");
+
+    /* no me lo cambia */
+
+    var promise = new Hope.Promise();
+    this.findOneAndUpdate(query, update, options,function(error, user) {
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            return promise.done(null, user);
+        }
+    });
+    return promise;
+};
+
+
+
+
+
 userSchema.statics.updateuser = function updateuser (id, update, options) {
     var promise = new Hope.Promise();
     this.findByIdAndUpdate(id, update, options,function(error, user) {
@@ -307,8 +355,19 @@ userSchema.statics.updateuser = function updateuser (id, update, options) {
     return promise;
 };
 
+
+
+
+
+
+
+
+//actualizar varios usuarios
 userSchema.statics.updateusers = function updateusers (query, update, options) {
     var promise = new Hope.Promise();
+
+
+
     this.update(query, update, options,function(error, user) {
         if (error) {
             return promise.done(error, null);
@@ -326,6 +385,10 @@ userSchema.statics.updateusers = function updateusers (query, update, options) {
     });
     return promise;
 };
+
+
+
+
 
 //ACTIVAR CUENTA
 userSchema.statics.activate = function activate(attributes){
@@ -349,26 +412,7 @@ userSchema.statics.activate = function activate(attributes){
     return promise;
 };
 
-//actualizar varios usuarios
-userSchema.statics.updateusers = function updateusers (query, update, options) {
-    var promise = new Hope.Promise();
-    this.update(query, update, options,function(error, user) {
-        if (error) {
-            return promise.done(error, null);
-        }else {
-            if (user){
-                promise.done(null, user);
-            }else {
-                var err = {
-                    code   : 400,
-                    message: 'user not found'
-                };
-                return promise.done(err, null);
-            }
-        }
-    });
-    return promise;
-};
+
 //eliminar cuenta
 userSchema.statics.remove = function remove(attributes){
     var promise = new Hope.Promise();

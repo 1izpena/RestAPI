@@ -114,9 +114,7 @@ exports.createToken = function createToken (userid, username, pass) {
             /* entonces update */
 
         }
-        else if (res.token) {
-
-            /* hay que guardar el token en la bd */
+        else if(res.token){
             return promise.done(null,res.token);
 
         }
@@ -124,6 +122,8 @@ exports.createToken = function createToken (userid, username, pass) {
             return promise.done(null,null);
 
         }
+
+
     });
 
     return promise;
@@ -132,17 +132,89 @@ exports.createToken = function createToken (userid, username, pass) {
 
 
 
-exports.saveUserToken = function saveUserToken(userid, username, token){
+exports.saveUserToken = function saveUserToken(userid, username, token, oldToken){
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
 
-    var query = { _id: userid};
-    var update = {$push : {githubtoken:{username:username, token:token}}};
+
+
+    var query;
+    var update;
+    var options;
+
+
+/*  422 si ya lo tiene creado , habria que hacer 1 get o algo para recogerlo o para cambiarlo */
+
+    /* aqui cambiar el royo si oldToken es !== null*/
+
+    if(oldToken !== null && oldToken !== undefined){
+        /* cambiar el token del usuario xese y
+        * cambiar el token de los repositorios de los canales
+        * */
+
+
+
+
+        /* falta cambiar los repos asociados,
+        mirar si ya hay token y
+        la bd esta corrompida,
+        no dejar en agular meter la misma cuenta??
+        comprobar esto para tods y hacer que haga lo mismo (createwebhooks y delete)
+        si en angular create webhooks peta xesto, le devolvemos a la pagina anterior con un error
+        para que se loguee de nuevo y cree el token
+        con el otro habra que crear una ventana mas
+        al loro porque cada repo puede estar asociado a cuentas diferentes,
+        esperemos que no peten ambas, podemos decirle que en ese caso se loguee para las 2
+        miramos las cuentas de los repositorios, si es la misma que se loguee para ella
+        sino hacemos ventanas para cada repositorio
+        hay varias cuentas asociadas y ambas petan los repos, eso probar
+
+        despues de esto permitir añadir nuevos repos
+         */
+
+        query = {"githubtoken" :{$elemMatch: {"username": username}}};
+
+
+        update = {$set : {
+            "githubtoken.$.username": username,
+            "githubtoken.$.token": token
+        }};
+
+
+
+
+
+
+
+
+
+
+
+    }
+    else{
+
+
+        console.log("con push");
+        query = { _id: userid};
+        update = {$push : {githubtoken:{username:username, token:token}}};
+
+
+    }
     /* return the modified document rather than the original */
-    var options = { new: true};
+    options = { new: true};
 
 
-    User.updateuser(userid,update,options).then(function (error,user){
+
+
+
+    /* antes con updateuser funcionaba */
+    User.updateusergithubtoken(query,update,options).then(function (error,user){
+
+
+        console.log("esto vale user en services con updateusergithubtoken");
+        console.log(user);
+
+
         if(error){
             return promise.done(error,null);
         }else{
@@ -152,7 +224,9 @@ exports.saveUserToken = function saveUserToken(userid, username, token){
 
             } else {
 
-                /* me devuelve un usuario */
+                /* una vez hecho esto, habría que modificar los repositorios asociados */
+
+                /* me devuelve un usuario, con eso cambiado */
                 if(user.githubtoken !== undefined && user.githubtoken !== null){
 
                     /* solo va a tener 1 token */
@@ -580,21 +654,6 @@ exports.getRepositories = function getRepositories(githubtoken){
     github.authenticate({
         type: "oauth",
         token: githubtoken
-
-    }, function(err, res) {
-        if (err) {
-            console.log("error al autentificarse");
-            console.log(err);
-            return promise.done(err,null);
-
-        }
-        else {
-            console.log("salgo de autentificarme sin problema");
-
-            return promise.done(null,res);
-
-
-        }
 
     });
 
