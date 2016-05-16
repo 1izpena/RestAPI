@@ -10,11 +10,6 @@ var Repositories = new Schema({
     id     : Number
     , name      : String
     , hookid      : Number
-    , githubtoken : {
-            token: String,
-            username: String
-    }
-
 });
 
 
@@ -26,6 +21,14 @@ var channelSchema   = new Schema({
     users:  [ { type: Schema.ObjectId, ref: 'User' }],
     group:  { type: Schema.ObjectId, ref: 'Group' },
     _admin:  { type: Schema.ObjectId, ref: 'User' },
+    githubUsername: { type: String, required: false },
+    /*
+    githubtoken: [{
+        username: {type: String, required: false},
+        token: {type: String, required: false}
+    }],
+    */
+
     githubRepositories: [Repositories]
 });
 
@@ -48,14 +51,6 @@ channelSchema.statics.createchannel = function createchannel (attributes, reposi
 
     console.log("ha entrado a crear canal");
 
-    /* hay que mirar como guardar 1 array de ids de repos */
-
-/*
-    if(attributes.repositories !== undefined && attributes.repositories !== null){
-        if(attributes.repositories.length >0){
-
-        }
-    }*/
 
 
     var m = new Channel(attributes);
@@ -84,14 +79,6 @@ channelSchema.statics.createchannel = function createchannel (attributes, reposi
     }
 
 
-/*
-    console.log("esto vale attributes.githubRepositories[0] ");
-    console.log(attributes.githubRepositories[0].id);
-    */
-
-    /*
-    Channel = new Channel(attributes).save(function (error, result) {
-    */
     m.save(function (error, result) {
 
         if(error){
@@ -121,6 +108,8 @@ channelSchema.statics.createchannel = function createchannel (attributes, reposi
     });
     return promise;
 };
+
+
 
 /* BUSCAR */
 channelSchema.statics.search = function search (query, limit, page) {
@@ -179,6 +168,37 @@ channelSchema.statics.searchpopulated = function searchpopulated (query,populate
     });
     return promise;
 };
+
+
+/* actualizar todos aquellos que coincidan con el repo
+* updaterepositoriesgithubtoken */
+
+
+channelSchema.statics.updaterepositoriesgithubtoken = function updaterepositoriesgithubtoken (query, update, options) {
+
+    console.log("entro en updaterepositoriesgithubtoken dentro de models/channels.js");
+
+    var promise = new Hope.Promise();
+    this.update(query, update, options,function(error, channel) {
+        console.log("esto devuelve el metodo update");
+        console.log("error");
+        console.log(error);
+        console.log("channel");
+        console.log(channel);
+
+        if (error) {
+            return promise.done(error, null);
+        }else {
+            return promise.done(null, channel);
+        }
+    });
+    return promise;
+};
+
+
+
+
+
 
 /* ACTUALIZAR */
 channelSchema.statics.updatechannel = function updatechannel (id, update, options) {

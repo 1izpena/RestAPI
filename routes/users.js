@@ -41,19 +41,22 @@ router.route('/:userid/get_meta').post(session.userplaylist);
 
 
 /*************** new ****************/
-/* GET return Github accounts metatags of url which user sends */
+/* GET return Github accounts of userid */
 router.route('/:userid/github/accounts').get(githubapi.getAccountsGithub);
 
 
-/* aqui logueamos,
- mandamos aoa id, username y pass
- creamos token y recogemos los repos validos sin webhooks asociados */
+/* POST Create a new application authorization */
+/* params : userid, username, pass (githubaccount)
+*  return githubtoken + repositories without webhooks
+* */
 router.route('/:userid/github/auth').post(githubapi.auth);
 
 /* esto igual debería ir en canal
  * para hacer validaciones y mandar ala bd, de momento usuario
  * luego grupo/channels*/
 /* puedo hacer dos peticiones desde angular, esta y una para crear el canal, cuando tenga la respuesta */
+
+
 router.route('/:userid/github/createHooks').post(githubapi.createHooks);
 
 
@@ -104,6 +107,8 @@ router.route('/:userid/chat/groups/:groupid/users/:userid1/invite').post(group.i
 
 /* POST Crea y guarda un nuevo canal, dentro del grupo con el groupid, actualiza referencias en grupo y usuario */
 router.route('/:userid/chat/groups/:groupid/channels').post(channel.newchannel);
+
+/* por aqui deberia entrar el de create webhooks */
 
 
 

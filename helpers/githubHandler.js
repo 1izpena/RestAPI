@@ -405,8 +405,8 @@ function getFieldsSender (sender) {
 function getFieldsEvents (event, body) {
 
     console.log("entro en controlar evento");
-    console.log(event);
-    console.log(body);
+    //console.log(event);
+    //console.log(body);
 
     var obj = {};
     var obj2 = {};

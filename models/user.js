@@ -20,8 +20,13 @@ var userSchema = new Schema({
         required: true,
         validate: validators.isEmail({message: 'Mail format is invalid'})
     },
-    githubtoken: [ { username: {type: String, required: false },
-        token: {type: String, required: false}  }],
+    githubtoken: [{
+        username: {type: String, required: false},
+        token: {type: String, required: false},
+        authid: {type: Number, required: false},
+
+
+    }],
     social: [],
     groups      : [ { _group: { type: Schema.ObjectId, ref: 'Group'},
         privateChannels: [{type: Schema.ObjectId, ref: 'Channel'}],
@@ -330,6 +335,7 @@ userSchema.statics.updateusergithubtoken = function updateusergithubtoken (query
 
     var promise = new Hope.Promise();
     this.findOneAndUpdate(query, update, options,function(error, user) {
+
         if (error) {
             return promise.done(error, null);
         }else {
