@@ -29,6 +29,16 @@ exports.newchannel = function newchannel (request, response) {
     console.log("esto vale el request.body");
     console.log(request.body);
 
+    var chService = request.body.channelService;
+    console.log("esto vale request.body.channelService");
+    console.log(chService);
+
+    /* si es !==2 no tiene scrum, luego lo pasamos como null */
+    /*if(chService !== 2){
+        chService = null;
+
+    }*/
+
 
 
     Auth(request, response).then(function(error, result) {
@@ -51,11 +61,15 @@ exports.newchannel = function newchannel (request, response) {
                                         response.status(401).json({message: 'Second Userid not valid.'});
 
                                     } else {
-                                        channelservice.createnewchannel(result._id, request.params.groupid, request.body.channelName, request.body.channelType, userid2, null).then(function (error, channel) {
+                                        channelservice.createnewchannel(result._id, request.params.groupid,
+                                                                        request.body.channelName, request.body.channelType,
+                                                                        chService, userid2, null, null).then(function (error, channel) {
                                             if (error) {
                                                 response.status(error.code).json({message: error.message});
                                             } else {
                                                 console.log("channel successfully created... ");
+                                                console.log("esto vale la respuesta del servidor con channel");
+                                                console.log(channel);
                                                 response.json(channel);
                                             }
                                         });
@@ -63,10 +77,16 @@ exports.newchannel = function newchannel (request, response) {
                                 });
                             }
                             else {
-                                channelservice.createnewchannel(result._id,request.params.groupid,request.body.channelName,request.body.channelType, null, null).then(function (error,channel){
+                                channelservice.createnewchannel(result._id,request.params.groupid,
+                                                                request.body.channelName,request.body.channelType,
+                                                                chService, null, null, null).then(function (error,channel){
                                     if (error){
                                         response.status(error.code).json({message: error.message});
                                     }else {
+
+                                        console.log("channel successfully created... 2");
+                                        console.log("esto vale la respuesta del servidor con channel2");
+                                        console.log(channel);
 
                                         var Group = mongoose.model('Group');
                                         Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
@@ -84,7 +104,18 @@ exports.newchannel = function newchannel (request, response) {
                                                         if(channel.users[i].id != request.params.userid){
                                                             if (conectedUsers.indexOf(channel.users[i]) == -1){
                                                                 console.log("Emit newChannelEvent for new public channel");
-                                                                socketio.getIO().sockets.to('US_'+channel.users[i].id).emit('newChannelEvent', {groupid: group.id, groupName: group.groupName, channelid: channel.id,channelName: channel.channelName, channelType:channel.channelType});
+
+                                                                if(channel.scrum !== true){
+                                                                    channel.scrum = false;
+
+                                                                }
+
+                                                                socketio.getIO().sockets.to('US_'+channel.users[i].id).emit('newChannelEvent', {groupid: group.id, groupName: group.groupName,
+                                                                    channelid: channel.id,channelName: channel.channelName,
+                                                                    channelType:channel.channelType,
+                                                                    channelScrum:channel.scrum
+
+                                                                });
 
                                                             }
                                                         }

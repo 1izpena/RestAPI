@@ -188,7 +188,18 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                         var elto = {
                             id        : group.channels[i]._id,
                             channelName  : group.channels[i].channelName
+
                         };
+
+                        if(group.channels[i].scrum == true){
+                            elto.scrum = true;
+                            console.log("entro en canal:");
+                            console.log(group.channels[i].channelName);
+                            console.log("tiene scrum");
+
+                        }
+
+
                         publicos.push(elto);
                     }if (group.channels[i].channelType == "PRIVATE"){
                         var encontrado = false;
@@ -214,6 +225,17 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
                                     channelName  : group.channels[i].channelName,
                                     users: usuariosCanal
                                 };
+
+                                if(group.channels[i].scrum == true){
+                                    elto2.scrum = true;
+                                    console.log("entro en canal:");
+                                    console.log(group.channels[i].channelName);
+                                    console.log("tiene scrum");
+
+                                }
+
+
+
                                 privados.push(elto2);
                                 encontrado = true;
                             }

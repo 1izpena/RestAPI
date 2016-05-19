@@ -29,7 +29,8 @@ var channelSchema   = new Schema({
     }],
     */
 
-    githubRepositories: [Repositories]
+    githubRepositories: [Repositories],
+    scrum:{ type: Boolean, required: false }
 });
 
 channelSchema.path('channelType').validate(function(channelType){
@@ -48,10 +49,6 @@ channelSchema.path('channelType').validate(function(channelType){
 channelSchema.statics.createchannel = function createchannel (attributes, repositories) {
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel', channelSchema);
-
-    console.log("ha entrado a crear canal");
-
-
 
     var m = new Channel(attributes);
 
@@ -270,10 +267,12 @@ channelSchema.statics.deletechannels = function deletechannels (query) {
 
 channelSchema.methods.parse = function parse () {
     var channel = this;
+
     return {
         id         : channel._id,
         channelName: channel.channelName,
         channelType: channel.channelType,
+        scrum: channel.scrum,
         users: channel.users,
         admin: channel._admin
     };
@@ -316,6 +315,17 @@ channelSchema.statics.parsepopulated = function parsepopulated (channelid) {
                     admin: elto5,
                     users: usuarios
                 };
+
+
+                if(channel.scrum == true){
+                    console.log("etro en channel.scrum == true");
+                    vuelta.scrum = true;
+                }
+                else{
+                    vuelta.scrum == false;
+                }
+
+
                 return promise.done(null, vuelta);
             }else {
                 var err = {

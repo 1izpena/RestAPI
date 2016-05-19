@@ -216,7 +216,7 @@ function newchannelGithub (userid, groupid, channelGithub, arrReposOk, channelgi
     /* repositories es 1 array con item.id*/
     channelservice.createnewchannel(userid, groupid,
         channelGithub.channelName, channelGithub.channelType,
-        null,
+        null, null,
         arrReposOk, channelgithubtoken)
         .then(function (error,channel){
             if (error){

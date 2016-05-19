@@ -130,7 +130,7 @@ exports.updatechannelpublicuserlist = function updatechannelpublicuserlist(group
     return promise;
 };
 
-exports.createnewchannel = function createnewchannel(userid,groupid,channelName,channelType, userid2, repositories, githubtoken){
+exports.createnewchannel = function createnewchannel(userid,groupid,channelName,channelType, chService, userid2, repositories, githubtoken){
     var promise = new Hope.Promise();
     var Channel = mongoose.model('Channel');
     var User = mongoose.model('User');
@@ -158,11 +158,22 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
                 channelType: channelType,
                 _admin: userid,
                 users: users,
-                group: groupid,
-                /*githubtoken: githubtoken*/
-                githubUsername : githubtoken.username
+                group: groupid
+
             };
 
+            if(chService == '2'){
+                ats.scrum = true;
+
+            }
+            if(githubtoken !== null && githubtoken !== undefined && githubtoken !== '' ){
+                if(githubtoken.username !== null && githubtoken.username !== undefined && githubtoken.username !== ''){
+                    ats.githubUsername = githubtoken.username;
+                }
+            }
+
+            console.log("esto vale ats en services/channel.js");
+            console.log(ats);
 
             Channel.createchannel (ats, repositories).then(function (error, result){
                 if (error){
@@ -185,6 +196,10 @@ exports.createnewchannel = function createnewchannel(userid,groupid,channelName,
                     console.log(typeof (channel.githubRepositories[0] ));
                     */
 
+
+                    console.log("services/channel.js result of Channel.createchannel ");
+                    console.log(channel);
+                    /* aqui tengo scrum true */
 
 
 

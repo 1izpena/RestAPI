@@ -5,7 +5,9 @@ var mongoose = require('mongoose');
 var Hope  = require('hope');
 var groupservice  = require('../services/group');
 
+
 exports.getgrouplist = function getgrouplist(userid){
+
     var User = mongoose.model('User');
     var promise = new Hope.Promise();
     var query = { _id: userid};
@@ -18,10 +20,14 @@ exports.getgrouplist = function getgrouplist(userid){
         else {
             var vuelta = [];
             for (var i=0;i<user.groups.length;i++){
+
+
                 var elto = {
                     id        : user.groups[i]._group._id,
                     groupName  : user.groups[i]._group.groupName
+
                 };
+
                 vuelta.push(elto);
             }
             console.log("Ejecutado ok el GET de lista de grupos...");
@@ -73,6 +79,7 @@ exports.getchatinfo = function getchatinfo(userid){
                     id        : user.groups[i]._group._id,
                     groupName  : user.groups[i]._group.groupName
                 };
+
                 grupos.push(elto);
             }
             for (var j=0;j<user.invitations.length;j++){

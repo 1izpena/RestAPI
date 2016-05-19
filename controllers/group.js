@@ -6,6 +6,7 @@ var chatErrors  = require('../helpers/chatErrorsHandler');
 var mongoose = require('mongoose');
 var socketio  = require('../helpers/sockets');
 var io = require('socket.io');
+
 exports.getusergrouplist = function getusergrouplist (request, response) {
     Auth(request, response).then(function(error, result) {
         if (error) {
@@ -479,16 +480,20 @@ exports.updategroupinfo = function updategroupinfo (request, response){
 };
 
 exports.newgroup = function newgroup (request, response){
+
     Auth(request, response).then(function(error, result) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
             var userid = result._id;
+
             if (request.params.userid == result._id){
+
                 if (request.body.groupName == undefined || request.body.groupName == "" || request.body.groupName == null){
                     console.log("You must enter a valid groupName");
                     response.status(400).json({message: 'You must enter a valid groupName'});
                 } else {
+
                     chatErrors.checkgroupnameunique(result._id,request.body.groupName).then(function (error,result){
                         if (error){
                             response.status(error.code).json({message: error.message});
@@ -516,4 +521,7 @@ exports.newgroup = function newgroup (request, response){
             }
         }
     });
+
+
+
 };
