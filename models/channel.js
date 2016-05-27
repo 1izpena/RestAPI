@@ -5,6 +5,15 @@ var Hope = require('hope');
 var Schema = mongoose.Schema;
 
 
+var User  = require('./user');
+var Group  = require('./group');
+
+var Issue  = require('./issue');
+var Sprint  = require('./sprint');
+var Userstory  = require('./userstory');
+
+
+
 
 var Repositories = new Schema({
     id     : Number
@@ -13,14 +22,14 @@ var Repositories = new Schema({
 });
 
 
-
-
 var channelSchema   = new Schema({
     channelName: { type: String, required: true },
     channelType: { type: String, required: true },
     users:  [ { type: Schema.ObjectId, ref: 'User' }],
     group:  { type: Schema.ObjectId, ref: 'Group' },
     _admin:  { type: Schema.ObjectId, ref: 'User' },
+
+    /* github service */
     githubUsername: { type: String, required: false },
     /*
     githubtoken: [{
@@ -30,7 +39,23 @@ var channelSchema   = new Schema({
     */
 
     githubRepositories: [Repositories],
-    scrum:{ type: Boolean, required: false }
+
+    /* scrum service */
+    scrum:{ type: Boolean, required: false },
+    roles:{
+        /* */
+        pow: { type: Schema.ObjectId, ref: 'User', required: false },
+        /* interes en experiencia de usuario (vamos all) */
+        ux: { type: Schema.ObjectId, ref: 'User', required: false },
+        design: { type: Schema.ObjectId, ref: 'User', required: false },
+        front: { type: Schema.ObjectId, ref: 'User', required: false },
+        back: { type: Schema.ObjectId, ref: 'User', required: false }
+
+    }
+
+
+
+
 });
 
 channelSchema.path('channelType').validate(function(channelType){
@@ -120,6 +145,7 @@ channelSchema.statics.search = function search (query, limit, page) {
     var skip = (page * limit);
     var promise = new Hope.Promise();
     var value2 = [];
+
     this.find(query).skip(skip).limit(limit).exec(function(error, value) {
         if (error) {
             return promise.done(error, null);
@@ -135,15 +161,31 @@ channelSchema.statics.search = function search (query, limit, page) {
         }
         else {
             value.forEach(function(channel){
-                channel = channel.parse();
+
+                /* miramos si tiene scrum, entonces hacemos parse con scrum */
+                if(channel.scrum){
+                    channel = channel.parseForScrum();
+
+                }
+                else{
+                    channel = channel.parse();
+                }
+
                 value2.push(channel);
             });
+
             value= value2;
+
         } /* end else:: want multiple values & parse this values */
         return promise.done(error, value);
     });
     return promise;
 };
+
+
+
+
+
 
 channelSchema.statics.searchpopulated = function searchpopulated (query,populate) {
     var promise = new Hope.Promise();
@@ -277,6 +319,32 @@ channelSchema.methods.parse = function parse () {
         admin: channel._admin
     };
 };
+
+
+
+
+channelSchema.methods.parseForScrum = function parseForScrum () {
+    var channel = this;
+
+    var parseChannel = {
+        id          : channel._id,
+        channelName : channel.channelName,
+        channelType : channel.channelType,
+        scrum       : channel.scrum,
+        roles       : channel.roles,
+        users       : channel.users,
+        admin       : channel._admin
+    };
+
+
+    return parseChannel;
+
+
+
+
+};
+
+
 
 channelSchema.statics.parsepopulated = function parsepopulated (channelid) {
     var query = { _id: channelid};

@@ -25,6 +25,7 @@
     "mongodb-uri": "0.9.3",
     "mongoosastic": "^3.6.0",
     "mongoose": "^4.2.9",
+    "mongoose-sequence": "^3.0.2",
     "mongoose-validators": "^0.1.0",
     "morgan": "~1.6.1",
     "node-metainspector": "^1.0.0",

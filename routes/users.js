@@ -5,7 +5,9 @@ var group = require('../controllers/group');
 var channel = require('../controllers/channel');
 var message = require('../controllers/message');
 var elasticsearch = require('../controllers/elasticsearch');
+
 var githubapi = require('../controllers/githubapi');
+var userstory = require('../controllers/userstory');
 
 
 
@@ -119,6 +121,24 @@ router.route('/:userid/chat/groups/:groupid/channels').get(channel.getgroupchann
 
 /* POST Devuelve la lista de mensajes del canal que coinciden con el contenido de la búsqueda*/
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/search').post(elasticsearch.chatsearch);
+
+
+/* ********************* scrum ************************* */
+
+/* GET CH USERSTORIES  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').get(userstory.getuserstories);
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').post(userstory.newuserstory);
+
+/* GET Devuelve la lista de los tags de los userstories del canal */
+/*router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').get(channel.getuserstories);*/
+
+
+
+/* GET Devuelve la lista de los tags de los userstories del canal */
+/*
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/tags').get(channel.getuserstoriestags);
+*/
+
 
 
 /* GET Devuelve la lista de usuarios del canal */

@@ -5,7 +5,7 @@
 'use strict';
 
 
-
+/************** faltaria hacer 1 servicio que hable con la bd, cuando me ponga conesto lo reviso *********************/
 /****** new ******/
 var config = require('../config');
 var githubHandler = require('../helpers/githubHandler');
@@ -157,7 +157,8 @@ function newEventGithub (obj) {
                                 channelid: channel.id,
                                 userid: internalUser.id,
                                 messageType: 'TEXT',
-                                text: JSON.stringify(message)
+                                text: JSON.stringify(message),
+                                serviceType : 'GITHUB'
                             };
 
 

@@ -1,4 +1,7 @@
 var mongoose    = require('mongoose');
+
+/* para usar elastic en las busquedas */
+
 var mongoosastic = require('mongoosastic');
 var Hope      	= require('hope');
 var Channel  = require('./channel');
@@ -21,7 +24,8 @@ var messageSchema   = new Schema({
             _user: {type: Schema.ObjectId, ref: 'User'},
             datetime: { type: Date, required: true },
             text: String }]
-    }
+    },
+    serviceType: { type: String, required: false }
 });
 
 messageSchema.plugin(mongoosastic);
@@ -321,7 +325,8 @@ messageSchema.methods.parse = function parse () {
         },
         date        : message.datetime,
         messageType : message.messageType,
-        text        : message.content.text
+        text        : message.content.text,
+        serviceType : message.serviceType
     };
 
     if (message.messageType == 'FILE') {

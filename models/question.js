@@ -18,7 +18,7 @@ var questionSchema = new Schema({
 	views: Number,
 	comments:[{comment: String, _user:{ type: Schema.ObjectId, ref: 'User'}, created: Date}],
 	tags:[{type: Schema.ObjectId, ref: 'Tag'}],
-	answers:[{type: Schema.ObjectId, ref: 'Answer'}],
+	answers:[{type: Schema.ObjectId, ref: 'Answer', es_indexed:true }],
 	userVotes:[{type: Schema.ObjectId, ref: 'User'}]
 });
 

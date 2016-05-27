@@ -15,8 +15,7 @@ var githubapiservice = require('../services/githubapi');
 
 
 
-
-    exports.updateuserchannellist = function updateuserchannellist(userid,groupid,channelid,channelType){
+exports.updateuserchannellist = function updateuserchannellist(userid,groupid,channelid,channelType){
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
     var query = { _id: userid};
@@ -1021,7 +1020,20 @@ function updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, 
 };
 
 
+exports.getchannel = function getinfo(channelid){
+    var Channel = mongoose.model('Channel');
+    var promise = new Hope.Promise();
 
+    Channel.search(channelid).then(function (error, channel) {
+        if (error){
+            return promise.done(error,null);
+        }
+        else {
+            return promise.done(null, channel);
+        }
+    });
+    return promise;
+};
 
 
 

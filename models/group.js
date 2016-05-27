@@ -13,6 +13,7 @@ var groupSchema   = new Schema({
 
 /* static methods */
 /* NUEVO GRUPO , guarda el nuevo grupo */
+
 groupSchema.statics.creategroup = function creategroup (attributes,userid) {
     var promise = new Hope.Promise();
     var Group = mongoose.model('Group', groupSchema);
