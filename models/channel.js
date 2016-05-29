@@ -8,11 +8,6 @@ var Schema = mongoose.Schema;
 var User  = require('./user');
 var Group  = require('./group');
 
-var Issue  = require('./issue');
-var Sprint  = require('./sprint');
-var Userstory  = require('./userstory');
-
-
 
 
 var Repositories = new Schema({
@@ -42,6 +37,9 @@ var channelSchema   = new Schema({
 
     /* scrum service */
     scrum:{ type: Boolean, required: false },
+
+    /* si quiero ver cosas de los usuarios quizas esto haya que cambiarlo
+    * y poner 1 objecto con varios campos, entre ellos user */
     roles:{
         /* */
         pow: { type: Schema.ObjectId, ref: 'User', required: false },
@@ -331,6 +329,8 @@ channelSchema.methods.parseForScrum = function parseForScrum () {
         channelName : channel.channelName,
         channelType : channel.channelType,
         scrum       : channel.scrum,
+
+        /* con esto me vale, tengo al team entero en el canal solo hay que comparar los ids */
         roles       : channel.roles,
         users       : channel.users,
         admin       : channel._admin
@@ -388,9 +388,11 @@ channelSchema.statics.parsepopulated = function parsepopulated (channelid) {
                 if(channel.scrum == true){
                     console.log("etro en channel.scrum == true");
                     vuelta.scrum = true;
+                    vuelta.roles = channel.roles;
                 }
                 else{
-                    vuelta.scrum == false;
+                    vuelta.scrum = false;
+                    vuelta.roles = channel.roles;
                 }
 
 

@@ -6,7 +6,6 @@
 
 'use strict';
 
-
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
@@ -18,25 +17,26 @@ var Hope      	= require('hope');
 
 var taskSchema = new Schema({
 
-    /* las task siempre pertenecen de 1 userstory, solas como tal no las vas a ver */
-
-
     subject         : { type: String, required: true },
     createdby       : { type: Schema.ObjectId, ref: 'User', required: true },
     datetime        : { type: Date, default: Date.now },
+
     /* si locaine puede ser para varios, puedes poner contributors */
     assignedto      : { type: Schema.ObjectId, ref: 'User', required: false },
     contributors    : [{ type: Schema.ObjectId, ref: 'User', required: false }],
 
-    tags            : [{ type: String, required: false }], /* esto no se si dejarlo */
-    status          : { type: String, default: 'NEW' },
+    /* new, in progress, readyfortest, closed */
+    status          : { type: String, default: 'New' },
     description     : { type: String, required: false },
 
-    requirement     : { type: String, required: false }, /* iocained, bloqued */
+    requirement     : {
+        iocaine      : {type: Boolean, default: false },
+        blocked      : {type: Boolean, required: false}
+    }, /* Iocaine, bloqued */
     comments        : [{
                         comment: String,
                         _user:{ type: Schema.ObjectId, ref: 'User'},
-                        created: Date
+                        created: { type: Date, default: Date.now }
                         }],
 
     attachments     : [{ type: String, required: false }] /* array of filename */
@@ -58,7 +58,6 @@ var taskSchema = new Schema({
 taskSchema.statics.createTask = function createTask (attributes) {
 
     var promise = new Hope.Promise();
-
     var Task = mongoose.model('Task', taskSchema);
 
     Task = new Userstory(attributes);
@@ -78,9 +77,9 @@ taskSchema.statics.createTask = function createTask (attributes) {
 };
 
 
-taskSchema.statics.getTasks = function getTasks (query, limit, page) {
+taskSchema.statics.searchPopulatedTasks = function searchPopulatedTasks (query, limit, page) {
+
     var promise = new Hope.Promise();
-    var value2 = [];
 
 
     /* skip is number of results that not show */
@@ -90,35 +89,45 @@ taskSchema.statics.getTasks = function getTasks (query, limit, page) {
     if(typeof limit === "undefined" || limit == null) {
         limit = 0;
     }
-
     var skip = (page * limit);
 
 
-    this.find(query).skip(skip).limit(limit).exec(function(error, value) {
-        if (limit === 1 && !error) {
-            if (value.length === 0) {
-                error = {
-                    code: 402,
-                    message: "Task not found."
-                };
+
+    this.find(query).sort({datetime: -1})
+        .skip(skip)
+        .limit(limit)
+        .populate('createdby assignedto contributors comments._user')
+        .exec(function(error, value) {
+
+            if(error){
+                return promise.done(error, null);
             }
-            value = value[0];
+            else if (limit === 1){
+                if (value.length === 0) {
+                    error = {
+                        code: 402,
+                        message: "Task not found."
+                    };
+                    value = [];
+                }
+                else {
+                    value = value[0].parse();
+                }
+            }
+            else{
+                value = value.map(function(elem,index) {
 
-        } else {
+                    return elem.parse();
+                });
+                // Ordenamos x orden descendente
+                value = value.reverse();
 
-            value.forEach(function(task){
+            }/* end else:: want multiple values & parse this values */
 
-                task = task.parse();
-                value2.push(task);
+            // Devolvemos en order ascendente de fecha
+            return promise.done(error, value);
 
-            });
-            value= value2;
-        } /* end else:: want multiple values & parse this values */
-
-
-
-        return promise.done(error, value);
-    });
+        });
 
     return promise;
 };
@@ -157,6 +166,8 @@ taskSchema.statics.deleteTasks = function deleteTasks (query) {
 
 
 
+
+
 taskSchema.methods.parse = function parse () {
     var task = this;
 
@@ -164,11 +175,18 @@ taskSchema.methods.parse = function parse () {
     var parseTask = {
         id          : task._id,
         subject     : task.subject,
-        createdby   : task.createdby.parse(),
+        createdby   : {
+            id         : (task.createdby._id) ? task.createdby._id : task.createdby,
+            username   : (task.createdby.username) ? task.createdby.username :  '',
+            mail       : (task.createdby.mail) ? task.createdby.mail :  ''
+        },
         datetime    : task.datetime,
-        assignedto  : task.assignedto.parse(),
+        assignedto   : {
+            id         : (task.assignedto._id) ? task.assignedto._id : task.assignedto,
+            username   : (task.assignedto.username) ? task.assignedto.username :  '',
+            mail       : (task.assignedto.mail) ? task.assignedto.mail :  ''
+        },
         status      : task.status,
-        tags        : task.tags,
         description : task.description,
         requirement : task.requirement,
         attachments : task.attachments
@@ -176,51 +194,91 @@ taskSchema.methods.parse = function parse () {
 
     };
 
+
+    /*
+     var task;
+
+
+    for (var i = 0; i < userstory.tasks.length; i++) {
+     */
+
+     /* de task quiero all *
+    task.id = (userstory.tasks[i]._id) ? userstory.tasks[i]._id : userstory.tasks[i];
+    task.subject = (userstory.tasks[i].subject) ? userstory.tasks[i].subject : userstory.tasks[i];
+
+    if(userstory.tasks[i].createdby !== undefined &&
+        userstory.tasks[i].createdby !== null &&
+        userstory.tasks[i].createdby !== '' ){
+
+        task.createdby = {
+            id         : (userstory.tasks[i].createdby._id) ? userstory.createdby.tasks[i]._id : userstory.createdby.tasks[i],
+            username   : (userstory.tasks[i].createdby.username) ? userstory.tasks[i].createdby.username :  '',
+            mail       : (userstory.tasks[i].createdby.mail) ? userstory.tasks[i].createdby.mail :  ''
+        };
+
+    }
+
+
+      comments        : [{
+      comment: String,
+      _user:{ type: Schema.ObjectId, ref: 'User'},
+      created: { type: Date, default: Date.now }
+      }],
+    */
+
     if(task.contributors !== null && task.contributors !== undefined){
         if(task.contributors.length){
 
+            var contributor = {};
             for (var i = 0; i < task.contributors.length; i++) {
+                contributor.id = (task.contributors[i]._id) ? task.contributors[i]._id : task.contributors[i];
+                contributor.username = (task.contributors[i].username) ? task.contributors[i].username : '';
+                contributor.mail = (task.contributors[i].mail) ? task.contributors[i].mail : '';
 
-                parseTask.contributors.push(task.contributors[i].parse());
             }
+            parseTask.contributors.push(contributor);
         }
         else{
             parseTask.contributors = [];
         }
-
     }
     else{
-
         parseTask.contributors = [];
     }
 
 
     if(task.comments !== null && task.comments !== undefined){
         if(task.comments.length > 0){
-
-
-            for (var i = 0; i < issue.comments.length; i++) {
+            var comment = {};
+            for (var i = 0; i < task.comments.length; i++) {
+                comment.comment = (task.comments[i].comment) ? task.comments[i].comment : '';
+                comment.created = (task.comments[i].created) ? task.comments[i].created : Date.now;
 
                 if(task.comments[i]._user !== undefined && task.comments[i]._user !== null){
 
-                    task.comments[i]._user = task.comments[i]._user.parse();
-                    parseTask.comments.push(task.comments[i]);
+                    comment.user = {
+                        id         : (task.comments[i]._user._id) ? task.comments[i]._user._id : task.comments[i]._user,
+                        username   : (task.comments[i]._user.username) ? task.comments[i]._user.username :  '',
+                        mail       : (task.comments[i]._user.mail) ? task.comments[i]._user.mail :  ''
+                    };
+
+
                 }
+
+                parseTask.comments.push(comment);
+
 
             }
         }
         else{
-            taskContributors.comments = [];
+            parseTask.comments = [];
         }
 
     }
     else{
 
-        taskContributors.comments = [];
+        parseTask.comments = [];
     }
-
-
-
 
 
     return parseTask;

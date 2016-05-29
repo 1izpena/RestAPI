@@ -35,7 +35,7 @@ var issueSchema = new Schema({
     comments        : [{
         comment: String,
         _user: { type: Schema.ObjectId, ref: 'User'},
-        created: Date
+        created: { type: Date, default: Date.now },
     }],
 
     userstories   : [{ type: Schema.ObjectId, ref: 'Userstory', required: false }],
@@ -72,7 +72,7 @@ issueSchema.statics.createIsssue = function createIsssue (attributes) {
 };
 
 
-issueSchema.statics.getIssues = function getIssues (query, limit, page) {
+issueSchema.statics.searchIssues = function searchIssues (query, limit, page) {
     var promise = new Hope.Promise();
     var value2 = [];
 
@@ -88,15 +88,25 @@ issueSchema.statics.getIssues = function getIssues (query, limit, page) {
     var skip = (page * limit);
 
 
-    this.find(query).skip(skip).limit(limit).exec(function(error, value) {
+    this.find(query)
+        .skip(skip)
+        .limit(limit)
+        .populate('createdby assignedto comments._user')
+        .exec(function(error, value) {
         if (limit === 1 && !error) {
             if (value.length === 0) {
                 error = {
                     code: 402,
                     message: "Issue not found."
                 };
+
+                value = value[0];
             }
-            value = value[0];
+            else{
+                value = value[0].parse();
+
+            }
+
 
         } else {
 
@@ -166,17 +176,27 @@ issueSchema.methods.parse = function parse () {
         type        : issue.type,
         severity    : issue.severity,
         priority    : issue.priority,
-        createdby   : issue.createdby.parse(),
-        assignedto  : issue.assignedto.parse(),
+        createdby   : {
+            id         : (issue.createdby._id) ? issue.createdby._id : issue.createdby,
+            username   : (issue.createdby.username) ? issue.createdby.username :  '',
+            mail       : (issue.createdby.mail) ? issue.createdby.mail :  ''
+        },
+        assignedto   : {
+            id         : (issue.assignedto._id) ? issue.assignedto._id : issue.assignedto,
+            username   : (issue.assignedto.username) ? issue.assignedto.username :  '',
+            mail       : (issue.assignedto.mail) ? issue.assignedto.mail :  ''
+        },
         datetime    : issue.datetime,
         tags        : issue.tags,
         description : issue.description,
+        userstories : issue.userstories,
         attachments : issue.attachments,
         channel     : issue.channel
 
     };
 
 
+    /*
     if(issue.userstories !== null && issue.userstories !== undefined){
         if(issue.userstories.length > 0){
 
@@ -196,20 +216,31 @@ issueSchema.methods.parse = function parse () {
 
         parseIssue.userstories = [];
     }
+*/
+
 
 
 
     if(issue.comments !== null && issue.comments !== undefined){
         if(issue.comments.length > 0){
-
-
+            var comment = {};
             for (var i = 0; i < issue.comments.length; i++) {
+                comment.comment = (issue.comments[i].comment) ? issue.comments[i].comment : '';
+                comment.created = (issue.comments[i].created) ? issue.comments[i].created : Date.now;
 
                 if(issue.comments[i]._user !== undefined && issue.comments[i]._user !== null){
 
-                    issue.comments[i]._user = issue.comments[i]._user.parse();
-                    parseIssue.comments.push(issue.comments[i]);
+                    comment.user = {
+                        id         : (issue.comments[i]._user._id) ? issue.comments[i]._user._id : issue.comments[i]._user,
+                        username   : (issue.comments[i]._user.username) ? issue.comments[i]._user.username :  '',
+                        mail       : (issue.comments[i]._user.mail) ? issue.comments[i]._user.mail :  ''
+                    };
+
+
                 }
+
+                parseIssue.comments.push(comment);
+
 
             }
         }
@@ -222,8 +253,6 @@ issueSchema.methods.parse = function parse () {
 
         parseIssue.comments = [];
     }
-
-
 
 
     return parseIssue;

@@ -5,12 +5,7 @@
 
 var mongoose = require('mongoose');
 var Hope  = require('hope');
-
-
 var Userstory  = require('../models/userstory');
-var User  = require('../models/user');
-var Channel  = require('../models/channel');
-
 
 
 
@@ -25,21 +20,31 @@ exports.newuserstory = function newuserstory(userstory){
             return promise.done(error, null);
         }
         else {
-            return promise.done(null, newuserstory);
+
+            var query = { _id: newuserstory._id};
+            Userstory.searchPopulatedUserstories (query).then (function (error, userstory) {
+                if (error) {
+                    return promise.done(error, null);
+                }
+                else {
+                    return promise.done(null, userstory);
+                }
+            });
+
         }
     });
     return promise;
 };
 
 
-/* probar que funcione */
+
 exports.getuserstories = function getuserstories (channelid){
     var promise = new Hope.Promise();
     var Userstory = mongoose.model('Userstory');
 
     var query = { channel: channelid};
 
-    Userstory.getUserstories (query).then (function (error, userstories) {
+    Userstory.searchPopulatedUserstories (query).then (function (error, userstories) {
         if (error) {
             return promise.done(error, null);
         }

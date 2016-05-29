@@ -92,7 +92,7 @@ exports.newinternalmessage = function newinternalmessage(message, channelid){
                                 console.log("esto vale el channelid que vamos a mandar :");
                                 console.log(messageData.channelid);*/
 
-                                socketio.getIO().sockets.to('CH_' + messageData.channelid).emit('newMessage', {groupid: channel.group,message: result});
+                                socketio.getIO().sockets.to('CH_' + messageData.channelid).emit('newMessage', {groupid: channel.group, message: result});
 
 
                                 /* hace esto para meter los usuarios */
@@ -196,6 +196,8 @@ exports.newinternalmessage = function newinternalmessage(message, channelid){
 
 
         });
+
+    return promise;
 
 
 

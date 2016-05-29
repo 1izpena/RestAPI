@@ -12,7 +12,6 @@ var Userstory  = require('./userstory');
 var Channel  = require('./channel');
 var User  = require('./user');
 
-
 var Hope      	= require('hope');
 
 
@@ -27,10 +26,8 @@ var sprintSchema = new Schema({
     /* esta la metemos programaticamente, buscamos el ultimo sprint, su fecha de fin, esto en angular */
     startdate   :  { type: Date, default: Date.now },
     endingdate  :  { type: Date, default: Date.now},
-    userstories   : [{ type: Schema.ObjectId, ref: 'Userstory', required: false }],
+    /*userstories   : [{ type: Schema.ObjectId, ref: 'Userstory', required: false }],*/
     channel     : { type: Schema.ObjectId, ref: 'Channel', required: true }
-
-
 
 
 });
@@ -60,7 +57,8 @@ sprintSchema.statics.createSprint = function createSprint (attributes) {
 };
 
 
-sprintSchema.statics.getSprints = function getSprints (query, limit, page) {
+
+sprintSchema.statics.searchSprints = function searchSprints (query, limit, page) {
     var promise = new Hope.Promise();
     var value2 = [];
 
@@ -76,15 +74,76 @@ sprintSchema.statics.getSprints = function getSprints (query, limit, page) {
     var skip = (page * limit);
 
 
-    this.find(query).skip(skip).limit(limit).exec(function(error, value) {
+    this.find(query)
+        .skip(skip)
+        .limit(limit)
+        .exec(function(error, value) {
+            if (limit === 1 && !error) {
+                if (value.length === 0) {
+                    error = {
+                        code: 402,
+                        message: "Sprint not found."
+                    };
+
+                }
+                value = value[0];
+
+
+            } else {
+
+                value.forEach(function(sprint){
+
+                    value2.push(sprint);
+
+                });
+                value= value2;
+            }
+            return promise.done(error, value);
+        });
+
+    return promise;
+};
+
+
+
+
+
+
+sprintSchema.statics.searchPopulateSprints = function searchPopulateSprints (query, limit, page) {
+    var promise = new Hope.Promise();
+    var value2 = [];
+
+
+    /* skip is number of results that not show */
+    if(typeof page === "undefined" || page == null) {
+        page = 0;
+    }
+    if(typeof limit === "undefined" || limit == null) {
+        limit = 0;
+    }
+
+    var skip = (page * limit);
+
+
+    this.find(query)
+        .skip(skip)
+        .limit(limit)
+        .populate('createdby')
+        .exec(function(error, value) {
         if (limit === 1 && !error) {
             if (value.length === 0) {
                 error = {
                     code: 402,
                     message: "Sprint not found."
                 };
+
+                value = value[0];
             }
-            value = value[0];
+            else {
+                value = value[0].parse();
+
+            }
+
 
         } else {
 
@@ -95,10 +154,7 @@ sprintSchema.statics.getSprints = function getSprints (query, limit, page) {
 
             });
             value= value2;
-        } /* end else:: want multiple values & parse this values */
-
-
-
+        }
         return promise.done(error, value);
     });
 
@@ -140,7 +196,6 @@ sprintSchema.statics.deleteSprints = function deleteSprints (query) {
 
 
 /* parse hay que mirar que nos interesa, quizas hacer populated */
-
 sprintSchema.methods.parse = function parse () {
     var sprint = this;
     var parseSprint = {};
@@ -150,19 +205,24 @@ sprintSchema.methods.parse = function parse () {
     parseSprint = {
         id          : sprint._id,
         title       : sprint.title,
-        createdby   : sprint.createdby.parse(),
+        createdby   : {
+            id         : (sprint.createdby._id) ? sprint.createdby._id : sprint.createdby,
+            username   : (sprint.createdby.username) ? sprint.createdby.username :  '',
+            mail       : (sprint.createdby.mail) ? sprint.createdby.mail :  ''
+        },
         datetime    : sprint.datetime,
         startdate   : sprint.startdate,
-        endingdate  : sprint.endingdate
+        endingdate  : sprint.endingdate,
+        /*userstories : sprint.userstories,*/
+        channel     : sprint.channel
 
 
     };
 
 
-
+/*
     if(sprint.userstories !== null && sprint.userstories !== undefined){
         if(sprint.userstories.length){
-
             for (var i = 0; i < userstory.tasks.length; i++) {
                 parseSprint.userstories.push(sprint.userstories[i].parse());
             }
@@ -175,7 +235,7 @@ sprintSchema.methods.parse = function parse () {
     else{
 
         parseSprint.userstories = [];
-    }
+    }*/
 
 
     return parseSprint;
@@ -185,7 +245,7 @@ sprintSchema.methods.parse = function parse () {
 
 };
 
-
+/* esto sobra xq los parseos los cojo en el otro lado
 
 sprintSchema.methods.parseForUserstory = function parseForUserstory () {
     var sprint = this;
@@ -212,7 +272,7 @@ sprintSchema.methods.parseForUserstory = function parseForUserstory () {
 
 };
 
-
+*/
 
 
 

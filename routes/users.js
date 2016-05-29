@@ -8,6 +8,9 @@ var elasticsearch = require('../controllers/elasticsearch');
 
 var githubapi = require('../controllers/githubapi');
 var userstory = require('../controllers/userstory');
+var sprint = require('../controllers/sprint');
+var issue = require('../controllers/issue');
+
 
 
 
@@ -127,17 +130,16 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/search').post(el
 
 /* GET CH USERSTORIES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').get(userstory.getuserstories);
+/* POST CH USERSTORIES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').post(userstory.newuserstory);
 
-/* GET Devuelve la lista de los tags de los userstories del canal */
-/*router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').get(channel.getuserstories);*/
+/* GET CH SPRINTS  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints').get(sprint.getsprints);
+/* GET CH ISSUES  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/issues').get(issue.getissues);
 
 
 
-/* GET Devuelve la lista de los tags de los userstories del canal */
-/*
-router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/tags').get(channel.getuserstoriestags);
-*/
 
 
 
