@@ -110,6 +110,9 @@ messageSchema.statics.newMessage = function (data) {
 
         Message = new Message(data);
 
+        console.log("esto vale el mensaje que vamos a guardar en la bd");
+        console.log(Message);
+
         Message.save(function (error, message) {
             if(error){
                 var messageError = '';

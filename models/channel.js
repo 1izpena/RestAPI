@@ -144,6 +144,7 @@ channelSchema.statics.search = function search (query, limit, page) {
     var promise = new Hope.Promise();
     var value2 = [];
 
+
     this.find(query).skip(skip).limit(limit).exec(function(error, value) {
         if (error) {
             return promise.done(error, null);
@@ -154,8 +155,20 @@ channelSchema.statics.search = function search (query, limit, page) {
                     code: 400,
                     message: "Channel not found."
                 };
+
+                value = value[0];
             }
-            value = value[0];
+            else{
+                if(value[0].scrum){
+                    value = value[0].parseForScrum();
+
+                }
+                else{
+                    value = value[0].parse();
+
+                }
+            }
+
         }
         else {
             value.forEach(function(channel){

@@ -10,24 +10,23 @@ var Userstory  = require('../models/userstory');
 
 
 
-/* probar que funcione */
 exports.newuserstory = function newuserstory(userstory){
     var promise = new Hope.Promise();
     var Userstory = mongoose.model('Userstory');
 
-    Userstory.createUserstory (userstory).then (function (error, newuserstory) {
+    Userstory.createUserstory (userstory).then (function (error, newuserstoryresult) {
         if (error) {
             return promise.done(error, null);
         }
         else {
 
-            var query = { _id: newuserstory._id};
-            Userstory.searchPopulatedUserstories (query).then (function (error, userstory) {
+            var query = { _id: newuserstoryresult._id};
+            Userstory.searchPopulatedUserstories (query, 1).then (function (error, userstoryresult) {
                 if (error) {
                     return promise.done(error, null);
                 }
                 else {
-                    return promise.done(null, userstory);
+                    return promise.done(null, userstoryresult);
                 }
             });
 

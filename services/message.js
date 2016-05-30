@@ -45,22 +45,30 @@ exports.newinternalmessage = function newinternalmessage(message, channelid){
         .then(function(error, internalUser) {
             if(!error){
 
-                console.log("NO ERROR en services/message search internal user");
 
+
+                /* aqui bien
+                console.log("esto vale channelid antes de hacer el search");
+                console.log(channelid);
+                */
+
+
+                var query = {_id: channelid};
 
                 var Channel = mongoose.model('Channel');
-                Channel.search(channelid, 1).then(function(error, channel) {
+                Channel.search(query, 1).then(function(error, channel) {
                     if (!error) {
 
-                        console.log("entro en channel search !error");
-                        console.log("esto vale channel");
-                        console.log(channel);
+
 
 
 
                         /* tengo el user y el canal */
-                        console.log("esto vale channel.id");
-                        console.log(channel.id);
+                        /* esto esta mal me devuelve otra cosa */
+                        /*console.log("esto vale channel.id");
+                        console.log(channel.id);*/
+                        /*console.log("esto vale mensaje a guardar en bd en el servicio");
+                        console.log(message);*/
 
                         var messageData = {
                             channelid: channel.id,
@@ -72,25 +80,25 @@ exports.newinternalmessage = function newinternalmessage(message, channelid){
 
                         };
 
+                        /*console.log("esto vale mensaje CON all a guardar en bd en el servicio");
+                        console.log(messageData);*/
+
+                        console.log("en services/message esto vale messageData text");
+                        console.log(messageData.text);
+
 
                         var Message = mongoose.model('Message');
                         Message.newMessage(messageData).then(function newmessage(error, result) {
+                            /*console.log("estoes lo que responde newmessage con result y error");
+                            console.log("error");
+                            console.log(error);*/
+
+
+                            /*console.log("result");
+                            console.log(result);*/
+
                             if (!error) {
 
-                                /*console.log("esto vale el id del grupo ");
-                                console.log(channel.group);
-
-
-
-                                console.log("esto vale el result de newMessage");
-                                console.log(result);
-
-
-                                console.log("esto vale groupid que vamos a mandar : ");
-                                console.log(channel.group);
-
-                                console.log("esto vale el channelid que vamos a mandar :");
-                                console.log(messageData.channelid);*/
 
                                 socketio.getIO().sockets.to('CH_' + messageData.channelid).emit('newMessage', {groupid: channel.group, message: result});
 

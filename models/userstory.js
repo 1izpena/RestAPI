@@ -30,10 +30,10 @@ var userstorySchema = new Schema({
     sprint      : { type: Schema.ObjectId, ref: 'Sprint', required: false },
     voters      : [{ type: Schema.ObjectId, ref: 'User', required: false }],
     point      : {
-        ux      : {type: Number, required: false},
-        design  : {type: Number, required: false},
-        front   : {type: Number, required: false},
-        back    : {type: Number, required: false},
+        ux      : {type: Number, default: 0},
+        design  : {type: Number, default: 0},
+        front   : {type: Number, default: 0},
+        back    : {type: Number, default: 0},
     },
     attachments : [{ type: String, required: false }],
     tasks       : [{ type: Schema.ObjectId, ref: 'Task', required: false }],
@@ -43,8 +43,8 @@ var userstorySchema = new Schema({
     description : { type: String, required: false },
     requirement : {
         team      : {type: Boolean, default: false },
-        client    : {type: Boolean, required: false},
-        blocked   : {type: Boolean, required: false}
+        client    : {type: Boolean, default: false},
+        blocked   : {type: Boolean, default: false}
     },
 
     /* con el id de sobra */
@@ -153,7 +153,7 @@ userstorySchema.statics.searchPopulatedUserstories = function searchPopulatedUse
     this.find(query).sort({num: -1})
         .skip(skip)
         .limit(limit)
-        /* quitamos sprint de aqui y sprint.createdby, y solo mandamos los ids */
+        /* quitamos sprint de aqui, y solo mandamos los ids */
         .populate('createdby tasks')
         .exec(function(error, value) {
 

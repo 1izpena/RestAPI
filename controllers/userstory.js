@@ -30,14 +30,14 @@ exports.newuserstory = function newuserstory (request, response){
 
     var userstory = request.body;
     userstory.datetime = new Date();
-     userstory.channel = channelid;
-     userstory.createdby = userid;
-     userstory.status = "New";
+    userstory.channel = channelid;
+    userstory.createdby = userid;
+    userstory.status = "New";
 
 
 
-    console.log("esto vale userstory");
-    console.log(userstory);
+    /*console.log("esto vale userstory");
+    console.log(userstory);*/
 
 
     if(userstory == undefined || userstory == null || userstory == '' ){
@@ -69,6 +69,9 @@ exports.newuserstory = function newuserstory (request, response){
                         if (userid == result._id){
 
                             /* primero buscamos que exista el canal y el usuario pertenezca */
+
+                            /*console.log("esto vale channelid antes de checkuser en channel");
+                            console.log(channelid);*/
                             chatErrors.checkuserinchannel(channelid,userid)
                                 .then (function (error,channel) {
                                     if (error) {
@@ -77,22 +80,28 @@ exports.newuserstory = function newuserstory (request, response){
                                     else {
                                         /* existe y el usuario esta en el */
                                         /* entonces procedemos a guardar el userstory */
-                                        /* mirar que devuelve channel */
-                                        console.log("ESTO VALE CHANNEL PARA CREAR USERSTORY");
-                                        console.log(channel);
 
-                                        userstoryservice.newuserstory (userstory).then(function (error, userstory) {
+                                        /*console.log("esto vale channel despues de checkinchannel");
+                                        console.log(channel);*/
+
+                                        console.log("esto vale userstory antes de mandar a guardar");
+                                        console.log(userstory);
+
+
+                                        /* userstoryresult devuelve 1 array */
+                                        userstoryservice.newuserstory (userstory).then(function (error, userstoryresult) {
                                             if (error) {
                                                 return promise.done(error, null);
                                             } else {
 
-                                                console.log("esto vale el userstory creado");
-                                                console.log(userstory);
                                                 console.log("userstory successfully created... ");
 
+                                                console.log("este es el userstoryresult que devuelve el metodo de creacion");
+
+                                                console.log(userstoryresult);
                                                 /* notif. al CH de nuevo userstory */
                                                 /*socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {groupid: groupid, userstory: userstory});*/
-                                                socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {userstory: userstory});
+                                                socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {userstory: userstoryresult});
 
 
                                                 /* tengo que hacer 1 json para el mensaje */
@@ -110,14 +119,11 @@ exports.newuserstory = function newuserstory (request, response){
 
                                                 var sender = {
                                                     id  : result._id,
-                                                    name: result.username,
+                                                    username: result.username,
                                                     mail: result.mail
                                                 };
 
 
-
-                                                console.log("esto vale el userstory que voy a meter en mensaje text en controller/userstory");
-                                                console.log(userstory);
 
                                                 /* quizas no habria que mandar all del userstory
                                                  * mandamos mejor solo el id del userstory y si lo quieren ver que hagan 1 get y a correr */
@@ -131,28 +137,31 @@ exports.newuserstory = function newuserstory (request, response){
                                                 };
 
                                                 messagetext.userstory = {
-                                                    id          : userstory.id,
-                                                    num         : userstory.num,
-                                                    subject     : userstory.subject,
-                                                    tags        : userstory.tags,
-                                                    status      : userstory.status,
-                                                    votes       : userstory.votes,
-                                                    points      : userstory.points,
-                                                    description : userstory.description,
-                                                    requirement : userstory.requirement
+                                                    id          : userstoryresult.id,
+                                                    num         : userstoryresult.num,
+                                                    subject     : userstoryresult.subject,
+                                                    tags        : userstoryresult.tags,
+                                                    status      : userstoryresult.status,
+                                                    /* array con id de user*/
+                                                    /* si dejo hacerlo en la creacion */
+                                                    voters      : userstoryresult.voters,
+                                                    points      : userstoryresult.points,
+                                                    totalPoints : userstoryresult.totalPoints,
+                                                    description : userstoryresult.description,
+                                                    requirement : userstoryresult.requirement
                                                 };
 
 
+                                                console.log("esto vale el userstory que voy a meter en mensaje text en controller/userstory");
+                                                console.log(messagetext.userstory);
+
+                                                /*console.log("en el controller esto vale channelid");
+                                                console.log(channelid);*/
 
                                                 messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
-                                                    if(!error){
-                                                        console.log("NO HAY ERROR EN NEWINTERNAL MESSAJE");
-                                                        console.log("este esel mensaje guardado en la bd");
-                                                    }
-
 
                                                     /* devuelvo el json cuando se haya hecho all */
-                                                    response.json(userstory);
+                                                    response.json(userstoryresult);
 
                                                 });
 
@@ -229,8 +238,8 @@ exports.getuserstories = function getuserstories (request, response){
                                     }
                                     else {
 
-                                        console.log("esto valen los userstories devueltos");
-                                        console.log(userstories);
+                                        /*console.log("esto valen los userstories devueltos");
+                                        console.log(userstories);*/
                                         response.json(userstories);
 
 

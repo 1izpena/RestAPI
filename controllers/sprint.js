@@ -21,7 +21,7 @@ var chatErrors  = require('../helpers/chatErrorsHandler');
 var socketio  = require('../helpers/sockets');
 var io = require('socket.io');
 
-exports.getuserstories = function getuserstories (request, response){
+exports.getsprints = function getsprints (request, response){
 
     var userid = request.params.userid;
     var channelid = request.params.channelid;
