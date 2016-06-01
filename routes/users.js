@@ -133,6 +133,11 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').ge
 /* POST CH USERSTORIES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').post(userstory.newuserstory);
 
+/* POST CH USERSTORIES  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid').put(userstory.updateuserstory);
+
+
+
 /* GET CH SPRINTS  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints').get(sprint.getsprints);
 /* GET CH ISSUES  */

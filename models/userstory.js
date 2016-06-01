@@ -58,7 +58,7 @@ var userstorySchema = new Schema({
 userstorySchema.plugin(AutoIncrement, {inc_field: 'num'});
 
 
-/* metodos create, get y delete */
+/* metodos create, get, delete y update */
 userstorySchema.statics.createUserstory = function createUserstory (attributes) {
 
     var promise = new Hope.Promise();
@@ -78,6 +78,35 @@ userstorySchema.statics.createUserstory = function createUserstory (attributes) 
     });
     return promise;
 };
+
+
+
+userstorySchema.statics.updateUserstoryById = function updateUserstoryById (id, update, options) {
+
+    var promise = new Hope.Promise();
+
+    this.findByIdAndUpdate(id, update, options,function(error, userstory) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            if (userstory){
+                return promise.done(null, userstory);
+            }
+            else {
+                var err = {
+                    code   : 400,
+                    message: 'Userstory not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
+
+
 
 
 
