@@ -10,6 +10,8 @@ var Userstory  = require('../models/userstory');
 
 
 
+
+
 exports.newuserstory = function newuserstory(userstory){
     var promise = new Hope.Promise();
     var Userstory = mongoose.model('Userstory');
@@ -35,42 +37,48 @@ exports.newuserstory = function newuserstory(userstory){
     return promise;
 };
 
-/*
-*
-*
-*
- var options = {new: true};
- var query = {"groupName": groupName};
- Group.updategroup (groupid,query,options).then (function (error,group){
- if (error){
- console.log("error update");
- return promise.done(error,null);
- }
- else{
- console.log("ok update");
- var Group = mongoose.model('Group');
- Group.parsepopulated(userid,groupid).then(function (error, group) {
- if (error){
- return promise.done(error,null);
- }
- else {
- return promise.done(null, group);
- }
- });
- }
- });
- return promise;
- };
-*
-*
-*
-*
-*
-*
-*
-*
-*
-* */
+
+
+/* añadir 1 task en el userstory */
+
+exports.updateuserstoryTaskById = function updateuserstoryTaskById(userstoryid, taskid){
+    var promise = new Hope.Promise();
+    var Userstory = mongoose.model('Userstory');
+    var options = {new: true};
+
+    var update = { $push: { "tasks": taskid} };
+
+
+    /* si no lo encuentra me avisa */
+    /* reutilizamos el socket del userstory cada vez que se actualice la tarea */
+    Userstory.updateUserstoryById (userstoryid, update, options).then (function (error, newuserstoryresult) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+
+            var query = { _id: newuserstoryresult._id};
+            Userstory.searchPopulatedUserstories (query, 1).then (function (error, userstoryresult) {
+                if (error) {
+                    return promise.done(error, null);
+                }
+                else {
+                    return promise.done(null, userstoryresult);
+                }
+            });
+
+        }
+    });
+    return promise;
+};
+
+
+
+
+
+
+
+
 exports.updateuserstoryById = function updateuserstoryById(userstoryid, userstory, codefield){
     var promise = new Hope.Promise();
     var Userstory = mongoose.model('Userstory');
@@ -156,3 +164,40 @@ exports.getuserstories = function getuserstories (channelid){
     });
     return promise;
 };
+
+
+exports.getuserstoryById = function getuserstoryById (channelid, userstoryid){
+    var promise = new Hope.Promise();
+    var Userstory = mongoose.model('Userstory');
+
+    var query = { channel: channelid, _id:userstoryid};
+
+    Userstory.searchPopulatedUserstories (query,1).then (function (error, userstories) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            return promise.done(null, userstories);
+        }
+    });
+    return promise;
+};
+
+
+exports.getuserstoryByIdwithquery = function getuserstoryByIdwithquery (query){
+    var promise = new Hope.Promise();
+    var Userstory = mongoose.model('Userstory');
+
+
+    Userstory.searchPopulatedUserstories (query,1).then (function (error, userstories) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            return promise.done(null, userstories);
+        }
+    });
+    return promise;
+};
+
+

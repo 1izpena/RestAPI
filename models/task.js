@@ -12,20 +12,24 @@ var Schema = mongoose.Schema;
 var User  = require('./user');
 var Hope      	= require('hope');
 
+var AutoIncrement = require('mongoose-sequence');
+
 
 
 
 var taskSchema = new Schema({
 
+    numtask         : Number,
     subject         : { type: String, required: true },
     createdby       : { type: Schema.ObjectId, ref: 'User', required: true },
     datetime        : { type: Date, default: Date.now },
+   /* tags            : [{ type: String, required: false }],*/
 
     /* si locaine puede ser para varios, puedes poner contributors */
     assignedto      : { type: Schema.ObjectId, ref: 'User', required: false },
     contributors    : [{ type: Schema.ObjectId, ref: 'User', required: false }],
 
-    /* new, in progress, readyfortest, closed */
+    /* new = 0, in progress = 1, readyfortest = 2, closed =3 */
     status          : { type: String, default: 'New' },
     description     : { type: String, required: false },
 
@@ -41,18 +45,12 @@ var taskSchema = new Schema({
 
     attachments     : [{ type: String, required: false }] /* array of filename */
 
-    /* puedo meter historial?? */
-    /**
-    activity        : [{
-        subject: String,
-        _user:{ type: Schema.ObjectId, ref: 'User'},
-        datetime: Date
-    }],*/
 
 
 });
 
 
+taskSchema.plugin(AutoIncrement, {inc_field: 'numTask'});
 
 
 taskSchema.statics.createTask = function createTask (attributes) {
@@ -60,7 +58,7 @@ taskSchema.statics.createTask = function createTask (attributes) {
     var promise = new Hope.Promise();
     var Task = mongoose.model('Task', taskSchema);
 
-    Task = new Userstory(attributes);
+    Task = new Task(attributes);
     Task.save(function (error, task) {
         if(error){
 
@@ -167,6 +165,32 @@ taskSchema.statics.deleteTasks = function deleteTasks (query) {
 
 
 
+taskSchema.statics.updateTaskyById = function updateTaskyById (id, update, options) {
+
+    var promise = new Hope.Promise();
+
+    this.findByIdAndUpdate(id, update, options,function(error, task) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            if (task){
+                return promise.done(null, task);
+            }
+            else {
+                var err = {
+                    code   : 400,
+                    message: 'Task not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
+
+
 
 taskSchema.methods.parse = function parse () {
     var task = this;
@@ -174,18 +198,15 @@ taskSchema.methods.parse = function parse () {
 
     var parseTask = {
         id          : task._id,
+        num         : task.numTask,
         subject     : task.subject,
         createdby   : {
             id         : (task.createdby._id) ? task.createdby._id : task.createdby,
             username   : (task.createdby.username) ? task.createdby.username :  '',
             mail       : (task.createdby.mail) ? task.createdby.mail :  ''
         },
+        /*tags        : task.tags,*/
         datetime    : task.datetime,
-        assignedto   : {
-            id         : (task.assignedto._id) ? task.assignedto._id : task.assignedto,
-            username   : (task.assignedto.username) ? task.assignedto.username :  '',
-            mail       : (task.assignedto.mail) ? task.assignedto.mail :  ''
-        },
         status      : task.status,
         description : task.description,
         requirement : task.requirement,
@@ -195,36 +216,18 @@ taskSchema.methods.parse = function parse () {
     };
 
 
-    /*
-     var task;
-
-
-    for (var i = 0; i < userstory.tasks.length; i++) {
-     */
-
-     /* de task quiero all *
-    task.id = (userstory.tasks[i]._id) ? userstory.tasks[i]._id : userstory.tasks[i];
-    task.subject = (userstory.tasks[i].subject) ? userstory.tasks[i].subject : userstory.tasks[i];
-
-    if(userstory.tasks[i].createdby !== undefined &&
-        userstory.tasks[i].createdby !== null &&
-        userstory.tasks[i].createdby !== '' ){
-
-        task.createdby = {
-            id         : (userstory.tasks[i].createdby._id) ? userstory.createdby.tasks[i]._id : userstory.createdby.tasks[i],
-            username   : (userstory.tasks[i].createdby.username) ? userstory.tasks[i].createdby.username :  '',
-            mail       : (userstory.tasks[i].createdby.mail) ? userstory.tasks[i].createdby.mail :  ''
+    if(task.assignedto !== null && task.assignedto !== undefined){
+        parseTask.assignedto = {
+            id         : (task.assignedto._id) ? task.assignedto._id : task.assignedto,
+            username   : (task.assignedto.username) ? task.assignedto.username :  '',
+            mail       : (task.assignedto.mail) ? task.assignedto.mail :  ''
         };
 
     }
+    else{
+        parseTask.assignedto = {};
+    }
 
-
-      comments        : [{
-      comment: String,
-      _user:{ type: Schema.ObjectId, ref: 'User'},
-      created: { type: Date, default: Date.now }
-      }],
-    */
 
     if(task.contributors !== null && task.contributors !== undefined){
         if(task.contributors.length){

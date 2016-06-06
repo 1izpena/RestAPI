@@ -8,6 +8,9 @@ var elasticsearch = require('../controllers/elasticsearch');
 
 var githubapi = require('../controllers/githubapi');
 var userstory = require('../controllers/userstory');
+
+var task = require('../controllers/task');
+
 var sprint = require('../controllers/sprint');
 var issue = require('../controllers/issue');
 
@@ -133,8 +136,18 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').ge
 /* POST CH USERSTORIES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').post(userstory.newuserstory);
 
-/* POST CH USERSTORIES  */
+/* PUT CH USERSTORIES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid').put(userstory.updateuserstory);
+
+/* POST CH TASK  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid/tasks').post(task.newtask);
+
+/* PUT CH TASK  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid/tasks/:taskid').put(task.updatetask);
+
+
+
+
 
 
 

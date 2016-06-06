@@ -4,10 +4,10 @@
 
 
 
-var Hope  = require('hope');
+/*var Hope  = require('hope');*/
 
 
-exports.checkfields = function(userstory, fieldchange) {
+exports.checkfields = function checkfields (userstory, fieldchange) {
 
     /* puede cambiar
     *   subject,
@@ -20,7 +20,11 @@ exports.checkfields = function(userstory, fieldchange) {
      * description,
      * requirement(team, client, blocked */
 
-    var promise = new Hope.Promise();
+
+    var answer = {};
+    answer.err = {};
+    answer.num = 0;
+
 
 
 
@@ -35,28 +39,31 @@ exports.checkfields = function(userstory, fieldchange) {
         fieldchange !== 'subject' &&
         fieldchange !== 'sprint'){
 
-        var err = {
-            code   : 400,
-            message: 'Bad Request. Missing required parameters: field that changed mismatch.'
-        };
-        return promise.done(err, null);
+
+        answer.err.code = 400;
+        answer.err.message = 'Bad Request. Missing required parameters: field that changed mismatch.';
+
+        return answer;
 
     }
     else{
         if(fieldchange == 'voters'){
+            console.log("esto vale userstory.voters");
+            console.log(userstory.voters);
+
             if(userstory.voters == undefined ||
                 userstory.voters == null ||
-                userstory.voters == '' ){
+                Object.prototype.toString.call( userstory.voters) !== '[object Array]'){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: voters.'
-                };
-                return promise.done(err, null);
+                answer.err.code = 400;
+                answer.err.message = 'Bad Request. Missing required parameters: voters.';
+
+                return answer;
 
             }
             else{
-                return promise.done(null, 1);
+                answer.num = 1;
+                return answer;
 
             }
 
@@ -66,15 +73,14 @@ exports.checkfields = function(userstory, fieldchange) {
                 userstory.point == null ||
                 userstory.point == '' ){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: point.'
-                };
-                return promise.done(err, null);
+                answer.err.code = 400;
+                answer.err.message = 'Bad Request. Missing required parameters: point.';
+                return answer;
 
             }
             else{
-                return promise.done(null, 2);
+                answer.num = 2;
+                return answer;
 
             }
 
@@ -82,17 +88,18 @@ exports.checkfields = function(userstory, fieldchange) {
         else if(fieldchange == 'attachments'){
             if(userstory.attachments == undefined ||
                 userstory.attachments == null ||
-                userstory.attachments == '' ){
+                Object.prototype.toString.call( userstory.attachments) !== '[object Array]' ){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: attachments.'
-                };
-                return promise.done(err, null);
+
+                answer.err.code = 400;
+                answer.err.message = 'Bad Request. Missing required parameters: attachments.';
+
+                return answer;
 
             }
             else{
-                return promise.done(null, 3);
+                answer.num = 3;
+                return answer;
 
             }
 
@@ -100,17 +107,18 @@ exports.checkfields = function(userstory, fieldchange) {
         else if(fieldchange == 'tasks'){
             if(userstory.tasks == undefined ||
                 userstory.tasks == null ||
-                userstory.tasks == '' ){
+                Object.prototype.toString.call( userstory.tasks) !== '[object Array]' ){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: tasks.'
-                };
-                return promise.done(err, null);
+
+                answer.err.code = 400;
+                answer.err.message = 'Bad Request. Missing required parameters: tasks.';
+
+                return answer;
 
             }
             else{
-                return promise.done(null, 4);
+                answer.num = 4;
+                return answer;
 
             }
 
@@ -119,17 +127,18 @@ exports.checkfields = function(userstory, fieldchange) {
         else if(fieldchange == 'tags'){
             if(userstory.tags == undefined ||
                 userstory.tags == null ||
-                userstory.tags == '' ){
+                Object.prototype.toString.call( userstory.tags) !== '[object Array]' ){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: tags.'
-                };
-                return promise.done(err, null);
+
+                answer.err.code = 400;
+                answer.err.message = 'Bad Request. Missing required parameters: tags.';
+
+                return answer;
 
             }
             else{
-                return promise.done(null, 5);
+                answer.num = 5;
+                return answer;
 
             }
 
@@ -140,15 +149,15 @@ exports.checkfields = function(userstory, fieldchange) {
                 userstory.description == null ||
                 userstory.description == '' ){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: description.'
-                };
-                return promise.done(err, null);
+
+                answer.err.code = 400;
+                answer.err.message = 'Bad Request. Missing required parameters: description.';
+                return answer;
 
             }
             else{
-                return promise.done(null, 6);
+                answer.num = 6;
+                return answer;
 
             }
 
@@ -158,15 +167,15 @@ exports.checkfields = function(userstory, fieldchange) {
                 userstory.requirement == null ||
                 userstory.requirement == '' ){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: requirement.'
-                };
-                return promise.done(err, null);
+
+                answer.err.code = 400;
+                answer.err.message = 'Bad Request. Missing required parameters: requirement.';
+                return answer;
 
             }
             else{
-                return promise.done(null, 7);
+                answer.num = 7;
+                return answer;
 
             }
 
@@ -176,15 +185,14 @@ exports.checkfields = function(userstory, fieldchange) {
                 userstory.subject == null ||
                 userstory.subject == '' ){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: subject.'
-                };
-                return promise.done(err, null);
+                answer.err.code = 400;
+                answer.err.message = 'Bad Request. Missing required parameters: subject.';
+                return answer;
 
             }
             else{
-                return promise.done(null, 8);
+                answer.num = 8;
+                return answer;
 
             }
 
@@ -194,32 +202,28 @@ exports.checkfields = function(userstory, fieldchange) {
                 userstory.sprint == null ||
                 userstory.sprint == '' ){
 
-                var err = {
-                    code   : 400,
-                    message: 'Bad Request. Missing required parameters: sprint.'
-                };
+
+                err.code = 400;
+                err.message = 'Bad Request. Missing required parameters: sprint.';
                 return promise.done(err, null);
 
             }
             else{
-                return promise.done(null, 9);
+                answer.num = 9;
+                return answer;
 
             }
 
         }
         else{
-            var err = {
-                code   : 400,
-                message: 'Bad Request. Missing required parameters: field that changed mismatch.'
-            };
-            return promise.done(err, null);
+
+            answer.err.code = 400;
+            answer.err.message = 'Bad Request. Missing required parameters: field that changed mismatch.';
+            return answer;
 
         }
 
     }
 
 
-
-    return promise;
-
-}
+};

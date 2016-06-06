@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Userstory  = require('./userstory');
+var Task  = require('./task');
 var Channel  = require('./channel');
 var User  = require('./user');
 
@@ -39,6 +40,7 @@ var issueSchema = new Schema({
     }],
 
     userstories   : [{ type: Schema.ObjectId, ref: 'Userstory', required: false }],
+    tasks         : [{ type: Schema.ObjectId, ref: 'Task', required: false }],
     attachments   : [{ type: String, required: false }], /* array of filename */
     channel       : { type: Schema.ObjectId, ref: 'Channel', required: true }
 
@@ -190,6 +192,7 @@ issueSchema.methods.parse = function parse () {
         tags        : issue.tags,
         description : issue.description,
         userstories : issue.userstories,
+        tasks       : issue.tasks,
         attachments : issue.attachments,
         channel     : issue.channel
 

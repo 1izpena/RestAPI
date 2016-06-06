@@ -15,6 +15,8 @@ var Task  = require('./task');
 var Sprint  = require('./sprint');
 var Channel = require('./channel');
 
+async = require("async");
+
 
 var Hope      	= require('hope');
 
@@ -182,7 +184,6 @@ userstorySchema.statics.searchPopulatedUserstories = function searchPopulatedUse
     this.find(query).sort({num: -1})
         .skip(skip)
         .limit(limit)
-        /* quitamos sprint de aqui, y solo mandamos los ids */
         .populate('createdby tasks')
         .exec(function(error, value) {
 
@@ -196,23 +197,102 @@ userstorySchema.statics.searchPopulatedUserstories = function searchPopulatedUse
                         message: "Userstory not found."
                     };
                     value = [];
+
+                    return promise.done(error, value);
                 }
                 else {
-                    value = value[0].parse();
+
+
+                    var parseuserstory = {};
+
+                    User.populate(value[0], {
+                            path: 'tasks.createdby tasks.assignedto tasks.contributors tasks.comments._user',
+                            select: 'username mail _id'
+                        },
+                        function (error, userstory)
+                        {
+                            if(error){
+                                return promise.done(error, parseuserstory);
+                            }
+                            else{
+                                parseuserstory = userstory.parse();
+                                return promise.done(error, parseuserstory);
+
+                            }
+
+                        }
+                    );
+
                 }
+
+
+
             }
             else{
-                value = value.map(function(elem,index) {
 
-                    return elem.parse();
+                var arrUserstories = [];
+                var parseuserstory = {};
+                async.forEach(value,function(item,callback) {
+
+                    User.populate(item, {
+                            path: 'tasks.createdby tasks.assignedto tasks.contributors tasks.comments._user',
+                            select: 'username mail _id'
+                    },
+                        function(error,output) {
+
+                            parseuserstory = output.parse()
+                            arrUserstories.push(parseuserstory);
+
+                            console.log("esto vale output");
+                            console.log(parseuserstory);
+
+                            callback();
+                    });
+                }, function(err) {
+                    console.log("esto vale el value");
+                    console.log(arrUserstories);
+                    return promise.done(err, arrUserstories);
+
                 });
+
+
+
+
+
+
+
+
+         /*       value = value.map(function(elem,index) {
+
+
+/*
+                    User.populate(elem, {
+                            path: 'tasks.createdby tasks.assignedto tasks.contributors tasks.comments._user',
+                            select: 'username mail _id'
+                        },
+                        function (error, userstory)
+                        {
+
+
+                            console.log("esto vale en la funcion userstory");
+                            console.log(userstory);
+                            return userstory.parse();
+                        }
+                    );
+                    return pru;
+
+                    */
+             /*   });
                 // Ordenamos x orden descendente
                 value = value.reverse();
+
+
+*/
 
             }/* end else:: want multiple values & parse this values */
 
             // Devolvemos en order ascendente de fecha
-            return promise.done(error, value);
+
 
         });
 
@@ -332,30 +412,48 @@ userstorySchema.methods.parse = function parse () {
 
 
 
+    parseUserstory.tasks = [];
     if(userstory.tasks !== null && userstory.tasks !== undefined){
 
         var arrayTaskStatus = [];
+
         if(userstory.tasks.length){
 
 
-            var task;
+
             for (var i = 0; i < userstory.tasks.length; i++) {
+                var task = {};
+
+                console.log("esto vale en el parse userstory.tasks[i].numTask");
+                console.log(userstory.tasks[i].numTask);
 
                 /* de task quiero all */
+
                 task.id = (userstory.tasks[i]._id) ? userstory.tasks[i]._id : userstory.tasks[i];
-                task.subject = (userstory.tasks[i].subject) ? userstory.tasks[i].subject : userstory.tasks[i];
+                task.num = (userstory.tasks[i].numTask) ? userstory.tasks[i].numTask : 0;
+                task.subject = (userstory.tasks[i].subject) ? userstory.tasks[i].subject : '';
 
                 if(userstory.tasks[i].createdby !== undefined &&
                     userstory.tasks[i].createdby !== null &&
                     userstory.tasks[i].createdby !== '' ){
 
                     task.createdby = {
-                        id         : (userstory.tasks[i].createdby._id) ? userstory.createdby.tasks[i]._id : userstory.createdby.tasks[i],
+                        id         : (userstory.tasks[i].createdby._id) ? userstory.tasks[i].createdby._id : userstory.tasks[i].createdby,
                         username   : (userstory.tasks[i].createdby.username) ? userstory.tasks[i].createdby.username :  '',
                         mail       : (userstory.tasks[i].createdby.mail) ? userstory.tasks[i].createdby.mail :  ''
                     };
 
                 }
+
+                /*if(userstory.tasks[i].tags !== undefined &&
+                    userstory.tasks[i].tags !== null &&
+                    userstory.tasks[i].tags !== ''){
+                    task.tags = userstory.tasks[i].tags;
+                }
+                else{
+                    task.tags = [];
+
+                }*/
 
                 task.datetime = (userstory.tasks[i].datetime) ? userstory.tasks[i].datetime : Date.now;
                 if(userstory.tasks[i].assignedto !== undefined &&
@@ -375,9 +473,9 @@ userstorySchema.methods.parse = function parse () {
                 arrayTaskStatus.push(task.status);
 
 
-                task.description = userstory.task[i].description;
-                task.requirement = userstory.task[i].requirement;
-                task.attachments = userstory.task[i].attachments;
+                task.description = userstory.tasks[i].description;
+                task.requirement = userstory.tasks[i].requirement;
+                task.attachments = userstory.tasks[i].attachments;
 
 
 
@@ -387,7 +485,7 @@ userstorySchema.methods.parse = function parse () {
                     userstory.tasks[i].contributors !== '' ){
                     if(userstory.tasks[i].contributors.length){
                         var contributor = {};
-                        for(var j = 0; j < userstory.task[i].contributors.length; j++){
+                        for(var j = 0; j < userstory.tasks[i].contributors.length; j++){
                             contributor = {
                                 id         : (userstory.tasks[i].contributors[j]._id) ? userstory.tasks[i].contributors[j]._id : userstory.tasks[i].contributors[j],
                                 username   : (userstory.tasks[i].contributors[j].username) ? userstory.tasks[i].contributors[j].username :  '',
@@ -404,12 +502,13 @@ userstorySchema.methods.parse = function parse () {
                 }
 
                 task.comments = [];
+
                 if(userstory.tasks[i].comments !== undefined &&
                     userstory.tasks[i].comments !== null &&
                     userstory.tasks[i].comments !== '' ){
                     if(userstory.tasks[i].comments.length){
                         var comment = {};
-                        for(var k = 0; k < userstory.task[i].comments.length; k++){
+                        for(var k = 0; k < userstory.tasks[i].comments.length; k++){
                             comment = {
                                 id         : (userstory.tasks[i].comments[k]._id) ? userstory.tasks[i].comments[k]._id : userstory.tasks[i].comments[k],
                                 username   : (userstory.tasks[i].comments[k].username) ? userstory.tasks[i].comments[k].username :  '',
@@ -430,6 +529,9 @@ userstorySchema.methods.parse = function parse () {
 
 
                 /* hay que parsear y meterlo */
+
+
+
                 parseUserstory.tasks.push(task);
 
             } /* end for */
@@ -464,13 +566,13 @@ userstorySchema.methods.parse = function parse () {
 
         }
         else{
-            parseUserstory.tasks = [];
+
             parseUserstory.status = "New";
         }
 
     }
     else{
-        parseUserstory.tasks = [];
+
         parseUserstory.status = "New";
     }
 
