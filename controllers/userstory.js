@@ -21,6 +21,13 @@ var io = require('socket.io');
 
 
 
+async = require("async");
+
+
+var createJSONmsgTask  = require('../helpers/createJSONmsgTask');
+
+
+
 
 exports.newuserstory = function newuserstory (request, response){
 
@@ -94,51 +101,8 @@ exports.newuserstory = function newuserstory (request, response){
 
 
                                                 /* tengo que hacer 1 json para el mensaje */
+                                                var messagetext = createJSONmsgTask.generateMSGNewUS(result, userstoryresult);
 
-                                                /* si el servicio devuelve null no se ha guardado bien en la bd el mensaje,
-                                                 * o no ha podido hacer busquedas para hacer emits
-                                                 * de todas formas se hace
-                                                 * esto no deberia pasar */
-
-                                                /* he mandado el mensaje xsockets, con eso vale */
-
-                                                /* text: JSON.stringify(message),*/
-
-
-
-                                                var sender = {
-                                                    id  : result._id,
-                                                    username: result.username,
-                                                    mail: result.mail
-                                                };
-
-
-
-                                                /* quizas no habria que mandar all del userstory
-                                                 * mandamos mejor solo el id del userstory y si lo quieren ver que hagan 1 get y a correr */
-
-                                                /* yo le meteria el userstory sin referencias externas */
-                                                var messagetext = {
-                                                    action      : 'created',
-                                                    event       :  'userstory',
-                                                    sender      :   sender
-
-                                                };
-
-                                                messagetext.userstory = {
-                                                    id          : userstoryresult.id,
-                                                    num         : userstoryresult.num,
-                                                    subject     : userstoryresult.subject,
-                                                    tags        : userstoryresult.tags,
-                                                    status      : userstoryresult.status,
-                                                    /* array con id de user*/
-                                                    /* si dejo hacerlo en la creacion */
-                                                    voters      : userstoryresult.voters,
-                                                    points      : userstoryresult.points,
-                                                    totalPoints : userstoryresult.totalPoints,
-                                                    description : userstoryresult.description,
-                                                    requirement : userstoryresult.requirement
-                                                };
 
 
                                                 messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
@@ -173,6 +137,8 @@ exports.newuserstory = function newuserstory (request, response){
 
 
 /** updateuserstory **/
+
+/* aqui habria que mirar que el userstory esta en el canal, falta, asique cambiamos y probamos */
 exports.updateuserstory = function updateuserstory (request, response){
 
     var userid = request.params.userid;
@@ -233,91 +199,64 @@ exports.updateuserstory = function updateuserstory (request, response){
                                             response.status(401).json({message: 'User not included in requested channel'});
                                         }
                                         else {
-                                            /* existe y el usuario esta en el */
-                                            /* entonces procedemos a updatear el userstory */
 
-                                            /* userstoryresult devuelve 1 array */
-                                            userstoryservice.updateuserstoryById (userstoryid, userstory, codefield).then(function (error, userstoryresult) {
+
+                                            /* miramos que exista el US dentro del canal, porque puede existir pero no es propietario */
+                                            userstoryservice.getuserstoryById (channelid, userstoryid).then(function (error, userstoryexists) {
                                                 if (error) {
                                                     response.status(error.code).json({message: error.message});
                                                 } else {
 
-                                                    socketio.getIO().sockets.to('CH_' + channelid).emit('updateUserstory', {userstory: userstoryresult});
+                                                    if (userstoryexists == undefined || userstoryexists == null || userstoryexists == '') {
+                                                        var err = {
+                                                            code: 402,
+                                                            message: "Userstory to update not found inside channel requested."
+                                                        };
+                                                        response.status(err.code).json({message: err.message});
 
-
-                                                    /* tengo que hacer 1 json para el mensaje */
-
-                                                    /* si el servicio devuelve null no se ha guardado bien en la bd el mensaje,
-                                                     * o no ha podido hacer busquedas para hacer emits
-                                                     * de todas formas se hace
-                                                     * esto no deberia pasar */
-
-                                                    /* he mandado el mensaje xsockets, con eso vale */
-
-                                                    /* text: JSON.stringify(message),*/
-
-
-
-                                                    var sender = {
-                                                        id  : result._id,
-                                                        username: result.username,
-                                                        mail: result.mail
-                                                    };
-
-
-
-                                                    /* quizas no habria que mandar all del userstory
-                                                     * mandamos mejor solo el id del userstory y si lo quieren ver que hagan 1 get y a correr */
-
-                                                    /* yo le meteria el userstory sin referencias externas */
-                                                    var messagetext = {
-                                                        action      :  'updated',
-                                                        field       :   codefield,
-                                                        event       :  'userstory',
-                                                        sender      :   sender
-
-                                                    };
-
-                                                    messagetext.userstory = {
-                                                        id          : userstoryresult.id,
-                                                        num         : userstoryresult.num,
-                                                        subject     : userstoryresult.subject,
-                                                        tags        : userstoryresult.tags,
-                                                        status      : userstoryresult.status,
-                                                        /* array con id de user*/
-                                                        /* si dejo hacerlo en la creacion */
-                                                        voters      : userstoryresult.voters,
-                                                        point       : userstoryresult.point,
-                                                        totalPoints : userstoryresult.totalPoints,
-                                                        description : userstoryresult.description,
-                                                        requirement : userstoryresult.requirement
-                                                    };
-
-
-                                                    /* point, tags, requirement*/
-                                                    if(messagetext.field == 2 ||
-                                                        messagetext.field == 5 ||
-                                                        messagetext.field == 7){
-                                                        if(codepoints !== undefined &&
-                                                            codepoints !== null &&
-                                                            codepoints !== '' ){
-                                                            messagetext.codepoints = codepoints;
-
-
-                                                        }
                                                     }
+                                                    else {
 
 
-                                                    messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
 
-                                                        /* devuelvo el json cuando se haya hecho all */
-                                                        response.json(userstoryresult);
+                                                        /* existe y el usuario esta en el */
+                                                        /* entonces procedemos a updatear el userstory */
 
-                                                    });
+                                                        /* userstoryresult devuelve 1 array */
+                                                        userstoryservice.updateuserstoryById (userstoryid, userstory, codefield).then(function (error, userstoryresult) {
+                                                            if (error) {
+                                                                response.status(error.code).json({message: error.message});
+                                                            } else {
+
+                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('updateUserstory', {userstory: userstoryresult});
 
 
-                                                } /* end else !err */
-                                            }); /* method newuserstory */
+                                                                /* tengo que hacer 1 json para el mensaje */
+                                                                var messagetext = createJSONmsgTask.generateMSGUpdateUS(result, userstoryresult, codefield, codepoints);
+
+
+
+                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                    /* devuelvo el json cuando se haya hecho all */
+                                                                    response.json(userstoryresult);
+
+                                                                });
+
+
+                                                            } /* end else !err */
+                                                        }); /* method newuserstory */
+
+
+
+
+
+                                                    }/* end else userstoryresult !== undefined */
+                                                } /* end else !error*/
+
+
+                                            }); /* end method getuserstorybyid para saber que existe en el canal */
+
 
                                         } /* end else !err */
                                     }); /* method checkuserinchannel */
@@ -429,6 +368,155 @@ exports.getuserstories = function getuserstories (request, response){
 
 
 };
+
+
+
+
+
+
+
+
+
+
+
+/******************************* !!!!!!!!!!! importante, ahora mismo no tenemos issues,
+ * pero cuando tengamos pueda que se asocien a US, luego habria que borrarlas *********************************************************/
+
+/** deleteuserstories **/
+
+
+exports.deleteuserstories = function deleteuserstories (request, response){
+
+    var userid = request.params.userid;
+    var channelid = request.params.channelid;
+    var groupid = request.params.groupid;
+    var userstoryid = request.params.userstoryid;
+
+
+
+
+    if(userid == undefined || userid == null || userid == '' ||
+        channelid == undefined || channelid == null || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == '' ||
+        userstoryid == undefined || userstoryid == null || userstoryid == '' ){
+        response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
+    }
+    else{
+
+
+        Auth(request, response).then(function(error, result) {
+            if(error) {
+                response.status(error.code).json({message: error.message});
+            }
+            else {
+                if (userid == result._id){
+
+                    /* primero buscamos que exista el canal y el usuario pertenezca */
+                    chatErrors.checkuserinchannel(channelid,userid)
+                        .then (function (error,channel) {
+                            if (error) {
+                                response.status(401).json({message: 'User not included in requested channel'});
+                            }
+                            else {
+
+                                /* miramos que exista el US dentro del canal, porque puede existir pero no es propietario */
+
+                                /* tengo el US con los ids de las tareas */
+                                userstoryservice.getuserstoryByIdWithInPopulate (channelid, userstoryid).then(function (error, userstoryexists) {
+                                    if (error) {
+                                        response.status(error.code).json({message: error.message});
+                                    } else {
+
+                                        if (userstoryexists == undefined || userstoryexists == null || userstoryexists == '') {
+                                            var err = {
+                                                code: 402,
+                                                message: "Userstory to delete not found inside channel requested."
+                                            };
+                                            response.status(err.code).json({message: err.message});
+
+                                        }
+                                        else {
+
+                                            /* esto retorna el US de nuevo */
+                                            userstoryservice.deleteTaskByIdRemovedUS(userstoryexists).then(function (error, sameuserstory) {
+                                                if (error) {
+
+                                                    response.status(error.code).json({message: error.message});
+                                                }
+
+                                                else {
+                                                   /* si ALL ha ido bien, borramos el US */
+                                                    console.log("estoy en controller,depues de borrar las tareas");
+                                                    userstoryservice.deleteuserstoryById (userstoryid)
+                                                        .then(function (error, userstoryresultid) {
+                                                            if (error) {
+
+                                                                response.status(error.code).json({message: error.message});
+                                                            }
+
+                                                            else {
+
+                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('deleteUserstory', {userstoryid: userstoryid});
+
+
+                                                                /* tengo que hacer 1 json para el mensaje **********************/
+                                                                var messagetext = createJSONmsgTask.generateMSGDeleteUS(result, userstoryexists);
+
+
+                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                    response.json({
+                                                                        userstoryid: userstoryid,
+                                                                        message: 'Userstory deleted successfully'
+                                                                    });
+
+
+                                                                });
+
+
+
+                                                            }
+                                                        });
+
+
+                                                }
+
+                                            });
+
+
+                                        }
+                                    }
+
+
+
+                                }); /* end method getuserstorybyid para saber que existe en el canal */
+
+
+                            } /* end else !err */
+                        }); /* method checkuserinchannel */
+
+                } /* end el token es del usuario */
+
+                else {
+                    response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                }
+
+            } /* end else !err */
+        }); /* method Auth */
+
+
+
+
+
+    } /* end else URL params exists */
+
+
+
+
+};
+
+
+
 
 
 

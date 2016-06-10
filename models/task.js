@@ -23,9 +23,7 @@ var taskSchema = new Schema({
     subject         : { type: String, required: true },
     createdby       : { type: Schema.ObjectId, ref: 'User', required: true },
     datetime        : { type: Date, default: Date.now },
-   /* tags            : [{ type: String, required: false }],*/
 
-    /* si locaine puede ser para varios, puedes poner contributors */
     assignedto      : { type: Schema.ObjectId, ref: 'User', required: false },
     contributors    : [{ type: Schema.ObjectId, ref: 'User', required: false }],
 
@@ -73,6 +71,7 @@ taskSchema.statics.createTask = function createTask (attributes) {
     });
     return promise;
 };
+
 
 
 taskSchema.statics.searchPopulatedTasks = function searchPopulatedTasks (query, limit, page) {
@@ -149,13 +148,18 @@ taskSchema.statics.deleteTaskById = function deleteTaskById (id) {
 
 
 
+
+
+
 taskSchema.statics.deleteTasks = function deleteTasks (query) {
     var promise = new Hope.Promise();
+
     this.remove(query,function(error) {
         if (error) {
             return promise.done(error, null);
-        }else {
-            console.log("tasks deleted successfully");
+        }
+        else {
+            console.log("Tasks deleted successfully");
             return promise.done(null, {message: 'Tasks deleted successfully'});
         }
     });
@@ -171,6 +175,8 @@ taskSchema.statics.updateTaskyById = function updateTaskyById (id, update, optio
 
     this.findByIdAndUpdate(id, update, options,function(error, task) {
         if (error) {
+            console.log("error");
+            console.log(error);
             return promise.done(error, null);
         }
         else {
@@ -229,33 +235,38 @@ taskSchema.methods.parse = function parse () {
     }
 
 
+
+    parseTask.contributors = [];
     if(task.contributors !== null && task.contributors !== undefined){
         if(task.contributors.length){
 
-            var contributor = {};
+
             for (var i = 0; i < task.contributors.length; i++) {
+                var contributor = {};
                 contributor.id = (task.contributors[i]._id) ? task.contributors[i]._id : task.contributors[i];
                 contributor.username = (task.contributors[i].username) ? task.contributors[i].username : '';
                 contributor.mail = (task.contributors[i].mail) ? task.contributors[i].mail : '';
 
+                parseTask.contributors.push(contributor);
+
             }
-            parseTask.contributors.push(contributor);
+
         }
-        else{
-            parseTask.contributors = [];
-        }
-    }
-    else{
-        parseTask.contributors = [];
     }
 
 
+
+    parseTask.comments = [];
     if(task.comments !== null && task.comments !== undefined){
         if(task.comments.length > 0){
-            var comment = {};
+
             for (var i = 0; i < task.comments.length; i++) {
+
+                var comment = {};
+
                 comment.comment = (task.comments[i].comment) ? task.comments[i].comment : '';
                 comment.created = (task.comments[i].created) ? task.comments[i].created : Date.now;
+                comment.id = (task.comments[i]._id) ? task.comments[i]._id : '';
 
                 if(task.comments[i]._user !== undefined && task.comments[i]._user !== null){
 
@@ -273,15 +284,10 @@ taskSchema.methods.parse = function parse () {
 
             }
         }
-        else{
-            parseTask.comments = [];
-        }
+
 
     }
-    else{
 
-        parseTask.comments = [];
-    }
 
 
     return parseTask;

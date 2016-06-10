@@ -17,7 +17,6 @@ var Channel = require('./channel');
 
 async = require("async");
 
-
 var Hope      	= require('hope');
 
 
@@ -167,6 +166,7 @@ userstorySchema.statics.searchUserstories = function searchUserstories (query, l
 
 /* en el search hay que hacer populate
 * getUserstories */
+
 userstorySchema.statics.searchPopulatedUserstories = function searchPopulatedUserstories (query, limit, page) {
     var promise = new Hope.Promise();
 
@@ -204,9 +204,8 @@ userstorySchema.statics.searchPopulatedUserstories = function searchPopulatedUse
 
 
                     var parseuserstory = {};
-
                     User.populate(value[0], {
-                            path: 'tasks.createdby tasks.assignedto tasks.contributors tasks.comments._user',
+                            path: 'tasks.createdby tasks.assignedto tasks.contributors',
                             select: 'username mail _id'
                         },
                         function (error, userstory)
@@ -225,8 +224,6 @@ userstorySchema.statics.searchPopulatedUserstories = function searchPopulatedUse
 
                 }
 
-
-
             }
             else{
 
@@ -235,63 +232,26 @@ userstorySchema.statics.searchPopulatedUserstories = function searchPopulatedUse
                 async.forEach(value,function(item,callback) {
 
                     User.populate(item, {
-                            path: 'tasks.createdby tasks.assignedto tasks.contributors tasks.comments._user',
+                            path: 'tasks.createdby tasks.assignedto tasks.contributors',
                             select: 'username mail _id'
-                    },
+                        },
                         function(error,output) {
 
                             parseuserstory = output.parse()
                             arrUserstories.push(parseuserstory);
 
-                            console.log("esto vale output");
-                            console.log(parseuserstory);
 
                             callback();
-                    });
+                        });
                 }, function(err) {
-                    console.log("esto vale el value");
-                    console.log(arrUserstories);
+
                     return promise.done(err, arrUserstories);
 
                 });
 
 
 
-
-
-
-
-
-         /*       value = value.map(function(elem,index) {
-
-
-/*
-                    User.populate(elem, {
-                            path: 'tasks.createdby tasks.assignedto tasks.contributors tasks.comments._user',
-                            select: 'username mail _id'
-                        },
-                        function (error, userstory)
-                        {
-
-
-                            console.log("esto vale en la funcion userstory");
-                            console.log(userstory);
-                            return userstory.parse();
-                        }
-                    );
-                    return pru;
-
-                    */
-             /*   });
-                // Ordenamos x orden descendente
-                value = value.reverse();
-
-
-*/
-
             }/* end else:: want multiple values & parse this values */
-
-            // Devolvemos en order ascendente de fecha
 
 
         });
@@ -303,13 +263,22 @@ userstorySchema.statics.searchPopulatedUserstories = function searchPopulatedUse
 
 
 
+
+
+
+
+
+
+
+
 userstorySchema.statics.deleteUserstoryById = function deleteUserstoryById (id) {
     var promise = new Hope.Promise();
-    this.remove({_id:id},function(error) {
+    this.remove( {_id : id },function(error) {
         if (error) {
             return promise.done(error, null);
-        }else {
-            console.log("userstory deleted successfully");
+        }
+        else {
+            console.log("Userstory deleted successfully");
             return promise.done(null, {message: 'Userstory deleted successfully'});
         }
     });
@@ -419,12 +388,11 @@ userstorySchema.methods.parse = function parse () {
 
         if(userstory.tasks.length){
 
-
-
             for (var i = 0; i < userstory.tasks.length; i++) {
                 var task = {};
 
-                console.log("esto vale en el parse userstory.tasks[i].numTask");
+
+                /*console.log("esto vale en el parse userstory.tasks[i].numTask");
                 console.log(userstory.tasks[i].numTask);
 
                 /* de task quiero all */
@@ -492,6 +460,7 @@ userstorySchema.methods.parse = function parse () {
                                 mail       : (userstory.tasks[i].contributors[j].mail) ? userstory.tasks[i].contributors[j].mail :  ''
                             };
 
+
                             task.contributors.push(contributor);
 
 
@@ -502,20 +471,35 @@ userstorySchema.methods.parse = function parse () {
                 }
 
                 task.comments = [];
-
                 if(userstory.tasks[i].comments !== undefined &&
                     userstory.tasks[i].comments !== null &&
                     userstory.tasks[i].comments !== '' ){
                     if(userstory.tasks[i].comments.length){
-                        var comment = {};
-                        for(var k = 0; k < userstory.tasks[i].comments.length; k++){
-                            comment = {
-                                id         : (userstory.tasks[i].comments[k]._id) ? userstory.tasks[i].comments[k]._id : userstory.tasks[i].comments[k],
-                                username   : (userstory.tasks[i].comments[k].username) ? userstory.tasks[i].comments[k].username :  '',
-                                mail       : (userstory.tasks[i].comments[k].mail) ? userstory.tasks[k].comments[k].mail :  ''
-                            };
+
+
+
+                        for (var k = 0; k < userstory.tasks[i].comments.length; k++) {
+                            var comment = {};
+
+
+                            comment.comment = (userstory.tasks[i].comments[k].comment) ? userstory.tasks[i].comments[k].comment : '';
+                            comment.created = (userstory.tasks[i].comments[k].created) ? userstory.tasks[i].comments[k].created : Date.now;
+                            comment.id = (userstory.tasks[i].comments[k]._id) ? userstory.tasks[i].comments[k]._id : '';
+
+                            if(userstory.tasks[i].comments[k]._user !== undefined && userstory.tasks[i].comments[k]._user !== null){
+
+                                comment.user = {
+                                    id         : (userstory.tasks[i].comments[k]._user._id) ? userstory.tasks[i].comments[k]._user._id : userstory.tasks[i].comments[k]._user,
+                                    username   : (userstory.tasks[i].comments[k]._user.username) ? userstory.tasks[i].comments[k]._user.username :  '',
+                                    mail       : (userstory.tasks[i].comments[k]._user.mail) ? userstory.tasks[i].comments[k]._user.mail :  ''
+                                };
+
+
+                            }
 
                             task.comments.push(comment);
+
+
 
 
                         }
@@ -530,11 +514,18 @@ userstorySchema.methods.parse = function parse () {
 
                 /* hay que parsear y meterlo */
 
-
-
                 parseUserstory.tasks.push(task);
 
+
+
             } /* end for */
+
+
+
+            for(var p = 0; p< parseUserstory.tasks.length; p++){
+                console.log(parseUserstory.tasks[p]);
+
+            }
 
             /* ahora reducimos el array y lo metemos */
             /* si el length es 1, ese es el status de userstory
@@ -556,7 +547,7 @@ userstorySchema.methods.parse = function parse () {
                     }
                 }
                 else{
-                    parseUserstory.status = arrayTaskStatusUniq.length[0];
+                    parseUserstory.status = arrayTaskStatusUniq[0];
                 }
             }
             else{

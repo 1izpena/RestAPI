@@ -135,17 +135,21 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/search').post(el
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').get(userstory.getuserstories);
 /* POST CH USERSTORIES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories').post(userstory.newuserstory);
-
 /* PUT CH USERSTORIES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid').put(userstory.updateuserstory);
+/* DELETE CH USERSTORIES  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid').delete(userstory.deleteuserstories);
+
+
+
+
 
 /* POST CH TASK  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid/tasks').post(task.newtask);
-
 /* PUT CH TASK  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid/tasks/:taskid').put(task.updatetask);
-
-
+/* DELETE CH TASK  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:userstoryid/tasks/:taskid').delete(task.deletetask);
 
 
 

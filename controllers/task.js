@@ -21,10 +21,141 @@ var userstoryErrors  = require('../helpers/userstoryErrorsHandler');
 
 var taskErrors = require('../helpers/taskErrorsHandler');
 
+var createJSONmsgTask  = require('../helpers/createJSONmsgTask');
+
 var socketio  = require('../helpers/sockets');
 var io = require('socket.io');
 
 
+
+
+
+
+exports.deletetask = function deletetask (request, response){
+    var userid = request.params.userid;
+    var channelid = request.params.channelid;
+    var groupid = request.params.groupid;
+    var userstoryid = request.params.userstoryid;
+    var taskid = request.params.taskid;
+
+    /* devolvemos el id de la tarea */
+
+    if(userid == undefined || userid == null || userid == '' ||
+        channelid == undefined || channelid == null || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == '' ||
+        userstoryid == undefined || userstoryid == null || userstoryid == '' ||
+        taskid == undefined || taskid == null || taskid == ''){
+
+
+        response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
+
+    }
+    else{
+
+
+        Auth(request, response).then(function(error, result) {
+            if (error) {
+                response.status(error.code).json({message: error.message});
+            }
+            else {
+                if (userid == result._id) {
+
+                    chatErrors.checkuserinchannel(channelid,userid)
+                        .then (function (error,channel) {
+                            if (error) {
+                                response.status(401).json({message: 'User not included in requested channel'});
+                            }
+                            else {
+
+
+                                var query = {channel: channelid, _id: userstoryid, tasks: taskid};
+
+                                userstoryservice.getuserstoryByIdwithquery(query).then(function (error, userstoryresult) {
+                                    if (error) {
+                                        response.status(error.code).json({message: error.message});
+                                    }
+                                    else {
+
+                                        if (userstoryresult == undefined || userstoryresult == null || userstoryresult == '') {
+                                            var err = {
+                                                code: 402,
+                                                message: "The task to remove not found inside channel requested."
+                                            };
+                                            response.status(err.code).json({message: err.message});
+
+                                        }
+                                        else {
+
+
+
+                                            /* hay que borrar la task del userstory */
+
+                                            userstoryservice.deletetaskFromUS(userstoryid, taskid).then(function (error, usresult) {
+                                                if (error) {
+                                                    response.status(error.code).json({message: error.message});
+                                                }
+                                                else {
+
+                                                    taskservice.deletetask(taskid).then(function (error, taskresult) {
+                                                        if (error) {
+                                                            response.status(error.code).json({message: error.message});
+                                                        }
+                                                        else {
+
+
+
+
+                                                            /* notificamos al CH de que ha cambiado el userstory */
+                                                            socketio.getIO().sockets.to('CH_' + channelid).emit('deleteTask', {
+                                                                taskid: taskid,
+                                                                userstoryid: userstoryid
+                                                            });
+
+
+                                                            /* tengo que hacer 1 json para el mensaje */
+                                                            var messagetext = createJSONmsgTask.generateMSGRemoveTask(result, userstoryresult, taskresult);
+
+
+                                                            messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+                                                                response.json({ taskid: taskresult.id, message: 'Task deleted successfully'});
+
+                                                            });
+
+                                                        }
+                                                    });
+                                                    /* end delete task */
+
+
+                                                }
+                                            }); /* end method deletetaskfromUS */
+
+
+
+                                        }
+                                        /* end else not userstory */
+
+                                    }
+                                    /* end else !error */
+
+                                });
+                                /* end method userstory.service para coger el US */
+                            }
+                        }); /* checkuser in channel */
+
+                }     /* end userid = result.id */
+                else {
+                    response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                }
+            }
+        });
+
+    }
+
+
+
+
+
+};
 
 
 exports.newtask = function newtask (request, response){
@@ -33,13 +164,7 @@ exports.newtask = function newtask (request, response){
     var channelid = request.params.channelid;
     var groupid = request.params.groupid;
     var userstoryid = request.params.userstoryid;
-
-
     var task = request.body;
-
-
-    console.log("esto vale task");
-     console.log(task);
 
 
     if(task == undefined || task == null || task == '' ){
@@ -113,8 +238,8 @@ exports.newtask = function newtask (request, response){
                                                     /* ha encontrado al userstory en el canal y podemos añadir tarea y metersela */
                                                     /* con el id nos vale */
 
-                                                    console.log("esto vale el userstoryresult para ver si existe el userstory en el canal, lo queremos asi para el status");
-                                                    console.log(userstoryresult.status);
+                                                    /*console.log("esto vale el userstoryresult para ver si existe el userstory en el canal, lo queremos asi para el status");
+                                                    console.log(userstoryresult.status);*/
 
                                                     /* si hacemos parse tenemos su status?? */
 
@@ -141,9 +266,9 @@ exports.newtask = function newtask (request, response){
 
 
 
-                                                                    console.log("userstory successfully update with task... ");
+                                                                    /*console.log("userstory successfully update with task... ");
                                                                     console.log("este es el userstoryresultchanged que devuelve el metodo de updateuserstoryTaskById");
-                                                                    console.log(userstoryresultchanged);
+                                                                    console.log(userstoryresultchanged);*/
 
 
                                                                     /* notificamos al CH de que ha cambiado el userstory */
@@ -152,52 +277,7 @@ exports.newtask = function newtask (request, response){
 
                                                                     /* tengo que hacer 1 json para el mensaje */
 
-                                                                    var sender = {
-                                                                        id  : result._id,
-                                                                        username: result.username,
-                                                                        mail: result.mail
-                                                                    };
-
-
-
-                                                                    /* quizas no habria que mandar all del userstory
-                                                                     * mandamos mejor solo el id del userstory y si lo quieren ver que hagan 1 get y a correr */
-
-                                                                    /* yo le meteria el userstory sin referencias externas */
-
-                                                                    var messagetext = {
-                                                                        action      : 'created',
-                                                                        event       :  'task',
-                                                                        sender      :   sender
-
-                                                                    };
-
-                                                                    /* hay que meter la tarea x separado para que se sepa cual se ha añadido */
-
-                                                                    messagetext.userstory = {
-                                                                        id          : userstoryresultchanged.id,
-                                                                        num         : userstoryresultchanged.num,
-                                                                        subject     : userstoryresultchanged.subject
-                                                                    };
-
-
-                                                                    /* si el status del userstory ha cambiado hay que notificarlo */
-                                                                    messagetext.task = {
-                                                                        id          : taskresult.id,
-                                                                        num         : taskresult.num,
-                                                                        subject     : taskresult.subject,
-                                                                        status      : taskresult.status,
-                                                                        description : taskresult.description,
-                                                                        requirement : taskresult.requirement
-
-                                                                    };
-
-
-                                                                    console.log("esto vale el userstory que voy a meter en mensaje text en controller/userstory para la creacion de nueva tarea");
-                                                                    console.log(messagetext.userstory);
-
-                                                                    console.log("esto vale la tarea que voy a meter en mensaje text en controller/userstory para la creacion de nueva tarea");
-                                                                    console.log(messagetext.task);
+                                                                    var messagetext = createJSONmsgTask.generateMSGnew(result, userstoryresultchanged, taskresult);
 
 
                                                                     messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
@@ -213,51 +293,23 @@ exports.newtask = function newtask (request, response){
 
 
                                                                         /* si son !== enviamos el mensaje */
+
+                                                                        console.log("en crear tarea esto valen los estatus de los userstories antes y despues de meterla");
+                                                                        console.log("userstoryresultchanged.status");
+                                                                        console.log(userstoryresultchanged.status);
+                                                                        console.log("userstoryresult.status");
+                                                                        console.log(userstoryresult.status);
                                                                         if(userstoryresultchanged.status !== userstoryresult.status){
 
-                                                                            var messagetext2 = {
-                                                                                action      : 'updated',
-                                                                                event       :  'userstory',
-                                                                                field       :   10
-
-                                                                            };
-
-                                                                            var codepoints = {
-                                                                                from    : userstoryresult.status,
-                                                                                to      : userstoryresultchanged.status
-
-                                                                            };
 
 
-                                                                            messagetext2.codepoints = codepoints;
-
-
-
-
-                                                                            /* hay que meter la tarea x separado para que se sepa cual se ha añadido */
-
-                                                                            messagetext2.userstory = {
-                                                                                id          : userstoryresultchanged.id,
-                                                                                num         : userstoryresultchanged.num,
-                                                                                subject     : userstoryresultchanged.subject
-                                                                            };
-
-
-                                                                            /* si el status del userstory ha cambiado hay que notificarlo */
-                                                                            messagetext2.task = {
-                                                                                id          : taskresult.id,
-                                                                                num         : taskresult.num,
-                                                                                subject     : taskresult.subject
-                                                                            };
+                                                                            var messagetext2 = createJSONmsgTask.generateMSGnewStatusChange(userstoryresultchanged, userstoryresult, taskresult);
 
 
                                                                             messageservice.newinternalmessage(messagetext2, channelid).then(function (error, message) {
                                                                                 response.json(userstoryresultchanged);
 
                                                                             });
-
-
-
 
 
 
@@ -275,13 +327,6 @@ exports.newtask = function newtask (request, response){
 
                                                                     /* si el status del userstory ha cambiado hay que hacer otro mensaje o poner que ha producido cambio
                                                                     * en el status del userstory */
-
-
-
-
-
-
-
 
 
 
@@ -371,125 +416,131 @@ exports.updatetask = function updatetask (request, response){
     var changesintask = request.body;
 
 
-    console.log("esto vale changeintask");
-    console.log(changesintask);
-
-
     var fieldchange = changesintask.field;
     var fieldnewvalue = changesintask.fieldnewvalue;
-
-
     var fieldoldvalue = changesintask.fieldoldvalue;
 
-    console.log("esto vale oldvalue");
-
-    console.log(fieldoldvalue);
 
 
+    if(userid == undefined || userid == null || userid == '' ||
+        channelid == undefined || channelid == null || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == '' ||
+        userstoryid == undefined || userstoryid == null || userstoryid == '' ||
+        taskid == undefined || taskid == null || taskid == ''){
 
-    if(taskid == undefined || taskid == null || taskid == '' ){
-        response.status(400).json({message: 'Bad Request. Missing required parameters: task id.'});
+
+        response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
 
     }
-    else {
+    else{
+        Auth(request, response).then(function(error, result) {
+            if(error) {
+                response.status(error.code).json({message: error.message});
+            }
+            else {
+                if (userid == result._id){
 
-        if(userid == undefined || userid == null || userid == '' ||
-            channelid == undefined || channelid == null || channelid == '' ||
-            groupid == undefined || groupid == null || groupid == '' ||
-            userstoryid == undefined || userstoryid == null || userstoryid == '' ||
-            taskid == undefined || taskid == null || taskid == ''){
+                    /* primero buscamos que exista el canal y el usuario pertenezca */
+
+                    chatErrors.checkuserinchannel(channelid,userid)
+                        .then (function (error,channel) {
+                            if (error) {
+                                response.status(401).json({message: 'User not included in requested channel'});
+                            }
+                            else {
+
+                                /* existe y el usuario esta en el */
+                                /* hacemos search de userstory y comprobar que el id de canal coincide  */
+
+                                var query = { channel: channelid, _id:userstoryid, tasks:taskid};
 
 
-            response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
 
-        }
-        else{
-            Auth(request, response).then(function(error, result) {
-                if(error) {
-                    response.status(error.code).json({message: error.message});
-                }
-                else {
-                    if (userid == result._id){
+                                /* aqui tengo el userstory entero, puedo coger el valor de la tarea, lo que valia antes
+                                * tendria que recorrerlo buscando la tarea pero me vale */
+                                userstoryservice.getuserstoryByIdwithquery (query).then(function (error, userstoryresult) {
+                                    if (error) {
+                                        response.status(error.code).json({message: error.message});
+                                    }
+                                    else {
 
-                        /* primero buscamos que exista el canal y el usuario pertenezca */
+                                        if(userstoryresult == undefined || userstoryresult == null || userstoryresult == ''){
+                                            var err = {
+                                                code: 402,
+                                                message: "The task to add not found inside channel requested."
+                                            };
+                                            response.status(err.code).json({message: err.message});
 
-                        chatErrors.checkuserinchannel(channelid,userid)
-                            .then (function (error,channel) {
-                                if (error) {
-                                    response.status(401).json({message: 'User not included in requested channel'});
-                                }
-                                else {
-
-                                    /* existe y el usuario esta en el */
-                                    /* hacemos search de userstory y comprobar que el id de canal coincide  */
-
-                                    var query = { channel: channelid, _id:userstoryid, tasks:taskid};
-
-                                    userstoryservice.getuserstoryByIdwithquery (query).then(function (error, userstoryresult) {
-                                        if (error) {
-                                            response.status(error.code).json({message: error.message});
                                         }
                                         else {
 
-                                            if(userstoryresult == undefined || userstoryresult == null || userstoryresult == ''){
-                                                var err = {
-                                                    code: 402,
-                                                    message: "The task to add not found inside channel requested."
-                                                };
-                                                response.status(err.code).json({message: err.message});
+                                            /* ha encontrado al userstory en el canal */
+                                            /* luego parseamos los fields */
+                                            /* tenemos el userstory entero y la tarea */
+
+
+                                            /* fieldchange fieldnewvalue task userstoryresult */
+                                            /* miramos que fieldchange fieldnewvalue no sea vacio */
+                                            /* falta task pero realmente no debería obligar a que mande toda la tarea, no tiene sentido */
+
+                                            if(fieldchange == null || fieldchange == undefined || fieldchange == '' ||
+                                                fieldnewvalue == null || fieldnewvalue == undefined || fieldnewvalue == '' ){
+
+                                                response.status(400).json({message: 'Bad Request. Missing required parameters: fieldchange or fieldnewvalue.'});
+
+
 
                                             }
-                                            else {
+                                            else{
 
-                                                /* ha encontrado al userstory en el canal */
-                                                /* luego parseamos los fields */
-                                                /* tenemos el userstory entero y la tarea */
+                                                var answer = taskErrors.checkfields(fieldnewvalue, fieldchange, fieldoldvalue);
 
-
-                                                console.log("esto vale el userstoryresult para ver si existe el userstory en el canal, lo queremos asi para el status");
-                                                console.log(userstoryresult.status);
-
-
-                                                /* fieldchange fieldnewvalue task userstoryresult */
-                                                /* miramos que fieldchange fieldnewvalue no sea vacio */
-                                                /* falta task pero realmente no debería obligar a que mande toda la tarea, no tiene sentido */
-
-                                                if(fieldchange == null || fieldchange == undefined || fieldchange == '' ||
-                                                    fieldnewvalue == null || fieldnewvalue == undefined || fieldnewvalue == '' ){
-
-                                                    response.status(400).json({message: 'Bad Request. Missing required parameters: fieldchange or fieldnewvalue.'});
-
-
-
+                                                if(answer.num == 0){
+                                                    /* hay error */
+                                                    response.status(answer.err.code).json({message: answer.err.message });
                                                 }
-                                                else{
+                                                else {
 
-                                                    var answer = taskErrors.checkfields(fieldnewvalue, fieldchange);
+                                                    /* vamos ha hacerlo para num == 1 assignedto */
+                                                    /* buscamos que el user ste en el channel */
+                                                    if(answer.num == 1 || answer.num == 2) {
 
-                                                    if(answer.num == 0){
-                                                        /* hay error */
-                                                        response.status(answer.err.code).json({message: answer.err.message });
-                                                    }
-                                                    else {
+                                                        chatErrors.checkuserinchannel(channelid,fieldnewvalue)
+                                                            .then (function (error,channel) {
+                                                                if (error) {
+                                                                    response.status(401).json({message: 'User assignee not included in requested channel'});
+                                                                }
+                                                                else {
 
-                                                        /* vamos ha hacerlo para num == 1 assignedto */
-                                                        /* buscamos que el user ste en el channel */
-                                                        if(answer.num == 1) {
-                                                            chatErrors.checkuserinchannel(channelid,fieldnewvalue)
-                                                                .then (function (error,channel) {
-                                                                    if (error) {
-                                                                        response.status(401).json({message: 'User assignee not included in requested channel'});
+
+
+                                                                    /* aqui tenemos el old vale , si es undefined ponemos not assignet */
+
+                                                                            /* aqui tenemos el valor de task.assignedto anterior con todos los campos */
+                                                                            /* ahora updateamos */
+                                                                    /* aqui tengo que mirar si answer.num == 2 el assignee de la tarea y su []
+                                                                    *
+                                                                    * tengo userstoryresult que tiene a la tarea
+                                                                    *
+                                                                    * */
+
+
+                                                                    /* esto lo puedo hacer en el helper */
+
+
+                                                                    var isworker = false;
+                                                                    if(answer.num == 2){
+
+                                                                        /* nos recorremos userstoryresult */
+                                                                        isworker = taskErrors.checkisassignedorcontributor(userstoryresult, taskid, fieldnewvalue);
+
                                                                     }
-                                                                    else {
+                                                                    if(answer.num == 1){
+                                                                        isworker = taskErrors.checkiscontributor(userstoryresult, taskid, fieldnewvalue);
 
+                                                                    }
 
-
-                                                                        /* aqui tenemos el old vale , si es undefined ponemos not assignet */
-
-                                                                                /* aqui tenemos el valor de task.assignedto anterior con todos los campos */
-                                                                                /* ahora updateamos */
-
-
+                                                                    if(!isworker){
                                                                         taskservice.updatetask (taskid, answer.num, fieldnewvalue).then(function (error, newtaskresult) {
                                                                             if (error) {
                                                                                 response.status(error.code).json({message: error.message});
@@ -500,69 +551,11 @@ exports.updatetask = function updatetask (request, response){
                                                                                 socketio.getIO().sockets.to('CH_' + channelid).emit('updateTask', {task: newtaskresult, userstoryid: userstoryid});
 
 
-                                                                                /* tengo que hacer 1 json para el mensaje */
+                                                                                /* tengo que hacer 1 json para el mensaje, este siempre es el mismo  */
+                                                                                var messagetext = createJSONmsgTask.generateMSGupdateTask(answer.num, result, fieldoldvalue, fieldchange, newtaskresult, userstoryresult, fieldnewvalue);
 
-                                                                                var sender = {
-                                                                                    id  : result._id,
-                                                                                    username: result.username,
-                                                                                    mail: result.mail
-                                                                                };
-
-
-                                                                                if(fieldoldvalue == undefined ||
-                                                                                    fieldoldvalue == null ||
-                                                                                    fieldoldvalue == ''){
-                                                                                    fieldoldvalue = {};
-                                                                                    fieldoldvalue.username = "None";
-
-                                                                                }
-                                                                                else if(fieldoldvalue.username == undefined ||
-                                                                                    fieldoldvalue.username == null ||
-                                                                                    fieldoldvalue.username == ''){
-                                                                                    fieldoldvalue.username = "None";
-
-                                                                                }
-
-                                                                                var attr = {
-                                                                                    'fieldchange' : fieldchange,
-                                                                                    'newfield'    : newtaskresult.assignedto,
-                                                                                    'oldfield'    : fieldoldvalue
-                                                                                };
-
-                                                                                var messagetext = {
-                                                                                    action      : 'updated',
-                                                                                    event       :  'task',
-                                                                                    sender      :  sender,
-                                                                                    attr        :  attr
-                                                                                };
-
-                                                                                /* hay que meter la tarea x separado para que se sepa cual se ha añadido */
-
-                                                                                messagetext.userstory = {
-                                                                                    id          : userstoryresult.id,
-                                                                                    num         : userstoryresult.num,
-                                                                                    subject     : userstoryresult.subject
-                                                                                };
-
-
-                                                                                /* si el status del userstory ha cambiado hay que notificarlo */
-                                                                                messagetext.task = {
-                                                                                    id          : newtaskresult.id,
-                                                                                    num         : newtaskresult.num,
-                                                                                    subject     : newtaskresult.subject,
-                                                                                    status      : newtaskresult.status,
-                                                                                    description : newtaskresult.description,
-                                                                                    requirement : newtaskresult.requirement
-
-                                                                                };
-
-
-                                                                                /*console.log("esto vale el userstory que voy a meter en mensaje text en controller/userstory para la creacion de nueva tarea");
-                                                                                console.log(messagetext.userstory);
-
-                                                                                console.log("esto vale la tarea que voy a meter en mensaje text en controller/userstory para la creacion de nueva tarea");
-                                                                                console.log(messagetext.task);*/
-                                                                                console.log("esto vale oldvalue");
+                                                                                /*console.log("en controller esto vale message");
+                                                                                console.log(messagetext);*/
 
 
                                                                                 messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
@@ -574,38 +567,142 @@ exports.updatetask = function updatetask (request, response){
                                                                             } /* else !error*/
                                                                         }); /* end update task */
 
+                                                                    }
+                                                                    else{
+                                                                        if(answer.num == 1){
+                                                                            response.status(400).json({message: 'Bad Request. The member to add as assignee is alredy as contributor.'});
+
+
+                                                                        }
+                                                                        else{
+                                                                            response.status(400).json({message: 'Bad Request. The member to add as contributor is alredy in.'});
+
+
+                                                                        }
 
 
                                                                     }
 
-                                                                }); /* end of checkuserinchannel assignee */
+
+
+
+
+
+
+                                                                }
+
+                                                            }); /* end of checkuserinchannel assignee */
+                                                    }/* end if num == 0 */
+                                                    /* luego igual se puede generalizar */
+
+
+
+
+                                                    /***************    empezamossssssssssssss ********************/
+
+
+                                                    else if(answer.num == 7 || answer.num == 5 || answer.num == 6 || answer.num == 8 || answer.num == 9 || answer.num == 10 || answer.num == 4){
+
+                                                        if(answer.num == 4){
+                                                            /* creamos el objecto del commentario */
+                                                            var comment = {};
+                                                            comment.created = new Date();
+                                                            comment._user = userid;
+                                                            comment.comment = fieldnewvalue;
+                                                            fieldnewvalue = comment;
+
                                                         }
 
-                                                    } /* end else answer.num == 0 */
+                                                        taskservice.updatetask (taskid, answer.num, fieldnewvalue).then(function (error, newtaskresult) {
+                                                            if (error) {
+                                                                response.status(error.code).json({message: error.message});
+                                                            }
+                                                            else {
 
-                                                } /* end else fieldchange == null || fieldnewvalue == null */
-                                            } /* end else userstoryresult == undefined */
-
-                                        } /* end else !err */
-                                    }); /* end method getUserstoryByIdwithquery */
-
-
-                                } /* end else !err */
-                            }); /* method checkuserinchannel */
-
-                    } /* end el token es del usuario */
-
-                    else {
-                        response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-                    }
-
-                } /* end else !err */
-            }); /* method Auth */
-
-        } /* end else URL params exists */
+                                                                /* notificamos al CH de que ha cambiado el userstory */
+                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('updateTask', {task: newtaskresult, userstoryid: userstoryid});
 
 
-    } /* end else userstory == undefined */
+                                                                /* tengo que hacer 1 json para el mensaje */
+                                                                var messagetext = createJSONmsgTask.generateMSGupdateTask(answer.num, result, fieldoldvalue, fieldchange, newtaskresult, userstoryresult, fieldnewvalue);
+
+
+                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+                                                                    response.json(newtaskresult);
+
+                                                                });
+
+
+                                                            } /* else !error*/
+                                                        }); /* end update task */
+
+
+
+
+                                                    } /*end if num == 7 */
+
+                                                    /* cuando borramos comentario no hacemos mensaje */
+                                                    else if(answer.num == 11){
+
+                                                        taskservice.updatetask (taskid, answer.num, fieldnewvalue).then(function (error, newtaskresult) {
+                                                            if (error) {
+                                                                response.status(error.code).json({message: error.message});
+                                                            }
+                                                            else {
+
+                                                                /* notificamos al CH de que ha cambiado el userstory */
+                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('updateTask', {task: newtaskresult, userstoryid: userstoryid});
+
+                                                                response.json(newtaskresult);
+
+                                                            } /* else !error*/
+                                                        }); /* end update task */
+
+
+
+
+                                                    } /*end if num == 7 */
+
+
+
+
+
+                                                    /*******************   terminamos   *******************************/
+
+
+
+
+
+
+
+
+
+
+                                                } /* end else answer.num == 0 */
+
+                                            } /* end else fieldchange == null || fieldnewvalue == null */
+                                        } /* end else userstoryresult == undefined */
+
+                                    } /* end else !err */
+                                }); /* end method getUserstoryByIdwithquery */
+
+
+                            } /* end else !err */
+                        }); /* method checkuserinchannel */
+
+                } /* end el token es del usuario */
+
+                else {
+                    response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                }
+
+            } /* end else !err */
+        }); /* method Auth */
+
+    } /* end else URL params exists */
+
+
+
 
 
 };

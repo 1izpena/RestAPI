@@ -6,7 +6,7 @@
 var config = require('../config');
 var Auth  = require('../helpers/authentication');
 var GitHubApi = require("github");
-async = require("async");
+var async = require("async");
 var githubapiservice = require('../services/githubapi');
 
 var channelservice  = require('../services/channel');

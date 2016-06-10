@@ -58,14 +58,15 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
                 answer.err.code = 400;
                 answer.err.message = 'Bad Request. Missing required parameters: voters.';
 
-                return answer;
+
 
             }
             else{
                 answer.num = 1;
-                return answer;
+
 
             }
+            return answer;
 
         }
         else if(fieldchange == 'point'){
@@ -75,14 +76,15 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
 
                 answer.err.code = 400;
                 answer.err.message = 'Bad Request. Missing required parameters: point.';
-                return answer;
+
 
             }
             else{
                 answer.num = 2;
-                return answer;
+
 
             }
+            return answer;
 
         }
         else if(fieldchange == 'attachments'){
@@ -94,14 +96,15 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
                 answer.err.code = 400;
                 answer.err.message = 'Bad Request. Missing required parameters: attachments.';
 
-                return answer;
+
 
             }
             else{
                 answer.num = 3;
-                return answer;
+
 
             }
+            return answer;
 
         }
         else if(fieldchange == 'tasks'){
@@ -113,14 +116,14 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
                 answer.err.code = 400;
                 answer.err.message = 'Bad Request. Missing required parameters: tasks.';
 
-                return answer;
 
             }
             else{
                 answer.num = 4;
-                return answer;
+
 
             }
+            return answer;
 
 
         }
@@ -133,14 +136,15 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
                 answer.err.code = 400;
                 answer.err.message = 'Bad Request. Missing required parameters: tags.';
 
-                return answer;
+
 
             }
             else{
                 answer.num = 5;
-                return answer;
+
 
             }
+            return answer;
 
 
         }
@@ -152,14 +156,15 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
 
                 answer.err.code = 400;
                 answer.err.message = 'Bad Request. Missing required parameters: description.';
-                return answer;
+
 
             }
             else{
                 answer.num = 6;
-                return answer;
+
 
             }
+            return answer;
 
         }
         else if(fieldchange == 'requirement'){
@@ -170,14 +175,14 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
 
                 answer.err.code = 400;
                 answer.err.message = 'Bad Request. Missing required parameters: requirement.';
-                return answer;
 
             }
             else{
                 answer.num = 7;
-                return answer;
+
 
             }
+            return answer;
 
         }
         else if(fieldchange == 'subject'){
@@ -187,14 +192,14 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
 
                 answer.err.code = 400;
                 answer.err.message = 'Bad Request. Missing required parameters: subject.';
-                return answer;
 
             }
             else{
                 answer.num = 8;
-                return answer;
+
 
             }
+            return answer;
 
         }
         else if(fieldchange == 'sprint'){
@@ -205,14 +210,14 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
 
                 err.code = 400;
                 err.message = 'Bad Request. Missing required parameters: sprint.';
-                return promise.done(err, null);
 
             }
             else{
                 answer.num = 9;
-                return answer;
+
 
             }
+            return answer;
 
         }
         else{

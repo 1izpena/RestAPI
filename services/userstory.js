@@ -76,6 +76,38 @@ exports.updateuserstoryTaskById = function updateuserstoryTaskById(userstoryid, 
 
 
 
+exports.deletetaskFromUS = function deletetaskFromUS(userstoryid, taskid){
+    var promise = new Hope.Promise();
+    var Userstory = mongoose.model('Userstory');
+
+    var options = {new: true};
+
+    var update = { $pull: { "tasks": taskid} };
+
+
+    Userstory.updateUserstoryById (userstoryid, update, options).then (function (error, newuserstoryresult) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+
+            return promise.done(null, newuserstoryresult);
+
+        }
+    });
+    return promise;
+
+
+
+
+
+
+};
+
+
+
+
+
 
 
 
@@ -166,6 +198,34 @@ exports.getuserstories = function getuserstories (channelid){
 };
 
 
+
+
+
+exports.getuserstoryByIdWithInPopulate = function getuserstoryByIdWithInPopulate (channelid, userstoryid){
+    var promise = new Hope.Promise();
+    var Userstory = mongoose.model('Userstory');
+
+    var query = { channel: channelid, _id:userstoryid};
+
+    Userstory.searchUserstories (query,1).then (function (error, userstory) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            return promise.done(null, userstory);
+        }
+    });
+    return promise;
+};
+
+
+
+
+
+
+
+
+
 exports.getuserstoryById = function getuserstoryById (channelid, userstoryid){
     var promise = new Hope.Promise();
     var Userstory = mongoose.model('Userstory');
@@ -199,5 +259,74 @@ exports.getuserstoryByIdwithquery = function getuserstoryByIdwithquery (query){
     });
     return promise;
 };
+
+
+
+
+
+
+
+
+exports.deleteuserstoryById = function deleteuserstoryById (userstoryid){
+    var promise = new Hope.Promise();
+    var Userstory = mongoose.model('Userstory');
+
+    var query = { _id: userstoryid};
+
+
+
+    Userstory.deleteUserstoryById (userstoryid).then (function(error) {
+        if (error) {
+            return promise.done(error, null);
+
+        }
+        else {
+            console.log("US deleted successfully2");
+            return promise.done(null, userstoryid)
+        }
+    });
+
+
+
+    return promise;
+};
+
+
+
+
+exports.deleteTaskByIdRemovedUS = function deleteTaskByIdRemovedUS(userstoryexists){
+
+    var promise = new Hope.Promise();
+    var Task = mongoose.model('Task');
+
+
+    var query = {_id:{$in:userstoryexists.tasks}};
+
+    Task.deleteTasks (query).then (function(error) {
+        if (error) {
+            return promise.done(error, null);
+        }
+
+
+        else {
+            return promise.done(null,userstoryexists);
+        }
+    });
+
+
+
+    return promise;
+
+
+
+};
+
+
+
+
+
+
+
+
 
 
