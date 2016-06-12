@@ -13,24 +13,28 @@ var Channel  = require('./channel');
 var User  = require('./user');
 
 var Hope      	= require('hope');
+var AutoIncrement = require('mongoose-sequence');
 
 
 
 
 var sprintSchema = new Schema({
 
-    title       : { type: String, required: true },
+    numSprint   : Number,
+    name        : { type: String, required: true },
     createdby   : { type: Schema.ObjectId, ref: 'User', required: true },
     datetime    : { type: Date, default: Date.now },
 
     /* esta la metemos programaticamente, buscamos el ultimo sprint, su fecha de fin, esto en angular */
     startdate   :  { type: Date, default: Date.now },
-    endingdate  :  { type: Date, default: Date.now},
+    enddate  :  { type: Date, default: Date.now(+ Date.now + 7*24*60*60*1000)},
     /*userstories   : [{ type: Schema.ObjectId, ref: 'Userstory', required: false }],*/
     channel     : { type: Schema.ObjectId, ref: 'Channel', required: true }
 
 
 });
+
+sprintSchema.plugin(AutoIncrement, {inc_field: 'numSprint'});
 
 
 /* metodos create, get y delete */
@@ -50,6 +54,7 @@ sprintSchema.statics.createSprint = function createSprint (attributes) {
             console.log(error);
             return promise.done(error, null);
         }else {
+            console.log("no hay error al guardar el sprint");
             return promise.done(null, sprint);
         }
     });
@@ -129,6 +134,7 @@ sprintSchema.statics.searchPopulateSprints = function searchPopulateSprints (que
         .skip(skip)
         .limit(limit)
         .populate('createdby')
+        .sort({ startdate: -1 })
         .exec(function(error, value) {
         if (limit === 1 && !error) {
             if (value.length === 0) {
@@ -147,13 +153,12 @@ sprintSchema.statics.searchPopulateSprints = function searchPopulateSprints (que
 
         } else {
 
-            value.forEach(function(sprint){
+                value=value.map(function(elem,index) {
+                    return elem.parse();
+                });
+                // Ordenamos x orden descendente de fecha
+                value=value.reverse();
 
-                sprint = sprint.parse();
-                value2.push(sprint);
-
-            });
-            value= value2;
         }
         return promise.done(error, value);
     });
@@ -204,7 +209,8 @@ sprintSchema.methods.parse = function parse () {
 
     parseSprint = {
         id          : sprint._id,
-        title       : sprint.title,
+        name        : sprint.name,
+        num         : sprint.numSprint,
         createdby   : {
             id         : (sprint.createdby._id) ? sprint.createdby._id : sprint.createdby,
             username   : (sprint.createdby.username) ? sprint.createdby.username :  '',
@@ -212,7 +218,7 @@ sprintSchema.methods.parse = function parse () {
         },
         datetime    : sprint.datetime,
         startdate   : sprint.startdate,
-        endingdate  : sprint.endingdate,
+        enddate  : sprint.enddate,
         /*userstories : sprint.userstories,*/
         channel     : sprint.channel
 

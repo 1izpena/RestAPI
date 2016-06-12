@@ -157,6 +157,11 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:use
 
 /* GET CH SPRINTS  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints').get(sprint.getsprints);
+/* POST CH SPRINTS  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints').post(sprint.newsprint);
+
+
+
 /* GET CH ISSUES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/issues').get(issue.getissues);
 

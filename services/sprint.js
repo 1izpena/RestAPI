@@ -23,3 +23,30 @@ exports.getsprints = function getsprints (channelid){
     });
     return promise;
 };
+
+
+
+exports.newsprint = function newsprint(sprint){
+    var promise = new Hope.Promise();
+    var Sprint = mongoose.model('Sprint');
+
+    Sprint.createSprint (sprint).then (function (error, newsprintresult) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+
+            var query = { _id: newsprintresult._id};
+            Sprint.searchPopulateSprints (query, 1).then (function (error, sprintresult) {
+                if (error) {
+                    return promise.done(error, null);
+                }
+                else {
+                    return promise.done(null, sprintresult);
+                }
+            });
+
+        }
+    });
+    return promise;
+};

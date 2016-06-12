@@ -7,6 +7,40 @@
 
 
 
+exports.generateMSGNewSprint = function generateMSGNewSprint (result, sprintresult) {
+
+
+    var sender = {
+        id  : result._id,
+        username: result.username,
+        mail: result.mail
+    };
+
+
+    var messagetext = {
+        action      :  'created',
+        event       :  'sprint',
+        sender      :   sender
+
+    };
+
+    messagetext.sprint = {
+        id          : sprintresult.id,
+        num         : sprintresult.num,
+        name        : sprintresult.name,
+        startdate   : sprintresult.startdate,
+        enddate     : sprintresult.enddate
+    };
+
+    return messagetext;
+
+
+
+
+};
+
+
+
 exports.generateMSGDeleteUS = function generateMSGDeleteUS (result, userstoryresult) {
 
 
