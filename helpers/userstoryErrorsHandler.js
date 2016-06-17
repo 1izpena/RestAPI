@@ -37,7 +37,8 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
         fieldchange !== 'description' &&
         fieldchange !== 'requirement' &&
         fieldchange !== 'subject' &&
-        fieldchange !== 'sprint'){
+        fieldchange !== 'sprint' &&
+        fieldchange !== 'unsprint'){
 
 
         answer.err.code = 400;
@@ -217,6 +218,12 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
 
 
             }
+            return answer;
+
+        }
+        else if(fieldchange == 'unsprint'){
+
+            answer.num = 10;
             return answer;
 
         }

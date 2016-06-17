@@ -112,6 +112,31 @@ sprintSchema.statics.searchSprints = function searchSprints (query, limit, page)
 
 
 
+sprintSchema.statics.updateSprintById = function updateSprintById (id, update, options) {
+
+    var promise = new Hope.Promise();
+
+    this.findByIdAndUpdate(id, update, options,function(error, sprint) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            if (sprint){
+
+                return promise.done(null, sprint);
+            }
+            else {
+                var err = {
+                    code   : 400,
+                    message: 'Sprint not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
 
 
 sprintSchema.statics.searchPopulateSprints = function searchPopulateSprints (query, limit, page) {
@@ -171,11 +196,14 @@ sprintSchema.statics.searchPopulateSprints = function searchPopulateSprints (que
 
 
 sprintSchema.statics.deleteSprintById = function deleteSprintById (id) {
+
     var promise = new Hope.Promise();
+
     this.remove({_id:id},function(error) {
         if (error) {
             return promise.done(error, null);
-        }else {
+        }
+        else {
             console.log("sprint deleted successfully");
             return promise.done(null, {message: 'Sprint deleted successfully'});
         }

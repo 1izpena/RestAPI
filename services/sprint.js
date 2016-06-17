@@ -26,6 +26,31 @@ exports.getsprints = function getsprints (channelid){
 
 
 
+exports.checksprintexistsByIdCH = function checksprintexistsByIdCH (channelid, sprintid){
+    var promise = new Hope.Promise();
+    var Sprint = mongoose.model('Sprint');
+
+
+
+
+    var query = { channel: channelid, _id: sprintid};
+
+    Sprint.searchPopulateSprints (query, 1).then (function (error, sprint) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            return promise.done(null, sprint);
+        }
+    });
+    return promise;
+};
+
+
+
+
+
+
 exports.newsprint = function newsprint(sprint){
     var promise = new Hope.Promise();
     var Sprint = mongoose.model('Sprint');
@@ -50,3 +75,106 @@ exports.newsprint = function newsprint(sprint){
     });
     return promise;
 };
+
+
+
+exports.updatesprint = function updatesprint(sprint, sprintid){
+    var promise = new Hope.Promise();
+    var Sprint = mongoose.model('Sprint');
+    var options = {new: true};
+
+
+    var update = {};
+
+    if(sprint.name !== undefined &&  sprint.name !== null && sprint.name !== ''){
+        update.name = sprint.name;
+
+    }
+
+
+    if(sprint.startdate !== undefined &&  sprint.startdate !== null && sprint.startdate !== ''){
+        if(Object.prototype.toString.call(sprint.startdate) === '[object String]'){
+            update.startdate = sprint.startdate;
+        }
+
+
+    }
+    console.log(Object.prototype.toString.call(sprint.startdate));
+    if(sprint.enddate !== undefined &&  sprint.enddate !== null && sprint.enddate !== ''){
+        if(Object.prototype.toString.call(sprint.enddate) === '[object String]'){
+            update.enddate = sprint.enddate;
+        }
+
+
+    }
+
+
+    Sprint.updateSprintById (sprintid, update, options).then (function (error, newsprintresult) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+
+            var query = { _id: newsprintresult._id};
+            Sprint.searchPopulateSprints (query, 1).then (function (error, sprintresult) {
+                if (error) {
+                    return promise.done(error, null);
+                }
+                else {
+                    return promise.done(null, sprintresult);
+                }
+            });
+
+        }
+    });
+    return promise;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.deletesprintById = function deletesprintById (sprintid){
+    var promise = new Hope.Promise();
+    var Sprint = mongoose.model('Sprint');
+
+    /*var query = { _id: sprintid};*/
+
+
+
+    Sprint.deleteSprintById(sprintid).then (function(error) {
+        if (error) {
+            return promise.done(error, null);
+
+        }
+        else {
+            console.log("Sprint deleted successfully2");
+            return promise.done(null, sprintid)
+        }
+    });
+
+
+
+    return promise;
+};
+
+

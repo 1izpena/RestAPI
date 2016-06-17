@@ -41,6 +41,92 @@ exports.generateMSGNewSprint = function generateMSGNewSprint (result, sprintresu
 
 
 
+exports.generateMSGDeleteSprint = function generateMSGDeleteSprint (result, sprintresult, raw) {
+
+
+    var sender = {
+        id  : result._id,
+        username: result.username,
+        mail: result.mail
+    };
+
+
+    var messagetext = {
+        action      :  'deleted',
+        event       :  'sprint',
+        sender      :   sender
+
+    };
+
+    messagetext.sprint = {
+        id          : sprintresult.id,
+        num         : sprintresult.num,
+        name        : sprintresult.name,
+        startdate   : sprintresult.startdate,
+        enddate     : sprintresult.enddate
+    };
+
+
+    if(raw !== undefined && raw !== null && raw !== ''){
+        if(raw.nModified !== undefined && raw.nModified !== null && raw.nModified !== ''){
+            messagetext.sprint.numuserstories = raw.nModified;
+
+        }
+
+    }
+
+    return messagetext;
+
+
+
+
+};
+
+
+
+
+exports.generateMSGEditSprint = function generateMSGEditSprint (result, sprintexists, sprintresultnew) {
+
+    var sender = {
+        id  : result._id,
+        username: result.username,
+        mail: result.mail
+    };
+
+
+    var messagetext = {
+        action      :  'updated',
+        event       :  'sprint',
+        sender      :   sender
+
+    };
+
+    messagetext.sprint = {
+        id          : sprintresultnew.id,
+        num         : sprintresultnew.num,
+        name        : sprintresultnew.name,
+        startdate   : sprintresultnew.startdate,
+        enddate     : sprintresultnew.enddate
+    };
+
+
+    messagetext.fieldschange = {};
+
+    messagetext.fieldschange.enddate = sprintexists.enddate;
+    messagetext.fieldschange.startdate = sprintexists.startdate;
+
+
+
+    return messagetext;
+
+
+};
+
+
+
+
+
+
 exports.generateMSGDeleteUS = function generateMSGDeleteUS (result, userstoryresult) {
 
 
@@ -80,7 +166,7 @@ exports.generateMSGDeleteUS = function generateMSGDeleteUS (result, userstoryres
 
 
 
-
+/* userstoryexists es el anterior sin updatear */
 exports.generateMSGUpdateUS = function generateMSGUpdateUS (result, userstoryresult, codefield, codepoints) {
 
 
@@ -114,8 +200,6 @@ exports.generateMSGUpdateUS = function generateMSGUpdateUS (result, userstoryres
         subject     : userstoryresult.subject,
         tags        : userstoryresult.tags,
         status      : userstoryresult.status,
-        /* array con id de user*/
-        /* si dejo hacerlo en la creacion */
         voters      : userstoryresult.voters,
         point       : userstoryresult.point,
         totalPoints : userstoryresult.totalPoints,
@@ -135,6 +219,44 @@ exports.generateMSGUpdateUS = function generateMSGUpdateUS (result, userstoryres
 
 
         }
+    }
+
+
+
+
+    /*codepoints.old = sprintresultold;
+     condepoints.new = sprintresult;*/
+    else if(messagetext.field == 9){
+        if(codepoints !== undefined &&
+            codepoints !== null &&
+            codepoints !== '' ){
+
+            if(codepoints.new !== undefined &&
+                codepoints.new !== null &&
+                codepoints.new !== '' ){
+                messagetext.userstory.sprint = {};
+                messagetext.userstory.sprint.id = codepoints.new.id;
+                messagetext.userstory.sprint.name = codepoints.new.name;
+                messagetext.userstory.sprint.num = codepoints.new.num;
+
+            }
+            if(codepoints.old !== undefined &&
+                codepoints.old !== null &&
+                codepoints.old !== '' ){
+                messagetext.codepoints = {};
+                messagetext.codepoints.id = codepoints.old.id;
+                messagetext.codepoints.name = codepoints.old.name;
+                messagetext.codepoints.num = codepoints.old.num;
+
+            }
+
+
+
+
+
+
+        }
+
     }
 
 
@@ -164,7 +286,7 @@ exports.generateMSGUpdateUS = function generateMSGUpdateUS (result, userstoryres
 
 
 
-exports.generateMSGNewUS = function generateMSGNewUS (result, userstoryresult) {
+exports.generateMSGNewUS = function generateMSGNewUS (result, userstoryresult, sprintresult) {
 
 
     var sender = {
@@ -194,12 +316,25 @@ exports.generateMSGNewUS = function generateMSGNewUS (result, userstoryresult) {
         status      : userstoryresult.status,
         /* array con id de user*/
         /* si dejo hacerlo en la creacion */
+
         voters      : userstoryresult.voters,
         points      : userstoryresult.points,
         totalPoints : userstoryresult.totalPoints,
         description : userstoryresult.description,
         requirement : userstoryresult.requirement
     };
+
+    if(sprintresult !== null){
+        messagetext.sprint = {
+            id          : sprintresult.id,
+            num         : sprintresult.num,
+            name        : sprintresult.name
+        };
+
+    }
+
+
+
 
 
     return messagetext;

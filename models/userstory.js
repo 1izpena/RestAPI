@@ -111,6 +111,40 @@ userstorySchema.statics.updateUserstoryById = function updateUserstoryById (id, 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+userstorySchema.statics.updateUserstoryByQuery = function updateUserstoryByQuery (query, update, options) {
+
+    var promise = new Hope.Promise();
+
+    this.update(query, update, options,function(error, raw) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            return promise.done(error, raw);
+        }
+    });
+    return promise;
+};
+
+
+
+
+
+
 /* para buscar si existe 1 concreta */
 userstorySchema.statics.searchUserstories = function searchUserstories (query, limit, page) {
     var promise = new Hope.Promise();

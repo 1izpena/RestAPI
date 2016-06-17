@@ -379,7 +379,7 @@ userSchema.statics.updateusers = function updateusers (query, update, options) {
             return promise.done(error, null);
         }else {
             if (user){
-                promise.done(null, user);
+                return promise.done(null, user);
             }else {
                 var err = {
                     code   : 400,

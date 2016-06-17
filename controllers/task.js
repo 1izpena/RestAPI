@@ -40,11 +40,11 @@ exports.deletetask = function deletetask (request, response){
 
     /* devolvemos el id de la tarea */
 
-    if(userid == undefined || userid == null || userid == '' ||
-        channelid == undefined || channelid == null || channelid == '' ||
-        groupid == undefined || groupid == null || groupid == '' ||
-        userstoryid == undefined || userstoryid == null || userstoryid == '' ||
-        taskid == undefined || taskid == null || taskid == ''){
+    if(userid == undefined || userid == null || userid == "undefined" || userid == "null" || userid == '' ||
+        channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ||
+        userstoryid == undefined || userstoryid == null || userstoryid == "undefined" || userstoryid == "null" || userstoryid == '' ||
+        taskid == undefined || taskid == null || taskid == "undefined" || taskid == "null" || taskid == ''){
 
 
         response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
@@ -166,6 +166,9 @@ exports.newtask = function newtask (request, response){
     var userstoryid = request.params.userstoryid;
     var task = request.body;
 
+    console.log("esto vale userstoryid al crear 1 tarea");
+    console.log(userstoryid);
+
 
     if(task == undefined || task == null || task == '' ){
         response.status(400).json({message: 'Bad Request. Missing required parameters: task.'});
@@ -188,10 +191,10 @@ exports.newtask = function newtask (request, response){
         }
         else {
 
-            if(userid == undefined || userid == null || userid == '' ||
-                channelid == undefined || channelid == null || channelid == '' ||
-                groupid == undefined || groupid == null || groupid == '' ||
-                userstoryid == undefined || userstoryid == null || userstoryid == '' ){
+            if(userid == undefined || userid == null || userid == "undefined" || userid == "null" || userid == '' ||
+                channelid == undefined || channelid == null || channelid == "undefined" || channelid == null || channelid == '' ||
+                groupid == undefined || groupid == null || groupid == "undefined" || groupid == null || groupid == '' ||
+                userstoryid == undefined || userstoryid == null || userstoryid == "undefined" || userstoryid == null || userstoryid == '' ){
 
 
                 response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
@@ -422,11 +425,12 @@ exports.updatetask = function updatetask (request, response){
 
 
 
-    if(userid == undefined || userid == null || userid == '' ||
-        channelid == undefined || channelid == null || channelid == '' ||
-        groupid == undefined || groupid == null || groupid == '' ||
-        userstoryid == undefined || userstoryid == null || userstoryid == '' ||
-        taskid == undefined || taskid == null || taskid == ''){
+    if(userid == undefined || userid == null || userid == "undefined" || userid == "null" || userid == '' ||
+        channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ||
+        userstoryid == undefined || userstoryid == null || userstoryid == "undefined" || userstoryid == "null" || userstoryid == '' ||
+        taskid == undefined || taskid == null || taskid == "undefined" || taskid == "null" || taskid == ''){
+
 
 
         response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
@@ -570,12 +574,12 @@ exports.updatetask = function updatetask (request, response){
                                                                     }
                                                                     else{
                                                                         if(answer.num == 1){
-                                                                            response.status(400).json({message: 'Bad Request. The member to add as assignee is alredy as contributor.'});
+                                                                            response.status(403).json({message: 'Bad Request. The member to add as assignee is alredy as contributor.'});
 
 
                                                                         }
                                                                         else{
-                                                                            response.status(400).json({message: 'Bad Request. The member to add as contributor is alredy in.'});
+                                                                            response.status(403).json({message: 'Bad Request. The member to add as contributor is alredy in.'});
 
 
                                                                         }

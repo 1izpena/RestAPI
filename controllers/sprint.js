@@ -36,9 +36,9 @@ exports.getsprints = function getsprints (request, response){
 
 
 
-    if(userid == undefined || userid == null ||
-        channelid == undefined || channelid == null ||
-        groupid == undefined || groupid == null){
+    if(userid == undefined || userid == null || userid == "undefined" || userid == "null" || userid == '' ||
+        channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == ''){
 
 
         response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
@@ -68,8 +68,6 @@ exports.getsprints = function getsprints (request, response){
                                     }
                                     else {
 
-                                        console.log("esto valen los sprints devueltos");
-                                        console.log(sprints);
                                         response.json(sprints);
 
 
@@ -112,6 +110,8 @@ exports.newsprint = function newsprint (request, response){
     var sprint = request.body;
 
 
+
+
     if(sprint == undefined || sprint == null || sprint == '' ){
         response.status(400).json({message: 'Bad Request. Missing required parameters: sprint.'});
 
@@ -131,9 +131,9 @@ exports.newsprint = function newsprint (request, response){
         }
         else {
 
-            if(userid == undefined || userid == null || userid == '' ||
-                channelid == undefined || channelid == null || channelid == '' ||
-                groupid == undefined || groupid == null || groupid == '' ){
+            if(userid == undefined || userid == null || userid == "undefined" || userid == "null" || userid == '' ||
+                channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+                groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == ''){
 
 
                 response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
@@ -201,6 +201,295 @@ exports.newsprint = function newsprint (request, response){
             } /* end else URL params exists */
         } /* end else userstory.subject == undefined */
     } /* end else userstory == undefined */
+
+
+
+
+
+
+
+};
+
+/* miramos que exista y lo modificamos */
+
+exports.editsprint = function editsprint (request, response){
+
+    var userid = request.params.userid;
+    var channelid = request.params.channelid;
+    var groupid = request.params.groupid;
+    var sprintid = request.params.sprintid;
+
+
+
+    var sprint = request.body;
+
+
+
+    if(sprint == undefined || sprint == null || sprint == '' ){
+        response.status(400).json({message: 'Bad Request. Missing required parameters: sprint.'});
+
+    }
+
+    else {
+
+
+        if(sprint.startdate == undefined || sprint.startdate == null || sprint.startdate == '' ||
+            sprint.enddate == undefined || sprint.enddate == null || sprint.enddate == '' ||
+            sprint.name == undefined || sprint.name == null || sprint.name == '' ){
+            response.status(400).json({message: 'Bad Request. Missing required parameters: sprint.'});
+
+        }
+
+        else{
+
+
+            if(userid == undefined || userid == null || userid == "undefined" || userid == "null" || userid == '' ||
+                channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+                groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ||
+                sprintid == undefined || sprintid == null || sprintid == "undefined" || sprintid == "null" || sprintid == ''){
+                response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
+            }
+            else{
+
+
+                Auth(request, response).then(function(error, result) {
+                    if(error) {
+                        response.status(error.code).json({message: error.message});
+                    }
+                    else {
+                        if (userid == result._id){
+
+                            /* primero buscamos que exista el canal y el usuario pertenezca */
+                            chatErrors.checkuserinchannel(channelid,userid)
+                                .then (function (error,channel) {
+                                    if (error) {
+                                        response.status(401).json({message: 'User not included in requested channel'});
+                                    }
+                                    else {
+
+                                        /* miramos que exista el sprint dentro del canal, porque puede existir pero no es propietario */
+                                        sprintservice.checksprintexistsByIdCH(channelid, sprintid).then(function (error, sprintexists) {
+                                            if (error) {
+                                                response.status(error.code).json({message: error.message});
+                                            }
+                                            else {
+
+                                                if (sprintexists == undefined || sprintexists == null || sprintexists == '') {
+                                                    var err = {
+                                                        code: 402,
+                                                        message: "Sprint to update not found inside channel requested."
+                                                    };
+                                                    response.status(err.code).json({message: err.message});
+
+                                                }
+                                                else {
+
+
+                                                    sprintservice.updatesprint(sprint, sprintid).then(function (error, sprintresultnew) {
+                                                        if (error) {
+                                                            response.status(error.code).json({message: error.message});
+                                                        }
+                                                        else {
+
+
+                                                            /* puedo comparar que ha cambiado:: si han cambiado las fechas decirlo  */
+
+                                                            socketio.getIO().sockets.to('CH_' + channelid).emit('updateSprint', {sprint: sprintresultnew});
+
+
+                                                            /* tengo que hacer 1 json para el mensaje **********************/
+                                                            var messagetext = createJSONmsgTask.generateMSGEditSprint(result, sprintexists, sprintresultnew);
+
+
+                                                            messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                response.json({
+                                                                    sprint: sprintresultnew,
+                                                                    message: 'Sprint updated successfully'
+                                                                });
+
+
+                                                            });
+
+
+
+
+
+                                                        }/* !error updateUSsforsprint */
+                                                    }); /* updatesprint */
+
+
+
+
+
+                                                } /* end else existe el sprint y no es null */
+                                            } /* end else no hay error al buscar el Sprint en el canal */
+
+                                        }); /* buscamos el sprint en el canal */
+
+
+
+                                    } /* end else !err */
+                                }); /* method checkuserinchannel */
+
+                        } /* end el token es del usuario */
+
+                        else {
+                            response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                        }
+
+                    } /* end else !err */
+                }); /* method Auth */
+
+
+            } /* end else URL params exists */
+
+        }
+
+
+
+
+
+
+
+    }
+
+
+
+
+};
+
+
+
+
+
+
+exports.deletesprint = function deletesprint (request, response){
+
+    var userid = request.params.userid;
+    var channelid = request.params.channelid;
+    var groupid = request.params.groupid;
+    var sprintid = request.params.sprintid;
+
+
+
+
+    if(userid == undefined || userid == null || userid == "undefined" || userid == "null" || userid == '' ||
+        channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ||
+        sprintid == undefined || sprintid == null || sprintid == "undefined" || sprintid == "null" || sprintid == ''){
+
+        response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
+    }
+    else{
+
+
+        Auth(request, response).then(function(error, result) {
+            if(error) {
+                response.status(error.code).json({message: error.message});
+            }
+            else {
+                if (userid == result._id){
+
+                    /* primero buscamos que exista el canal y el usuario pertenezca */
+                    chatErrors.checkuserinchannel(channelid,userid)
+                        .then (function (error,channel) {
+                            if (error) {
+                                response.status(401).json({message: 'User not included in requested channel'});
+                            }
+                            else {
+
+                                /* miramos que exista el sprint dentro del canal, porque puede existir pero no es propietario */
+                                sprintservice.checksprintexistsByIdCH(channelid, sprintid).then(function (error, sprintexists) {
+                                    if (error) {
+                                        response.status(error.code).json({message: error.message});
+                                    }
+                                    else {
+
+                                        if (sprintexists == undefined || sprintexists == null || sprintexists == '') {
+                                            var err = {
+                                                code: 402,
+                                                message: "Sprint to delete not found inside channel requested."
+                                            };
+                                            response.status(err.code).json({message: err.message});
+
+                                        }
+                                        else {
+                                            /* existe, se puede borrar, desvinculamos US y
+                                             * luego borramos sprint, para no perder las US si hay algun problema */
+                                            /* hay que buscar US que tengan x sprint sprintid */
+
+                                            /* tenemos el sprint, y ahora los US modificados en una respuesta raw
+                                            * no sabemos que devuleve, luego crearemos el mensaje en funcion de ello */
+
+                                            userstoryservice.updateuserstoriesFromSprint(sprintid).then(function (error, raw) {
+                                                if (error) {
+                                                    response.status(error.code).json({message: error.message});
+                                                }
+                                                else {
+
+
+                                                    sprintservice.deletesprintById (sprintid)
+                                                        .then(function (error, sprintresultid) {
+                                                            if (error) {
+
+                                                                response.status(error.code).json({message: error.message});
+                                                            }
+
+                                                            else {
+
+                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('deleteSprint', {sprintid: sprintid});
+
+
+                                                                /* tengo que hacer 1 json para el mensaje **********************/
+                                                                var messagetext = createJSONmsgTask.generateMSGDeleteSprint(result, sprintexists, raw);
+
+
+                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                    response.json({
+                                                                        sprintid: sprintid,
+                                                                        message: 'Sprint deleted successfully'
+                                                                    });
+
+
+                                                                });
+
+
+
+                                                            }
+                                                        }); /* delete sprintby id */
+
+
+                                                }/* !error updateUSsforsprint */
+                                            }); /* updateUSsfromsprint */
+
+
+
+
+
+                                        } /* end else existe el sprint y no es null */
+                                    } /* end else no hay error al buscar el Sprint en el canal */
+
+                                }); /* buscamos el sprint en el canal */
+
+
+
+                            } /* end else !err */
+                        }); /* method checkuserinchannel */
+
+                } /* end el token es del usuario */
+
+                else {
+                    response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                }
+
+            } /* end else !err */
+        }); /* method Auth */
+
+
+    } /* end else URL params exists */
+
 
 
 };

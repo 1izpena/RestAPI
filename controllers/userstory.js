@@ -11,6 +11,7 @@ var Auth  = require('../helpers/authentication');
 var channelservice  = require('../services/channel');
 var userstoryservice  = require('../services/userstory');
 var messageservice  = require('../services/message');
+var sprintservice  = require('../services/sprint');
 
 
 var chatErrors  = require('../helpers/chatErrorsHandler');
@@ -45,13 +46,6 @@ exports.newuserstory = function newuserstory (request, response){
     }
     else {
 
-        userstory.datetime = new Date();
-        userstory.channel = channelid;
-        userstory.createdby = userid;
-        /*userstory.status = "New";*/
-
-
-
 
         if(userstory.subject == undefined || userstory.subject == null || userstory.subject == ''){
             response.status(400).json({message: 'Bad Request. Missing required parameters: subject.'});
@@ -59,9 +53,9 @@ exports.newuserstory = function newuserstory (request, response){
         }
         else {
 
-            if(userid == undefined || userid == null || userid == '' ||
-                channelid == undefined || channelid == null || channelid == '' ||
-                groupid == undefined || groupid == null || groupid == '' ){
+            if(userid == undefined || userid == null || userid == "undefined" || userid == "null" ||userid == '' ||
+                channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+                groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ){
 
 
                 response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
@@ -86,35 +80,113 @@ exports.newuserstory = function newuserstory (request, response){
                                         /* existe y el usuario esta en el */
                                         /* entonces procedemos a guardar el userstory */
 
+                                        userstory.datetime = new Date();
+                                        userstory.channel = channelid;
+                                        userstory.createdby = userid;
 
-                                        /* userstoryresult devuelve 1 array */
-                                        userstoryservice.newuserstory (userstory).then(function (error, userstoryresult) {
-                                            if (error) {
-                                                response.status(error.code).json({message: error.message});
-                                            } else {
-
-                                                console.log("userstory successfully created... ");
-
-                                                /* notif. al CH de nuevo userstory */
-                                                /*socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {groupid: groupid, userstory: userstory});*/
-                                                socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {userstory: userstoryresult});
+                                        console.log("esto vale sprint");
+                                        console.log(userstory.sprint);
 
 
-                                                /* tengo que hacer 1 json para el mensaje */
-                                                var messagetext = createJSONmsgTask.generateMSGNewUS(result, userstoryresult);
+                                        /* antes de meterlo, mirar si tiene sprint */
+                                        if(userstory.sprint !== undefined &&
+                                            userstory.sprint !== null &&
+                                            userstory.sprint !== '' ) {
+
+                                            /* lo buscamos el la bd, mirar el canal y el id */
+                                            sprintservice.checksprintexistsByIdCH(channelid, userstory.sprint).then(function (error, sprintresult) {
+                                                if (error) {
+                                                    response.status(error.code).json({message: error.message});
+                                                }
+                                                else {
+
+                                                    console.log("esto vale sprint result");
+                                                    console.log(sprintresult);
+
+
+                                                    if(sprintresult == undefined ||
+                                                        sprintresult == null ||
+                                                        sprintresult == ''){
+                                                        response.status(400).json({message: 'Bad Request. Sprint parameter does not exist or does not belong to this channel.'});
 
 
 
-                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+                                                    }
+                                                    else{
+                                                        /* userstoryresult devuelve 1 array */
+                                                        userstoryservice.newuserstory (userstory).then(function (error, userstoryresult) {
+                                                            if (error) {
+                                                                response.status(error.code).json({message: error.message});
+                                                            } else {
 
-                                                    /* devuelvo el json cuando se haya hecho all */
-                                                    response.json(userstoryresult);
+                                                                console.log("userstory successfully created... ");
 
-                                                });
+                                                                /* notif. al CH de nuevo userstory */
+                                                                /*socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {groupid: groupid, userstory: userstory});*/
+                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {userstory: userstoryresult});
 
 
-                                            } /* end else !err */
-                                        }); /* method newuserstory */
+                                                                /* tengo que hacer 1 json para el mensaje */
+                                                                var messagetext = createJSONmsgTask.generateMSGNewUS(result, userstoryresult, sprintresult);
+
+
+
+                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                    /* devuelvo el json cuando se haya hecho all */
+                                                                    response.json(userstoryresult);
+
+                                                                });
+
+
+                                                            } /* end else !err */
+                                                        }); /* method newuserstory */
+
+
+                                                    }
+
+
+                                                } /* ! err buscando sprint */
+
+
+                                            });
+
+                                        } /* se ha mandado con sprint sprint  */
+                                        /* no se ha mandado sprint */
+                                        else {
+
+                                            userstoryservice.newuserstory (userstory).then(function (error, userstoryresult) {
+                                                if (error) {
+                                                    response.status(error.code).json({message: error.message});
+                                                } else {
+
+                                                    console.log("userstory successfully created... ");
+
+                                                    /* notif. al CH de nuevo userstory */
+                                                    /*socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {groupid: groupid, userstory: userstory});*/
+                                                    socketio.getIO().sockets.to('CH_' + channelid).emit('newUserstory', {userstory: userstoryresult});
+
+
+                                                    /* tengo que hacer 1 json para el mensaje */
+                                                    var messagetext = createJSONmsgTask.generateMSGNewUS(result, userstoryresult, null);
+
+
+
+                                                    messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                        /* devuelvo el json cuando se haya hecho all */
+                                                        response.json(userstoryresult);
+
+                                                    });
+
+
+                                                } /* end else !err */
+                                            }); /* method newuserstory */
+
+                                        }
+
+
+
 
                                     } /* end else !err */
                                 }); /* method checkuserinchannel */
@@ -149,14 +221,13 @@ exports.updateuserstory = function updateuserstory (request, response){
 
     var changesinuserstory = request.body;
 
-
     var userstory = changesinuserstory.userstory;
     var fieldchange = changesinuserstory.field;
     var codepoints = changesinuserstory.codepoints;
 
 
 
-    if(userstory == undefined || userstory == null || userstory == '' ){
+    if((userstory == undefined || userstory == null || userstory == '') && (fieldchange !== 'unsprint') ){
         response.status(400).json({message: 'Bad Request. Missing required parameters: userstory.'});
     }
     else {
@@ -164,10 +235,10 @@ exports.updateuserstory = function updateuserstory (request, response){
             response.status(400).json({message: 'Bad Request. Missing required parameters: field that changed.'});
         }
         else {
-            if(userid == undefined || userid == null || userid == '' ||
-                channelid == undefined || channelid == null || channelid == '' ||
-                groupid == undefined || groupid == null || groupid == '' ||
-                userstoryid == undefined || userstoryid == null || userstoryid == '' ){
+            if(userid == undefined || userid == null || userid == "undefined" || userid == "null" ||userid == '' ||
+                channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+                groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ||
+                userstoryid == undefined || userstoryid == null || userstoryid == "undefined" || userstoryid == "null" || userstoryid == '' ){
                 response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
             }
             else{
@@ -218,34 +289,256 @@ exports.updateuserstory = function updateuserstory (request, response){
                                                     else {
 
 
+                                                        /* antes de updatear hay que mirar que el sprint pertenezca al canal */
+                                                        if(codefield == 9){
 
-                                                        /* existe y el usuario esta en el */
-                                                        /* entonces procedemos a updatear el userstory */
+                                                            sprintservice.checksprintexistsByIdCH(channelid, userstory.sprint).then(function (error, sprintresult) {
+                                                                if (error) {
+                                                                    response.status(error.code).json({message: error.message});
+                                                                }
+                                                                else {
 
-                                                        /* userstoryresult devuelve 1 array */
-                                                        userstoryservice.updateuserstoryById (userstoryid, userstory, codefield).then(function (error, userstoryresult) {
-                                                            if (error) {
-                                                                response.status(error.code).json({message: error.message});
-                                                            } else {
-
-                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('updateUserstory', {userstory: userstoryresult});
-
-
-                                                                /* tengo que hacer 1 json para el mensaje */
-                                                                var messagetext = createJSONmsgTask.generateMSGUpdateUS(result, userstoryresult, codefield, codepoints);
+                                                                    console.log("************ esto vale sprint result ******************");
+                                                                    console.log(sprintresult);
 
 
-
-                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
-
-                                                                    /* devuelvo el json cuando se haya hecho all */
-                                                                    response.json(userstoryresult);
-
-                                                                });
+                                                                    if (sprintresult == undefined ||
+                                                                        sprintresult == null ||
+                                                                        sprintresult == '') {
+                                                                        response.status(400).json({message: 'Bad Request. Sprint parameter does not exist or does not belong to this channel.'});
 
 
-                                                            } /* end else !err */
-                                                        }); /* method newuserstory */
+                                                                    }
+                                                                    else {
+                                                                        /* aqui tengo el objeto sprint */
+
+
+                                                                        userstoryservice.updateuserstoryById (userstoryid, userstory, codefield).then(function (error, userstoryresult) {
+                                                                            if (error) {
+                                                                                response.status(error.code).json({message: error.message});
+                                                                            } else {
+
+                                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('updateUserstory', {userstory: userstoryresult});
+
+                                                                                /* antes de realizar el mensaje buscamos el anterior sprint */
+
+                                                                                console.log("***********************esto vale userstoryexist.sprint****************");
+                                                                                console.log(userstoryexists.sprint);
+
+
+                                                                                /* aunque antes no tuviera sprint ahora si */
+                                                                                codepoints = {};
+                                                                                codepoints.new = sprintresult;
+
+
+
+                                                                                if(userstoryexists.sprint !== undefined &&
+                                                                                    userstoryexists.sprint !== null &&
+                                                                                    userstoryexists.sprint !== '' ){
+
+                                                                                    console.log("el userstory de antes tiene sprint ya asignado");
+
+
+
+                                                                                    sprintservice.checksprintexistsByIdCH(channelid, userstoryexists.sprint).then(function (error, sprintresultold) {
+                                                                                        if (!error &&
+                                                                                            sprintresultold !== undefined &&
+                                                                                            sprintresultold !== null &&
+                                                                                            sprintresultold !== '') {
+
+
+                                                                                            codepoints.old = sprintresultold;
+                                                                                            var messagetext = createJSONmsgTask.generateMSGUpdateUS(result, userstoryresult, codefield, codepoints);
+
+
+
+                                                                                            messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                                                /* devuelvo el json cuando se haya hecho all */
+                                                                                                response.json(userstoryresult);
+
+                                                                                            });
+
+
+
+
+
+                                                                                        }
+                                                                                        else {
+
+                                                                                            var messagetext = createJSONmsgTask.generateMSGUpdateUS(result, userstoryresult, codefield, codepoints);
+
+
+
+                                                                                            messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                                                /* devuelvo el json cuando se haya hecho all */
+                                                                                                response.json(userstoryresult);
+
+                                                                                            });
+
+
+                                                                                        }
+                                                                                    });
+
+
+
+                                                                                }
+                                                                                else {
+
+                                                                                    /* tengo que hacer 1 json para el mensaje */
+                                                                                    /*el sprint de antes era vacio, pero el de ahora no lo es
+                                                                                    * */
+
+                                                                                    var messagetext = createJSONmsgTask.generateMSGUpdateUS(result, userstoryresult, codefield, codepoints);
+
+
+
+                                                                                    messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                                        /* devuelvo el json cuando se haya hecho all */
+                                                                                        response.json(userstoryresult);
+
+                                                                                    });
+
+
+                                                                                }
+
+
+
+
+
+
+
+
+
+                                                                            } /* end else !err */
+                                                                        }); /* method newuserstory */
+
+                                                                    }
+                                                                }
+                                                            });
+
+
+
+
+                                                        }
+                                                        else if(codefield == 10){
+                                                            /* miramos si el resultado de US tiene sprints, sino no hacemos nada */
+                                                            if(userstoryexists.sprint !== undefined &&
+                                                                userstoryexists.sprint !== null &&
+                                                                userstoryexists.sprint !== '' ){
+                                                                /* lo buscamos despues de updatear para evitar problemas */
+
+                                                                userstoryservice.updateuserstoryById (userstoryid, null, codefield).then(function (error, userstoryresult) {
+                                                                    if (error) {
+                                                                        response.status(error.code).json({message: error.message});
+                                                                    } else {
+
+                                                                        socketio.getIO().sockets.to('CH_' + channelid).emit('updateUserstory', {userstory: userstoryresult});
+
+
+
+                                                                        /* antes de crear el mensaje buscamos el sprint anterior */
+                                                                        sprintservice.checksprintexistsByIdCH(channelid, userstoryexists.sprint).then(function (error, sprintresult) {
+                                                                            if(!error &&
+                                                                                sprintresult !== undefined &&
+                                                                                sprintresult !== null &&
+                                                                                sprintresult !== ''){
+
+                                                                                /* cambiamos el codefield para que sea como el de assignar sprint */
+
+                                                                                codefield = 9;
+                                                                                codepoints = {};
+                                                                                codepoints.old = sprintresult;
+
+
+                                                                                var messagetext = createJSONmsgTask.generateMSGUpdateUS(result, userstoryresult, codefield, codepoints);
+
+
+
+                                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                                    /* devuelvo el json cuando se haya hecho all */
+                                                                                    response.json(userstoryresult);
+
+                                                                                });
+
+
+
+
+                                                                            }
+                                                                        });
+
+
+
+
+
+                                                                    } /* end else !err */
+                                                                }); /* method newuserstory */
+
+
+
+
+
+
+
+                                                            }
+                                                            else{
+                                                                var err = {
+                                                                    code: 403,
+                                                                    message: "Userstory is already unlinked from sprint."
+                                                                };
+                                                                response.status(err.code).json({message: err.message});
+
+                                                            }
+
+
+
+
+
+
+
+
+
+                                                        }
+
+
+
+                                                        else {
+                                                            /* existe y el usuario esta en el */
+                                                            /* entonces procedemos a updatear el userstory */
+
+                                                            /* userstoryresult devuelve 1 array */
+                                                            userstoryservice.updateuserstoryById (userstoryid, userstory, codefield).then(function (error, userstoryresult) {
+                                                                if (error) {
+                                                                    response.status(error.code).json({message: error.message});
+                                                                } else {
+
+                                                                    socketio.getIO().sockets.to('CH_' + channelid).emit('updateUserstory', {userstory: userstoryresult});
+
+
+                                                                    /* tengo que hacer 1 json para el mensaje */
+                                                                    var messagetext = createJSONmsgTask.generateMSGUpdateUS(result, userstoryresult, codefield, codepoints);
+
+
+
+                                                                    messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                        /* devuelvo el json cuando se haya hecho all */
+                                                                        response.json(userstoryresult);
+
+                                                                    });
+
+
+                                                                } /* end else !err */
+                                                            }); /* method newuserstory */
+
+                                                        }
+
+
+
+
 
 
 
@@ -309,10 +602,9 @@ exports.getuserstories = function getuserstories (request, response){
 
 
 
-    if(userid == undefined || userid == null ||
-        channelid == undefined || channelid == null ||
-        groupid == undefined || groupid == null){
-
+    if(userid == undefined || userid == null || userid == "undefined" || userid == "null" ||userid == '' ||
+        channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ){
 
         response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
 
@@ -395,10 +687,10 @@ exports.deleteuserstories = function deleteuserstories (request, response){
 
 
 
-    if(userid == undefined || userid == null || userid == '' ||
-        channelid == undefined || channelid == null || channelid == '' ||
-        groupid == undefined || groupid == null || groupid == '' ||
-        userstoryid == undefined || userstoryid == null || userstoryid == '' ){
+    if(userid == undefined || userid == null || userid == "undefined" || userid == "null" ||userid == '' ||
+        channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ||
+        userstoryid == undefined || userstoryid == null || userstoryid == "undefined" || userstoryid == "null" || userstoryid == '' ){
         response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
     }
     else{

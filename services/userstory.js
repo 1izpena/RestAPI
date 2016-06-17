@@ -151,8 +151,12 @@ exports.updateuserstoryById = function updateuserstoryById(userstoryid, userstor
         update.subject = userstory.subject;
 
     }
-    else{ /* sprint */
+    else if(codefield == 9){ /* sprint,es 1 id */
         update.sprint = userstory.sprint;
+
+    }
+    else if(codefield == 10){
+        update = {$unset: {sprint:1}};
 
     }
 
@@ -177,6 +181,42 @@ exports.updateuserstoryById = function updateuserstoryById(userstoryid, userstor
     });
     return promise;
 };
+
+
+
+
+exports.updateuserstoriesFromSprint = function updateuserstoriesFromSprint(sprintid){
+    var promise = new Hope.Promise();
+    var Userstory = mongoose.model('Userstory');
+
+    var options = {multi: true};
+    var update = {$unset: {sprint:1}};
+    var query = {sprint: sprintid};
+
+    /* se supone que raw podria devolverme el numero de documentos modificados */
+
+
+    Userstory.updateUserstoryByQuery (query,update, options).then (function (error, raw) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            console.log("esto vale raw en services ************");
+            console.log(raw);
+            return promise.done(null, raw);
+        }
+    });
+
+
+
+    return promise;
+};
+
+
+
+
+
+
 
 
 

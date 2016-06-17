@@ -159,6 +159,10 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/userstories/:use
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints').get(sprint.getsprints);
 /* POST CH SPRINTS  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints').post(sprint.newsprint);
+/* DELETE CH SPRINTS  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints/:sprintid').put(sprint.editsprint);
+/* DELETE CH SPRINTS  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints/:sprintid').delete(sprint.deletesprint);
 
 
 
