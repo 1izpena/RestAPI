@@ -360,7 +360,7 @@ userstorySchema.methods.parse = function parse () {
         voters      : userstory.voters,
         point       : userstory.point,
         description : userstory.description,
-        requirement: userstory.requirement,
+        requirement : userstory.requirement,
         attachments : userstory.attachments,
         channel     : userstory.channel
 

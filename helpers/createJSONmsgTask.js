@@ -4,6 +4,41 @@
 
 
 
+exports.generateMSGNewIssue = function generateMSGNewIssue (result, issueresult) {
+
+
+    var sender = {
+        id  : result._id,
+        username: result.username,
+        mail: result.mail
+    };
+
+
+
+    var messagetext = {
+        action      : 'created',
+        event       :  'issue',
+        sender      :   sender
+
+    };
+
+    messagetext.issue = {
+        id          : issueresult.id,
+        num         : issueresult.num,
+        subject     : issueresult.subject,
+        status      : issueresult.status,
+        voters      : issueresult.voters,
+        type        : issueresult.type,
+        priority    : issueresult.priority,
+        severity    : issueresult.severity,
+        description : issueresult.description
+    };
+
+
+
+    return messagetext;
+
+};
 
 
 

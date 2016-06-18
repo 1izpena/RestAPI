@@ -27,8 +27,7 @@ var taskSchema = new Schema({
     assignedto      : { type: Schema.ObjectId, ref: 'User', required: false },
     contributors    : [{ type: Schema.ObjectId, ref: 'User', required: false }],
 
-    /* new = 0, in progress = 1, readyfortest = 2, closed =3 */
-    status          : { type: String, default: 'New' },
+    status          : { type: String, default: 'New', enum: ['New', 'In progress', 'Closed', 'Ready for test'] },
     description     : { type: String, required: false },
 
     requirement     : {
@@ -48,7 +47,7 @@ var taskSchema = new Schema({
 });
 
 
-taskSchema.plugin(AutoIncrement, {inc_field: 'numTask'});
+taskSchema.plugin(AutoIncrement, {inc_field: 'numtask'});
 
 
 taskSchema.statics.createTask = function createTask (attributes) {
@@ -204,7 +203,7 @@ taskSchema.methods.parse = function parse () {
 
     var parseTask = {
         id          : task._id,
-        num         : task.numTask,
+        num         : task.numtask,
         subject     : task.subject,
         createdby   : {
             id         : (task.createdby._id) ? task.createdby._id : task.createdby,

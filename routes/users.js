@@ -168,6 +168,8 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints/:sprinti
 
 /* GET CH ISSUES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/issues').get(issue.getissues);
+/* POST CH ISSUES  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/issues').post(issue.newissue);
 
 
 

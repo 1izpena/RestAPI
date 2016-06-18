@@ -13,23 +13,26 @@ var User  = require('./user');
 
 
 var Hope      	= require('hope');
+var AutoIncrement = require('mongoose-sequence');
 
 
 
 
 var issueSchema = new Schema({
 
+    numissue    : Number,
     subject     : { type: String, required: true },
 
-    type        : { type: String, default: 'Bug' },     /* bug, question, enhancement */
-    severity    : { type: String, default: 'Normal' },  /* low, normal, high */
-    priority    : { type: String, default: 'Normal' },  /* wishlist, minor, normal, important, critical */
+    type        : { type: String, default: 'Bug', enum: ['Bug', 'Question', 'Enhancement']},
+    severity    : { type: String, default: 'Normal', enum: ['Wishlist', 'Minor', 'Normal', 'Important', 'Critical'] },
+    priority    : { type: String, default: 'Normal', enum: ['Low', 'Normal', 'High'] },
+    voters      : [{ type: Schema.ObjectId, ref: 'User', required: false }],
+    status      : { type: String, default: 'New', enum: ['New', 'In progress', 'Closed', 'Ready for test'] },
 
     createdby   : { type: Schema.ObjectId, ref: 'User', required: true },
     assignedto  : { type: Schema.ObjectId, ref: 'User', required: false },
     datetime    : { type: Date, default: Date.now },
 
-    tags        : [{ type: String, required: false }],
     description : { type: String, required: false },
 
     /* probar si pongo default date.now me lo crea */
@@ -40,7 +43,6 @@ var issueSchema = new Schema({
     }],
 
     userstories   : [{ type: Schema.ObjectId, ref: 'Userstory', required: false }],
-    tasks         : [{ type: Schema.ObjectId, ref: 'Task', required: false }],
     attachments   : [{ type: String, required: false }], /* array of filename */
     channel       : { type: Schema.ObjectId, ref: 'Channel', required: true }
 
@@ -49,11 +51,12 @@ var issueSchema = new Schema({
 
 });
 
+issueSchema.plugin(AutoIncrement, {inc_field: 'numissue'});
+
+
 
 /* metodos create, get y delete */
-
-
-issueSchema.statics.createIsssue = function createIsssue (attributes) {
+issueSchema.statics.createIssue = function createIsssue (attributes) {
 
     var promise = new Hope.Promise();
     var Issue = mongoose.model('Issue', issueSchema);
@@ -66,7 +69,8 @@ issueSchema.statics.createIsssue = function createIsssue (attributes) {
             console.log("hay error al guardar issue");
             console.log(error);
             return promise.done(error, null);
-        }else {
+        }
+        else {
             return promise.done(null, issue);
         }
     });
@@ -171,33 +175,38 @@ issueSchema.methods.parse = function parse () {
 
     var parseIssue = {
         id          : issue._id,
-        /* lo queremos para mostrarlo o no en el backlog,
-         * luego no necesito mas que saber si es vacio o no,
-         * de momento pasamos el array */
+        num         : issue.numissue,
         subject     : issue.subject,
         type        : issue.type,
         severity    : issue.severity,
         priority    : issue.priority,
+        voters      : issue.voters,
+        status      : issue.status,
         createdby   : {
             id         : (issue.createdby._id) ? issue.createdby._id : issue.createdby,
             username   : (issue.createdby.username) ? issue.createdby.username :  '',
             mail       : (issue.createdby.mail) ? issue.createdby.mail :  ''
         },
-        assignedto   : {
-            id         : (issue.assignedto._id) ? issue.assignedto._id : issue.assignedto,
-            username   : (issue.assignedto.username) ? issue.assignedto.username :  '',
-            mail       : (issue.assignedto.mail) ? issue.assignedto.mail :  ''
-        },
         datetime    : issue.datetime,
-        tags        : issue.tags,
         description : issue.description,
         userstories : issue.userstories,
-        tasks       : issue.tasks,
         attachments : issue.attachments,
         channel     : issue.channel
 
     };
 
+
+    if(issue.assignedto !== null && issue.assignedto !== undefined){
+        parseIssue.assignedto = {
+            id         : (issue.assignedto._id) ? issue.assignedto._id : issue.assignedto,
+            username   : (issue.assignedto.username) ? issue.assignedto.username :  '',
+            mail       : (issue.assignedto.mail) ? issue.assignedto.mail :  ''
+        };
+
+    }
+    else{
+        parseIssue.assignedto = {};
+    }
 
     /*
     if(issue.userstories !== null && issue.userstories !== undefined){
@@ -224,12 +233,17 @@ issueSchema.methods.parse = function parse () {
 
 
 
+    parseIssue.comments = [];
     if(issue.comments !== null && issue.comments !== undefined){
         if(issue.comments.length > 0){
-            var comment = {};
+
             for (var i = 0; i < issue.comments.length; i++) {
+
+                var comment = {};
+
                 comment.comment = (issue.comments[i].comment) ? issue.comments[i].comment : '';
                 comment.created = (issue.comments[i].created) ? issue.comments[i].created : Date.now;
+                comment.id = (issue.comments[i]._id) ? issue.comments[i]._id : '';
 
                 if(issue.comments[i]._user !== undefined && issue.comments[i]._user !== null){
 
@@ -247,14 +261,8 @@ issueSchema.methods.parse = function parse () {
 
             }
         }
-        else{
-            parseIssue.comments = [];
-        }
 
-    }
-    else{
 
-        parseIssue.comments = [];
     }
 
 
