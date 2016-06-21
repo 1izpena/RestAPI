@@ -364,6 +364,31 @@ exports.deleteTaskByIdRemovedUS = function deleteTaskByIdRemovedUS(userstoryexis
 
 
 
+exports.deleteUserstories = function deleteUserstories (channelid){
+    var promise = new Hope.Promise();
+    var Userstory = mongoose.model('Userstory');
+
+    var query = {channel : channelid};
+
+
+    Userstory.deleteUserstories (query).then (function(error, removed) {
+        if (error) {
+            return promise.done(error, null);
+
+        }
+        else {
+
+            return promise.done(null, removed);
+        }
+    });
+
+
+
+    return promise;
+};
+
+
+
 
 
 

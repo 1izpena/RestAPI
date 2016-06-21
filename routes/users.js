@@ -170,6 +170,10 @@ router.route('/:userid/chat/groups/:groupid/channels/:channelid/sprints/:sprinti
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/issues').get(issue.getissues);
 /* POST CH ISSUES  */
 router.route('/:userid/chat/groups/:groupid/channels/:channelid/issues').post(issue.newissue);
+/* PUT CH ISSUES  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/issues/:issueid').put(issue.updateissue);
+/* DELETE CH ISSUES  */
+router.route('/:userid/chat/groups/:groupid/channels/:channelid/issues/:issueid').delete(issue.deleteissue);
 
 
 

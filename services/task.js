@@ -46,6 +46,39 @@ exports.deletetask = function deletetask(taskid){
 
 
 
+exports.deleteTasks = function deleteTasks (channelid){
+    var promise = new Hope.Promise();
+    var Task = mongoose.model('Task');
+
+    var query = {channel : channelid};
+
+
+    Task.deleteTasks (query).then (function(error, removed) {
+        if (error) {
+            return promise.done(error, null);
+
+        }
+        else {
+
+            return promise.done(null, removed);
+        }
+    });
+
+
+
+    return promise;
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 exports.newtask = function newtask(task){

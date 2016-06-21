@@ -471,7 +471,7 @@ exports.updatetask = function updatetask (request, response){
                                         if(userstoryresult == undefined || userstoryresult == null || userstoryresult == ''){
                                             var err = {
                                                 code: 402,
-                                                message: "The task to add not found inside channel requested."
+                                                message: "The task to update not found inside channel requested."
                                             };
                                             response.status(err.code).json({message: err.message});
 
@@ -574,12 +574,12 @@ exports.updatetask = function updatetask (request, response){
                                                                     }
                                                                     else{
                                                                         if(answer.num == 1){
-                                                                            response.status(403).json({message: 'Bad Request. The member to add as assignee is alredy as contributor.'});
+                                                                            response.status(403).json({message: 'Bad Request. The member to add as assignee is already as contributor.'});
 
 
                                                                         }
                                                                         else{
-                                                                            response.status(403).json({message: 'Bad Request. The member to add as contributor is alredy in.'});
+                                                                            response.status(403).json({message: 'Bad Request. The member to add as contributor is already in.'});
 
 
                                                                         }
@@ -605,7 +605,7 @@ exports.updatetask = function updatetask (request, response){
                                                     /***************    empezamossssssssssssss ********************/
 
 
-                                                    else if(answer.num == 7 || answer.num == 5 || answer.num == 6 || answer.num == 8 || answer.num == 9 || answer.num == 10 || answer.num == 4){
+                                                    else {
 
                                                         if(answer.num == 4){
                                                             /* creamos el objecto del commentario */
@@ -627,37 +627,29 @@ exports.updatetask = function updatetask (request, response){
                                                                 socketio.getIO().sockets.to('CH_' + channelid).emit('updateTask', {task: newtaskresult, userstoryid: userstoryid});
 
 
-                                                                /* tengo que hacer 1 json para el mensaje */
-                                                                var messagetext = createJSONmsgTask.generateMSGupdateTask(answer.num, result, fieldoldvalue, fieldchange, newtaskresult, userstoryresult, fieldnewvalue);
+
+                                                                /* cuando borramos comentario no hacemos mensaje */
+                                                                if (answer.num !== 11) {
+                                                                    /* tengo que hacer 1 json para el mensaje */
+                                                                    var messagetext = createJSONmsgTask.generateMSGupdateTask(answer.num, result, fieldoldvalue, fieldchange, newtaskresult, userstoryresult, fieldnewvalue);
 
 
-                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+                                                                    messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+                                                                        response.json(newtaskresult);
+
+                                                                    });
+
+                                                                }
+                                                                else{
                                                                     response.json(newtaskresult);
 
-                                                                });
-
-
-                                                            } /* else !error*/
-                                                        }); /* end update task */
+                                                                }
 
 
 
 
-                                                    } /*end if num == 7 */
 
-                                                    /* cuando borramos comentario no hacemos mensaje */
-                                                    else if(answer.num == 11){
 
-                                                        taskservice.updatetask (taskid, answer.num, fieldnewvalue).then(function (error, newtaskresult) {
-                                                            if (error) {
-                                                                response.status(error.code).json({message: error.message});
-                                                            }
-                                                            else {
-
-                                                                /* notificamos al CH de que ha cambiado el userstory */
-                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('updateTask', {task: newtaskresult, userstoryid: userstoryid});
-
-                                                                response.json(newtaskresult);
 
                                                             } /* else !error*/
                                                         }); /* end update task */
@@ -666,18 +658,6 @@ exports.updatetask = function updatetask (request, response){
 
 
                                                     } /*end if num == 7 */
-
-
-
-
-
-                                                    /*******************   terminamos   *******************************/
-
-
-
-
-
-
 
 
 

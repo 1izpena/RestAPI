@@ -153,13 +153,13 @@ taskSchema.statics.deleteTaskById = function deleteTaskById (id) {
 taskSchema.statics.deleteTasks = function deleteTasks (query) {
     var promise = new Hope.Promise();
 
-    this.remove(query,function(error) {
+    this.remove(query,function(error, removed) {
         if (error) {
             return promise.done(error, null);
         }
         else {
             console.log("Tasks deleted successfully");
-            return promise.done(null, {message: 'Tasks deleted successfully'});
+            return promise.done(null, removed);
         }
     });
     return promise;

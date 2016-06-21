@@ -99,7 +99,7 @@ exports.updatesprint = function updatesprint(sprint, sprintid){
 
 
     }
-    console.log(Object.prototype.toString.call(sprint.startdate));
+
     if(sprint.enddate !== undefined &&  sprint.enddate !== null && sprint.enddate !== ''){
         if(Object.prototype.toString.call(sprint.enddate) === '[object String]'){
             update.enddate = sprint.enddate;
@@ -176,5 +176,38 @@ exports.deletesprintById = function deletesprintById (sprintid){
 
     return promise;
 };
+
+
+
+
+
+exports.deleteSprints = function deleteSprints (channelid){
+    var promise = new Hope.Promise();
+    var Sprint = mongoose.model('Sprint');
+
+
+    console.log("entro en deletesprints");
+
+
+    var query = {channel : channelid};
+
+
+    Sprint.deleteSprints (query).then (function(error, removed) {
+        if (error) {
+            return promise.done(error, null);
+
+        }
+        else {
+
+            return promise.done(null, removed);
+        }
+    });
+
+
+
+    return promise;
+};
+
+
 
 

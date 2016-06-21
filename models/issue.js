@@ -83,6 +83,7 @@ issueSchema.statics.searchIssues = function searchIssues (query, limit, page) {
     var value2 = [];
 
 
+
     /* skip is number of results that not show */
     if(typeof page === "undefined" || page == null) {
         page = 0;
@@ -97,10 +98,11 @@ issueSchema.statics.searchIssues = function searchIssues (query, limit, page) {
     this.find(query)
         .skip(skip)
         .limit(limit)
-        .populate('createdby assignedto comments._user')
+        .populate('createdby assignedto comments._user userstories')
         .exec(function(error, value) {
         if (limit === 1 && !error) {
             if (value.length === 0) {
+
                 error = {
                     code: 402,
                     message: "Issue not found."
@@ -109,6 +111,7 @@ issueSchema.statics.searchIssues = function searchIssues (query, limit, page) {
                 value = value[0];
             }
             else{
+
                 value = value[0].parse();
 
             }
@@ -139,11 +142,11 @@ issueSchema.statics.searchIssues = function searchIssues (query, limit, page) {
 
 issueSchema.statics.deleteIssueById = function deleteIssueById (id) {
     var promise = new Hope.Promise();
-    this.remove({_id:id},function(error) {
+    this.remove({_id : id },function(error) {
         if (error) {
             return promise.done(error, null);
         }else {
-            console.log("issue deleted successfully");
+            console.log("Issue deleted successfully");
             return promise.done(null, {message: 'Issue deleted successfully'});
         }
     });
@@ -154,12 +157,12 @@ issueSchema.statics.deleteIssueById = function deleteIssueById (id) {
 
 issueSchema.statics.deleteIssues = function deleteIssues (query) {
     var promise = new Hope.Promise();
-    this.remove(query,function(error) {
+    this.remove(query,function(error, removed) {
         if (error) {
             return promise.done(error, null);
         }else {
             console.log("Issues deleted successfully");
-            return promise.done(null, {message: 'Issues deleted successfully'});
+            return promise.done(null, removed);
         }
     });
     return promise;
@@ -167,8 +170,66 @@ issueSchema.statics.deleteIssues = function deleteIssues (query) {
 
 
 
-/* parse hay que mirar que nos interesa, quizas hacer populated */
+issueSchema.statics.updateIssuesByQuery = function updateIssuesByQuery (query, update, options) {
 
+    var promise = new Hope.Promise();
+
+    this.update(query, update, options,function(error, raw) {
+        if (error) {
+            return promise.done(error, null);
+        }
+        else {
+            return promise.done(error, raw);
+        }
+    });
+    return promise;
+};
+
+
+
+
+
+
+
+
+
+
+issueSchema.statics.updateIssueyById = function updateIssueyById (id, update, options) {
+
+    var promise = new Hope.Promise();
+
+    this.findByIdAndUpdate(id, update, options,function(error, issue) {
+        if (error) {
+            console.log("error");
+            console.log(error);
+            return promise.done(error, null);
+        }
+        else {
+            if (issue){
+                return promise.done(null, issue);
+            }
+            else {
+                var err = {
+                    code   : 400,
+                    message: 'Issue not found'
+                };
+                return promise.done(err, null);
+            }
+        }
+    });
+    return promise;
+};
+
+
+
+
+
+
+
+
+
+
+/* parse hay que mirar que nos interesa, quizas hacer populated */
 issueSchema.methods.parse = function parse () {
     var issue = this;
 
@@ -208,27 +269,28 @@ issueSchema.methods.parse = function parse () {
         parseIssue.assignedto = {};
     }
 
-    /*
+
+    parseIssue.userstories = [];
     if(issue.userstories !== null && issue.userstories !== undefined){
         if(issue.userstories.length > 0){
 
 
             for (var i = 0; i < issue.userstories.length; i++) {
+                var userstory = {};
 
-                parseIssue.userstories.push(issue.userstories[i].parse());
+                userstory.id = (issue.userstories[i]._id) ? issue.userstories[i]._id : issue.userstories[i];
+                userstory.num = (issue.userstories[i].num) ? issue.userstories[i].num : -1;
+                userstory.subject = (issue.userstories[i].subject) ? issue.userstories[i].subject : '';
+
+                parseIssue.userstories.push(userstory);
+
 
             }
         }
-        else{
-            parseIssue.userstories = [];
-        }
 
     }
-    else{
 
-        parseIssue.userstories = [];
-    }
-*/
+
 
 
 

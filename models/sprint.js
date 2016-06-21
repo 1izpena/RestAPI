@@ -215,12 +215,13 @@ sprintSchema.statics.deleteSprintById = function deleteSprintById (id) {
 
 sprintSchema.statics.deleteSprints = function deleteSprints (query) {
     var promise = new Hope.Promise();
-    this.remove(query,function(error) {
+    this.remove(query,function(error, removed) {
         if (error) {
             return promise.done(error, null);
-        }else {
+        }
+        else {
             console.log("Sprint deleted successfully");
-            return promise.done(null, {message: 'Sprints deleted successfully'});
+            return promise.done(null, removed);
         }
     });
     return promise;

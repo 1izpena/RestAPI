@@ -49,8 +49,6 @@ exports.checkfields = function checkfields (userstory, fieldchange) {
     }
     else{
         if(fieldchange == 'voters'){
-            console.log("esto vale userstory.voters");
-            console.log(userstory.voters);
 
             if(userstory.voters == undefined ||
                 userstory.voters == null ||

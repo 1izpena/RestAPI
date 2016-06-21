@@ -199,12 +199,16 @@ exports.checkischanneladmin = function(channelid,userid) {
         }
         else {
             if (channel){
-                if (userid == channel._admin){
-                    console.log("userid: " + userid);
-                    console.log("channel._admin: " + channel._admin);
+
+
+
+
+                if (userid == channel.admin){
+
                     console.log("the user is the admin of the channel");
                     return promise.done(null, channel);
-                }else {
+                }
+                else {
                     var err = {
                         code   : 401,
                         message: 'you are not the admin of the channel'

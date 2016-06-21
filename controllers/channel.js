@@ -2,6 +2,13 @@
 
 var Auth  = require('../helpers/authentication');
 var channelservice  = require('../services/channel');
+
+var issueservice  = require('../services/issue');
+var taskservice  = require('../services/task');
+var userstoryservice  = require('../services/userstory');
+var sprintservice  = require('../services/sprint');
+
+
 var mongoose = require('mongoose');
 var chatErrors  = require('../helpers/chatErrorsHandler');
 var User = require('../models/user');
@@ -738,91 +745,237 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
 
 
 /* si el canal esta asociado al servicio de github hay que borrar los webhooks primero, todos ellos */
-exports.deletechannelfromgroup = function deletechannelfromgroup (request, response){
-    Auth(request, response).then(function(error, result) {
+
+
+function removechannel(userid, groupid, channelid, response){
+
+    console.log("luego borro el canal");
+    channelservice.removechannel(userid, groupid, channelid).then(function (error, result) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
 
-            if (request.params.userid == result._id){
-                chatErrors.checkuserinchannel(request.params.channelid,request.params.userid).then(function (error,result){
-                    if(error){
-                        response.status(error.code).json({message: error.message});
-                    }else{
 
-                        chatErrors.checkischanneladmin(request.params.channelid,request.params.userid).then(function (error,result){
-                            if(error){
-                                response.status(error.code).json({message: error.message});
-                            }else{
+            if (result.channelType === "PRIVATE") {
+                socketio.getIO().sockets.to('GR_' + groupid).emit('deletedPrivateChannel', result);
+            }
+            if (result.channelType == "PUBLIC") {
+                socketio.getIO().sockets.to('GR_' + groupid).emit('deletedPublicChannel', result);
+            }
+            var Group = mongoose.model('Group');
+            Group.parsepopulated(userid, groupid).then(function (error, group) {
+                if (error) {
+                    response.status(error.code).json({message: error.message});
+                }
+                else {
+                    var roomName = 'CH_' + result.id;
+                    var conectedUsers = socketio.getUsersInSocket(roomName);
 
-                                /* en el result tenemos el id del user, pero tambien el su token
-                                *
-                                * githubtoken" : [ { "token" : "120dbe14caca8f6efb2e2b54597ae49ec557e5e1", "username" : "1izpena",
-                                * antes de remove channel lo buscamos y vemos si tiene
-                                *
-                                * "githubRepositories" : [ { "id" : 53012875, "name" : "angularProject",
-                                 * "hookid" : 8188275, "_id" : ObjectId("571ecef3cf02b1c75ba3d44c") },
-                                 * { "id" : 53012902, "name" : "RestAPI", "hookid" : 8188274,
-                                *
-                                *
-                                * */
+                    for (var i = 0; i < result.users.length; i++) {
+                        if (result.users[i].id != userid) {
 
-                                console.log("esto vale result en deletechannelfromgroup");
-                                console.log(result);
+                            if (conectedUsers.indexOf(result.users[i]) == -1) {
 
-
-                                /* buscamos el canal ,quizas se ouede hacer en el servicio */
-                                /*Channel.search(query,limit).then(function (error, user) {
-                                    if (error){
-                                        response.status(error.code).json({message: error.message});
-                                    }
-                                    else {*/
-
-                                /****************/
-                                channelservice.removechannel(request.params.userid, request.params.groupid, request.params.channelid).then(function (error,result){
-                                    if(error){
-                                        response.status(error.code).json({message: error.message});
-                                    }else{
+                                console.log("Emit deletedChannelEvent");
+                                socketio.getIO().sockets.to('US_' + result.users[i].id).emit('deletedChannelEvent', {
+                                    groupid: groupid,
+                                    groupName: group.groupName,
+                                    channelName: result.channelName,
+                                    channelid: result.id,
+                                    channelType: result.channelType
+                                });
+                            }
+                        }
+                    }
+                    response.json(result);
+                }
+            });
+        }
+    });
 
 
-                                        if (result.channelType === "PRIVATE"){
-                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPrivateChannel', result);
-                                        }
-                                        if (result.channelType == "PUBLIC"){
-                                            socketio.getIO().sockets.to('GR_'+request.params.groupid).emit('deletedPublicChannel', result);
-                                        }
-                                        var Group = mongoose.model('Group');
-                                        Group.parsepopulated(request.params.userid,request.params.groupid).then(function (error, group) {
-                                            if (error){
+
+
+
+};
+
+
+
+
+/* hay que mirar si es de tipo scrum */
+exports.deletechannelfromgroup = function deletechannelfromgroup (request, response){
+
+    var userid = request.params.userid;
+    var channelid = request.params.channelid;
+    var groupid = request.params.groupid;
+
+
+
+
+    if(userid == undefined || userid == null || userid == "undefined" || userid == "null" ||userid == '' ||
+        channelid == undefined || channelid == null || channelid == "undefined" || channelid == "null" || channelid == '' ||
+        groupid == undefined || groupid == null || groupid == "undefined" || groupid == "null" || groupid == '' ){
+        response.status(400).json({message: 'Bad Request. Missing required parameters in URL.'});
+    }
+    else {
+
+
+        Auth(request, response).then(function (error, result) {
+            if (error) {
+                response.status(error.code).json({message: error.message});
+            } else {
+
+                if (request.params.userid == result._id) {
+                    chatErrors.checkuserinchannel(channelid, userid).then(function (error, result) {
+                        if (error) {
+                            response.status(error.code).json({message: error.message});
+                        } else {
+
+                            chatErrors.checkischanneladmin(channelid, userid).then(function (error, result) {
+                                if (error) {
+                                    response.status(error.code).json({message: error.message});
+                                }
+                                else {
+
+                                    /* en el result tenemos el id del user, pero tambien el su token
+                                     *
+                                     * githubtoken" : [ { "token" : "120dbe14caca8f6efb2e2b54597ae49ec557e5e1", "username" : "1izpena",
+                                     * antes de remove channel lo buscamos y vemos si tiene
+                                     *
+                                     * "githubRepositories" : [ { "id" : 53012875, "name" : "angularProject",
+                                     * "hookid" : 8188275, "_id" : ObjectId("571ecef3cf02b1c75ba3d44c") },
+                                     * { "id" : 53012902, "name" : "RestAPI", "hookid" : 8188274,
+                                     *
+                                     *
+                                     * */
+
+                                    console.log("esto vale result en deletechannelfromgroup");
+                                    console.log(result);
+
+
+                                    /* buscamos el canal ,quizas se ouede hacer en el servicio */
+                                    /*Channel.search(query,limit).then(function (error, user) {
+                                     if (error){
+                                     response.status(error.code).json({message: error.message});
+                                     }
+                                     else {*/
+
+                                    /****************/
+
+
+                                    /* antes de borrar mirar si es scrum */
+                                    /* hay que buscarlo */
+                                    channelservice.getchannel(channelid)
+                                        .then(function (error, channelresult) {
+                                            if (error) {
                                                 response.status(error.code).json({message: error.message});
                                             }
                                             else {
-                                                var roomName = 'CH_'+result.id;
-                                                var conectedUsers = socketio.getUsersInSocket(roomName);
-                                                for (var i=0;i<result.users.length;i++){
-                                                    if(result.users[i].id != request.params.userid){
-                                                        if (conectedUsers.indexOf(result.users[i]) == -1){
-                                                            console.log("Emit deletedChannelEvent");
-                                                            socketio.getIO().sockets.to('US_'+result.users[i].id).emit('deletedChannelEvent', {groupid: request.params.groupid,  groupName: group.groupName , channelName: result.channelName, channelid: result.id, channelType: result.channelType});
-                                                        }
+
+                                                console.log("esto vale channelresult");
+                                                console.log(channelresult);
+
+
+
+                                                if(channelresult !== null && channelresult !== undefined && channelresult !== ''){
+
+                                                    /* si vale true hay que borrar all lo asociado primero */
+                                                    if(channelresult.scrum == true){
+                                                        /* borramos
+                                                        * 1 issues
+                                                        * 2 tasks
+                                                        * 3 us
+                                                        * 4 sprints */
+
+                                                        console.log("esto vale channelresult.scrum");
+                                                        console.log(channelresult.scrum);
+
+
+                                                        issueservice.deleteIssues(channelid)
+                                                            .then(function (error, removedissuesresult) { /* { result: { ok: 1, n: 2 },*/
+                                                            if (error) {
+
+                                                                response.status(error.code).json({message: error.message});
+                                                            }
+                                                            else {
+
+                                                                taskservice.deleteTasks(channelid)
+                                                                    .then(function (error, removedtasksresult) {
+
+                                                                    if (error) {
+                                                                        response.status(error.code).json({message: error.message});
+                                                                    }
+                                                                    else {
+
+
+                                                                        userstoryservice.deleteUserstories(channelid)
+                                                                            .then(function (error, removedusresult) {
+
+                                                                            if (error) {
+                                                                                response.status(error.code).json({message: error.message});
+                                                                            }
+                                                                            else {
+
+                                                                                sprintservice.deleteSprints(channelid)
+                                                                                    .then(function (error, removedsprintsresult) {
+
+                                                                                        if (error) {
+                                                                                            response.status(error.code).json({message: error.message});
+                                                                                        }
+                                                                                        else{
+                                                                                            removechannel(userid, groupid, channelid,response);
+                                                                                        }
+
+                                                                                    });
+                                                                            }
+
+                                                                        }); /* removeus */
+
+                                                                    }
+
+                                                                }); /* removetasks */
+
+                                                            }
+
+                                                        }); /* removeissue */
+
+                                                    } /* channel es scrum */
+                                                    else {
+                                                        removechannel(userid, groupid, channelid, response);
                                                     }
+                                                } /* channel es undefined  */
+                                                else {
+                                                    removechannel(userid, groupid, channelid, response);
                                                 }
-                                                response.json(result);
+
+
                                             }
-                                        });
-                                    }
-                                });
-                                /***********************/
-                            }
-                        });
-                    }
-                });
-            } else {
-                response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
-            }
-        }
-    });
+                                        }); /* get channel */
+
+
+
+
+
+                                    /***********************/
+                                } /* es admin */
+                            }); /* checkisadmin */
+                        }
+                    }); /* checkuserinchannel */
+                } /* es el mismo :: token id */
+
+                else {
+                    response.status(401).json({message: 'Unauthorized. You are trying to access with a different userid'});
+                }
+
+            } /* no error */
+        }); /* end method auth */
+    }
 };
+
+
+
+
+
 
 exports.getchannelinfo = function getchannelinfo (request, response){
     Auth(request, response).then(function(error, result) {

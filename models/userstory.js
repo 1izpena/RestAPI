@@ -323,12 +323,14 @@ userstorySchema.statics.deleteUserstoryById = function deleteUserstoryById (id) 
 
 userstorySchema.statics.deleteUserstories = function deleteUserstories (query) {
     var promise = new Hope.Promise();
-    this.remove(query,function(error) {
+
+    this.remove(query,function(error, removed) {
         if (error) {
             return promise.done(error, null);
-        }else {
+        }
+        else {
             console.log("Userstories deleted successfully");
-            return promise.done(null, {message: 'Userstories deleted successfully'});
+            return promise.done(null, removed);
         }
     });
     return promise;
@@ -432,7 +434,7 @@ userstorySchema.methods.parse = function parse () {
                 /* de task quiero all */
 
                 task.id = (userstory.tasks[i]._id) ? userstory.tasks[i]._id : userstory.tasks[i];
-                task.num = (userstory.tasks[i].numTask) ? userstory.tasks[i].numTask : 0;
+                task.num = (userstory.tasks[i].numtask) ? userstory.tasks[i].numtask : 0;
                 task.subject = (userstory.tasks[i].subject) ? userstory.tasks[i].subject : '';
 
                 if(userstory.tasks[i].createdby !== undefined &&

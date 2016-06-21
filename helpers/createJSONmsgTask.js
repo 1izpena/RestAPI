@@ -162,7 +162,7 @@ exports.generateMSGEditSprint = function generateMSGEditSprint (result, sprintex
 
 
 
-exports.generateMSGDeleteUS = function generateMSGDeleteUS (result, userstoryresult) {
+exports.generateMSGDeleteUS = function generateMSGDeleteUS (result, userstoryresult, raw) {
 
 
     var sender = {
@@ -186,6 +186,22 @@ exports.generateMSGDeleteUS = function generateMSGDeleteUS (result, userstoryres
         numtasks    : userstoryresult.tasks
     };
 
+
+
+    if(raw !== undefined && raw !== null && raw !== ''){
+        if(raw.nModified !== undefined && raw.nModified !== null && raw.nModified !== ''){
+            messagetext.userstory.numissues = raw.nModified;
+
+        }
+
+    }
+
+
+
+
+
+
+
     return messagetext;
 
 
@@ -196,6 +212,52 @@ exports.generateMSGDeleteUS = function generateMSGDeleteUS (result, userstoryres
 
 
 
+exports.generateMSGDeleteIssue = function generateMSGDeleteIssue (result, issueresult) {
+
+
+    var sender = {
+        id  : result._id,
+        username: result.username,
+        mail: result.mail
+    };
+
+
+    var messagetext = {
+        action      :  'deleted',
+        event       :  'issue',
+        sender      :   sender
+
+    };
+
+
+    messagetext.issue = {
+        id          : issueresult.id,
+        num         : issueresult.num,
+        subject     : issueresult.subject
+    };
+
+
+    console.log("esto vale issueresult");
+    console.log(issueresult);
+
+    /* mirar si tenia us creados a su cargo */
+    if(issueresult.userstories !== undefined &&
+        issueresult.userstories !== null &&
+        issueresult.userstories !== '' &&
+        issueresult.userstories.length >0){
+        messagetext.issue.numus = issueresult.userstories.length;
+        console.log("entro en issue.numus");
+
+    }
+
+
+
+    return messagetext;
+
+
+
+
+};
 
 
 
@@ -507,24 +569,6 @@ exports.generateMSGupdateTask = function generateMSGupdateTask (num, result, fie
 
     var messagetext = {};
 
-
-
-    console.log("esto valen los parametros");
-    console.log("num");
-    console.log(num);
-    console.log("result");
-    console.log(result);
-    console.log("fieldoldvalue");
-    console.log(fieldoldvalue);
-    console.log("fieldchange");
-    console.log(fieldchange);
-    console.log("newtaskresult");
-    console.log(newtaskresult);
-    console.log("userstoryresult");
-    console.log(userstoryresult);
-
-
-
     var sender = {};
     var attr = {};
 
@@ -545,13 +589,13 @@ exports.generateMSGupdateTask = function generateMSGupdateTask (num, result, fie
             fieldoldvalue == null ||
             fieldoldvalue == ''){
             fieldoldvalue = {};
-            fieldoldvalue.username = "None";
+            fieldoldvalue.username = "NONE";
 
         }
         else if(fieldoldvalue.username == undefined ||
             fieldoldvalue.username == null ||
             fieldoldvalue.username == ''){
-            fieldoldvalue.username = "None";
+            fieldoldvalue.username = "NONE";
 
         }
 
@@ -590,9 +634,6 @@ exports.generateMSGupdateTask = function generateMSGupdateTask (num, result, fie
         };
 
 
-        console.log("esto vale el mensaje en createJSONMSG");
-        console.log(messagetext);
-
 
     }/* end num == 1 */
 
@@ -629,12 +670,6 @@ exports.generateMSGupdateTask = function generateMSGupdateTask (num, result, fie
                 for(var i = 0; i< userstoryresult.tasks.length; i++){
 
                     if(userstoryresult.tasks[i].id.equals(newtaskresult.id)){
-                        console.log("en cambiar en status helper ha encontrado la tarea");
-                        console.log("esto valia antes");
-                        console.log(userstoryresult.tasks[i].status);
-
-                        console.log("esto valia ahora");
-                        console.log(newtaskresult.status);
 
                         attr.oldfield = userstoryresult.tasks[i].status;
 
@@ -681,6 +716,7 @@ exports.generateMSGupdateTask = function generateMSGupdateTask (num, result, fie
         }
         else if(num == 4){ /* new comment, si quieres ir te pongo los medios */
 
+            /* pero lo acaba de crear, no tendra id */
             attr.newfield = fieldnewvalue;
         }
 
@@ -720,4 +756,208 @@ exports.generateMSGupdateTask = function generateMSGupdateTask (num, result, fie
 
 
 };
+
+/******************* new **********************************/
+
+
+exports.generateMSGupdateIssue = function generateMSGupdateIssue (num, result, fieldoldvalue, fieldchange,
+                                                                  newissueresult, fieldnewvalue, oldissueresult) {
+
+
+    var messagetext = {};
+
+
+
+
+    var sender = {};
+    var attr = {};
+    var issue = {};
+
+    /* 1 assignedto 2 unassignedto */
+    if(num == 1 || num == 2 || num == 12 || num == 6 || num == 7 || num == 8 || num == 9 || num == 10 || num == 11 || num == 4){
+
+
+        sender.id = result._id;
+        sender.username = result.username;
+        sender.mail = result.mail;
+
+
+
+        issue.id = newissueresult.id;
+        issue.num = newissueresult.num;
+        issue.subject = newissueresult.subject;
+
+
+
+    }
+    else if(num == 13){
+        sender.username = result.username;
+        sender.mail = result.mail;
+
+
+        issue.id = newissueresult.id;
+        issue.num = newissueresult.num;
+        issue.subject = newissueresult.subject;
+
+        attr.fieldchange = fieldchange;
+
+
+        messagetext.action = "updated";
+        messagetext.event = "issue";
+        messagetext.sender = sender;
+        messagetext.attr = attr;
+        messagetext.issue = issue;
+
+    }
+
+    if(num == 1){
+
+
+        if(fieldoldvalue == undefined ||
+            fieldoldvalue == null ||
+            fieldoldvalue == ''){
+            fieldoldvalue = {};
+            fieldoldvalue.username = "NONE";
+
+        }
+        else if(fieldoldvalue.username == undefined ||
+            fieldoldvalue.username == null ||
+            fieldoldvalue.username == ''){
+            fieldoldvalue.username = "NONE";
+
+        }
+
+
+        attr.fieldchange = fieldchange;
+        attr.newfield = newissueresult.assignedto;
+        attr.oldfield = fieldoldvalue;
+
+
+
+        messagetext.action = "updated";
+        messagetext.event = "issue";
+        messagetext.sender = sender;
+        messagetext.attr = attr;
+        messagetext.issue = issue;
+
+
+
+        /* hay que meter la tarea x separado para que se sepa cual se ha añadido */
+
+
+
+
+
+
+
+    }/* end num == 1 */
+    else if(num == 2 || num == 12 || num == 6 || num == 7 || num == 8 || num == 9 || num == 10 || num == 11 || num == 4 ){
+
+
+
+        attr.fieldchange = fieldchange;
+
+        /* unassigned */
+        if(num == 2){
+            /* tiene que ser undefined */
+
+            attr.newfield = newissueresult.assignedto;
+            attr.oldfield = fieldoldvalue;
+
+        }
+        else if( num == 12){
+            /* miramos si el que ha enviado la peticion esta en el array o no
+             * si no esta, es que ha quitado el voto, si esta es que lo ha metido, esto para mandar el mensaje  */
+
+            var votes = -1;
+            if(newissueresult.voters !== undefined &&
+                newissueresult.voters !== null &&
+                newissueresult.voters !== '' &&
+                newissueresult.voters.length >0 ){
+
+                votes = newissueresult.voters.indexOf(result._id);
+
+
+            }
+            attr.newfield = newissueresult.voters.length;
+            // oldfield seria el index
+            attr.oldfield = votes;
+
+        }
+        else if(num == 7){
+            /* tiene que ser undefined */
+
+            attr.newfield = newissueresult.description;
+
+
+        }
+        else if(num == 8){
+            attr.newfield = newissueresult.type;
+            attr.oldfield = oldissueresult.type;
+
+
+        }
+        else if(num == 9){
+            attr.newfield = newissueresult.severity;
+            attr.oldfield = oldissueresult.severity;
+
+
+        }
+        else if(num == 10){
+            attr.newfield = newissueresult.priority;
+            attr.oldfield = oldissueresult.priority;
+
+
+        }
+        else if(num == 11){
+            attr.newfield = newissueresult.status;
+            attr.oldfield = oldissueresult.status;
+
+
+        }
+        else if(num == 4){ /* new comment, si quieres ir te pongo los medios */
+
+            attr.newfield = fieldnewvalue;
+        }
+
+
+
+
+
+
+
+
+        messagetext.action = "updated";
+        messagetext.event = "issue";
+        messagetext.sender = sender;
+        messagetext.attr = attr;
+        messagetext.issue = issue;
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+    return messagetext;
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
 

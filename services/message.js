@@ -16,6 +16,10 @@ var io = require('socket.io');
 
 
 var channelservice  = require('../services/channel');
+var issueservice  = require('../services/issue');
+var createJSONmsgTask  = require('../helpers/createJSONmsgTask');
+
+
 async = require("async");
 
 
@@ -28,7 +32,142 @@ var Userstory  = require('../models/userstory');
 var Hope  = require('hope');
 
 
+exports.newinternalcomment = function newinternalcomment(result, newissueresult, userstoryresult, channelid){
 
+
+
+    var promise = new Hope.Promise();
+
+
+    var User = mongoose.model('User');
+    User.search({mail: config.internalUserMail}, 1)
+        .then(function(error, internalUser) {
+            if (!error) {
+
+                console.log("esto vale internal user");
+                console.log(internalUser);
+
+
+
+                var message = {};
+                message.userstory = {
+                    id: userstoryresult.id,
+                    num: userstoryresult.num,
+                    subject: userstoryresult.subject,
+
+
+                };
+
+                message.sender = {
+                    id: result._id,
+                    username: result.username,
+                    mail: result.mail,
+
+
+                };
+
+
+
+                var comment = {};
+                comment.created = new Date();
+                comment._user = internalUser._id;
+                comment.comment = JSON.stringify(message);
+                fieldnewvalue = comment;
+
+
+                var answer = {};
+                answer.num = 4;
+
+                issueservice.updateissue(newissueresult.id, answer.num, fieldnewvalue).then(function (error, newissueresultwithcomment) {
+                    if (error) {
+                        response.status(error.code).json({message: error.message});
+                    }
+                    else {
+
+                        /* notificamos al CH de que ha cambiado el userstory ******************/
+                        socketio.getIO().sockets.to('CH_' + channelid).emit('updateIssue', {issue: newissueresultwithcomment});
+
+
+                        var fieldchange = "comments";
+                        answer.num = 13;
+                        var messagetext = createJSONmsgTask.generateMSGupdateIssue(answer.num, internalUser, null,
+                            fieldchange, newissueresult, null, null);
+
+
+
+
+
+
+                        /* aqui haria lo del nuevo comentario */
+                        return promise.done(null, messagetext);
+
+
+
+
+
+                        /* ahora generamos el mensaje, no comment xq no esta preparado */
+
+
+
+
+
+
+
+
+                        /*if (answer.num !== 5) {
+                         /* tengo que hacer 1 json para el mensaje *
+                         var messagetext = createJSONmsgTask.generateMSGupdateIssue(answer.num, result, fieldoldvalue,
+                         fieldchange, newissueresult, fieldnewvalue, issueresult);
+
+
+                         messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+                         response.json(newissueresult);
+
+                         });
+
+                         }
+                         else {
+                         response.json(newissueresult);
+
+                         }*/
+
+
+                    }
+                    /* else !error*/
+                });
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+            else {
+
+
+                return promise.done(error, null);
+            }
+
+
+
+
+        });
+    return promise;
+
+
+
+
+
+
+
+};
 
 
 exports.newinternalmessage = function newinternalmessage(message, channelid){
@@ -72,7 +211,7 @@ exports.newinternalmessage = function newinternalmessage(message, channelid){
 
                         var messageData = {
                             channelid: channel.id,
-                            userid: internalUser.id,
+                            userid: internalUser._id,
                             messageType: 'TEXT',
                             text: JSON.stringify(message),
                             serviceType : 'SCRUM'

@@ -15,6 +15,7 @@ var githubapiservice = require('../services/githubapi');
 
 
 
+
 exports.updateuserchannellist = function updateuserchannellist(userid,groupid,channelid,channelType){
     var promise = new Hope.Promise();
     var User = mongoose.model('User');
@@ -1024,7 +1025,10 @@ exports.getchannel = function getinfo(channelid){
     var Channel = mongoose.model('Channel');
     var promise = new Hope.Promise();
 
-    Channel.search(channelid).then(function (error, channel) {
+
+    var query = {_id : channelid};
+
+    Channel.search(query, 1).then(function (error, channel) {
         if (error){
             return promise.done(error,null);
         }

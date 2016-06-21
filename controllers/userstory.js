@@ -12,6 +12,7 @@ var channelservice  = require('../services/channel');
 var userstoryservice  = require('../services/userstory');
 var messageservice  = require('../services/message');
 var sprintservice  = require('../services/sprint');
+var issueservice  = require('../services/issue');
 
 
 var chatErrors  = require('../helpers/chatErrorsHandler');
@@ -739,36 +740,54 @@ exports.deleteuserstories = function deleteuserstories (request, response){
                                                 else {
                                                    /* si ALL ha ido bien, borramos el US */
                                                     console.log("estoy en controller,depues de borrar las tareas");
-                                                    userstoryservice.deleteuserstoryById (userstoryid)
-                                                        .then(function (error, userstoryresultid) {
-                                                            if (error) {
-
-                                                                response.status(error.code).json({message: error.message});
-                                                            }
-
-                                                            else {
-
-                                                                socketio.getIO().sockets.to('CH_' + channelid).emit('deleteUserstory', {userstoryid: userstoryid});
 
 
-                                                                /* tengo que hacer 1 json para el mensaje **********************/
-                                                                var messagetext = createJSONmsgTask.generateMSGDeleteUS(result, userstoryexists);
+                                                    /* antes de borrar el us hay que mirar si existe alguna issue que lo tenga,
+                                                    * en ese caso borrar la referencia y al mandar el emit en angular borrarlas tambn */
+
+                                                    issueservice.updateissueRemoveUs(userstoryid).then(function (error, raw) {
+                                                        if (error) {
+
+                                                            response.status(error.code).json({message: error.message});
+                                                        }
+
+                                                        else {
+                                                            userstoryservice.deleteuserstoryById (userstoryid)
+                                                                .then(function (error, userstoryresultid) {
+                                                                    if (error) {
+
+                                                                        response.status(error.code).json({message: error.message});
+                                                                    }
+
+                                                                    else {
+
+                                                                        socketio.getIO().sockets.to('CH_' + channelid).emit('deleteUserstory', {userstoryid: userstoryid});
 
 
-                                                                messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
-
-                                                                    response.json({
-                                                                        userstoryid: userstoryid,
-                                                                        message: 'Userstory deleted successfully'
-                                                                    });
+                                                                        /* tengo que hacer 1 json para el mensaje **********************/
+                                                                        var messagetext = createJSONmsgTask.generateMSGDeleteUS(result, userstoryexists, raw);
 
 
+                                                                        messageservice.newinternalmessage(messagetext, channelid).then(function (error, message) {
+
+                                                                            response.json({
+                                                                                userstoryid: userstoryid,
+                                                                                message: 'Userstory deleted successfully'
+                                                                            });
+
+
+                                                                        });
+
+
+
+                                                                    }
                                                                 });
 
+                                                        }
+                                                    });
 
 
-                                                            }
-                                                        });
+
 
 
                                                 }
