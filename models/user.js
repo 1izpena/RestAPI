@@ -203,6 +203,12 @@ userSchema.statics.searchConToken = function searchConToken (query, limit, page)
     var value2 = [];
 
     this.find(query).skip(skip).limit(limit).exec(function(error, value) {
+
+        console.log("*******estoy en user/models********");
+        console.log("esto vale value=user");
+        console.log(value);
+
+
         if (limit === 1 && !error) {
             if (value.length === 0) {
                 error = {

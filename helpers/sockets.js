@@ -80,6 +80,10 @@ module.exports = {
                 if (data && data.channelid) {
                         // Salimos del namespace asociado al canal si ya esta incluido en alguno
                         var roomName = 'CH_'+data.channelid;
+
+                        socket.userid = data.userid;
+
+
                         for (var room in socket.adapter.rooms) {
                             if ((room.indexOf('CH_') == 0)) {
                                 socket.leave(room);
@@ -87,7 +91,6 @@ module.exports = {
                             }
                         }
                         socket.join(roomName);
-                        socket.userid = data.userid;
                         console.log ("SOCKET(selectChannel) "+socket.id+"(userid="+socket.userid+") join to room "+roomName);
                     }
                 });
@@ -96,19 +99,22 @@ module.exports = {
                     if (data && data.userid) {
                         // Salimos del namespace asociado al usuario
                         var roomName = 'US_'+data.userid;
+                        socket.userid = data.userid;
+
                         for (var room in socket.adapter.rooms) {
                             if ((room.indexOf('US_') == 0))
                                 console.log ("SOCKET(newChatConnection):  "+socket.id+"(userid="+socket.userid+") leave room "+room);
                                 socket.leave(room);
                         }
                         socket.join(roomName);
-                        socket.userid = data.userid;
+
                         console.log ("SOCKET(newChatConnection): "+socket.id+"(userid="+socket.userid+") join to room "+roomName);
                     }
                 });
                 socket.on('selectGroup', function (data) {
                     if (data && data.groupid && data.userid) {
 
+                        socket.userid = data.userid;
                         var roomName = 'GR_'+data.groupid;
                         for (var room in socket.adapter.rooms) {
                             if ((room.indexOf('GR_') == 0) && (room != roomName)) {
@@ -121,7 +127,7 @@ module.exports = {
                         // Notificamos a los conectados al grupo la nueva conexion al grupo
                         socket.join(roomName);
                         console.log ("SOCKET(selectGroup):  "+socket.id+"(userid="+socket.userid+") join to room "+roomName);
-                        socket.userid = data.userid;
+
                         socket.broadcast.to(roomName).emit('newUserConnect', {userid: data.userid});
 
                         // Notificamos al usuario que se conecta, los usuarios ya conectados
@@ -149,6 +155,7 @@ module.exports = {
                     }
                 });
                 socket.on('disconnect', function () {
+
 
                     console.log ("========== SOCKET(disconnect):  "+socket.id+"(userid="+socket.userid+") disconnect");
                     //Notificamos la desconexion de lso grupos en los que estuviera

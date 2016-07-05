@@ -586,6 +586,10 @@ exports.createHooks = function createHooks (request, response) {
 
     console.log("esto vale account con username");
     console.log(account);
+
+
+
+    console.log("*******despues de account*****");
     //console.log(account.token);
 
     /* hay que coger el name y el id */
@@ -654,8 +658,10 @@ exports.createHooks = function createHooks (request, response) {
                                 var newGithubtoken = {};
 
                                 /* si no lo encuentra, mandarle a que se loguee otra vez*/
-                                console.log("result");
+                                console.log("*******result*********");
                                 console.log(result);
+
+                                console.log("despues de getUsertoken");
 
 
 
@@ -736,8 +742,10 @@ exports.createHooks = function createHooks (request, response) {
                                                     /* antes de contestar creamos el canal */
 
                                                     /*if(result.)*/
-                                                    console.log("esto vale result");
+                                                    console.log("esto vale result en crear webhooks");
                                                     console.log(result);
+
+                                                    console.log("*********end crear webhooks********");
 
                                                     /*
                                                      *

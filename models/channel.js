@@ -327,8 +327,12 @@ channelSchema.methods.parse = function parse () {
         channelType: channel.channelType,
         scrum: channel.scrum,
         users: channel.users,
-        admin: channel._admin
-    };
+        admin: channel._admin,
+        githubUsername : channel.githubUsername,
+        githubRepositories : channel.githubRepositories
+
+
+};
 };
 
 
@@ -405,12 +409,18 @@ channelSchema.statics.parsepopulated = function parsepopulated (channelid) {
                 }
                 else{
                     vuelta.scrum = false;
-                    vuelta.roles = channel.roles;
                 }
 
 
+                vuelta.githubUsername = channel.githubUsername;
+                vuelta.githubRepositories = channel.githubRepositories;
+
+
+
+
                 return promise.done(null, vuelta);
-            }else {
+            }
+            else {
                 var err = {
                     code   : 400,
                     message: 'channel not found'

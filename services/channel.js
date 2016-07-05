@@ -579,23 +579,28 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
     var Group = mongoose.model('Group');
     var Message = mongoose.model('Message');
 
-    Channel.search({_id:channelid},1).then(function (error, result) {
+    Channel.search({_id:channelid},1).then(function (error, canal) {
         if (error){
             return promise.done(error,null);
         }
         else {
 
-            var canal = result;
+
             var Channel = mongoose.model('Channel');
-            Channel.parsepopulated(channelid).then(function (error, result) {
+            Channel.parsepopulated(channelid).then(function (error, vuelta) {
                 if (error){
                     return promise.done(error,null);
                 }
                 else {
-                    var vuelta = result;
+
 
                     console.log("esto vale canal");
                     console.log(canal);
+
+                    console.log("esto vale vuelta");
+                    console.log(vuelta);
+
+
 
 
 
@@ -635,228 +640,17 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                             * */
 
                             /* si existe el canal */
-                            if(canal !== null && canal !== undefined && canal !== '' ){
-                                if(canal.githubRepositories !== null && canal.githubRepositories !== undefined && canal.githubRepositories !== ''
-                                    && canal.githubUsername !== null && canal.githubUsername !== undefined && canal.githubUsername !== ''){
 
-                                    githubapiservice.getUserToken(userid, canal.githubUsername).then(function (error,result) {
 
-                                        console.log("entra en getusertoken de services/channel ");
 
-                                        if (error) {
 
-                                            return promise.done(error, null);
-                                        }
+                            if(vuelta !== null && vuelta !== undefined && vuelta !== '' ){
 
-                                        else {
 
-                                            console.log("entra en getusertoken para deletewebhooks sin error");
 
+                                updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
 
-                                            var newGithubtoken = {};
 
-
-                                            console.log("result");
-                                            console.log(result);
-
-
-                                            if (result !== null) {
-
-                                                if (result.token !== null && result.token !== undefined &&
-                                                    result.username !== null && result.username !== undefined) {
-
-                                                    newGithubtoken.token = result.token;
-                                                    newGithubtoken.username = result.username;
-
-
-                                                    githubapiservice.deleteHooks(canal.githubRepositories, newGithubtoken).then(function (error, result) {
-                                                        if (error) {
-
-                                                            if (error.message !== undefined || error.message !== null) {
-                                                                console.log("error en services channel borrando hooks1");
-                                                                /* entra xaqui */
-                                                                 error.message = JSON.parse(error.message);
-
-                                                            }
-                                                            /* err.arrReposError = arrErrors;
-                                                             err.arrReposOk = arrOk; */
-
-                                                            /* metemos en vuelta lo devuelto */
-                                                            vuelta.errordeletehooks = error;
-
-                                                        }
-                                                        else {
-
-                                                            /* si no hay error ay que hacer lo otro y añadir en vuelta eso */
-
-                                                             /*
-                                                             *
-                                                             * var errores = {};
-
-                                                             errores.code = 200;
-                                                             errores.arrReposError = arrErrors;
-                                                             errores.arrReposOk = arrOk;
-                                                             *
-                                                             * */
-                                                             /*
-                                                             * var ok = {};
-
-                                                             ok.code = 201;
-                                                             ok.arrReposOk = arrOk;
-
-
-
-                                                             return promise.done(null,ok);
-                                                             *
-                                                             * ***/
-
-
-                                                             vuelta.resultdeletehooks = result;
-
-
-
-                                                        }
-
-                                                        updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
-                                                    });
-                                                }
-
-                                                else{
-                                                    updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
-
-                                                }
-                                            }
-                                            else {
-                                                updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
-                                            }
-                                        }
-
-                                    }); /* getUserToken */
-
-
-
-
-
-                                }/* end canal tiene los campos que queremos */
-                                else{
-                                    updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
-
-
-                                }
-
-                                //lo hemos borrado, ahora
-
-                                /*
-                                if(canal.githubRepositories !== null && canal.githubRepositories !== undefined && canal.githubRepositories !== ''
-                                    && canal.githubtoken !== null && canal.githubtoken !== undefined && canal.githubtoken !== '' ){
-
-                                    if(canal.githubRepositories.length &&
-                                        canal.githubtoken.token !== null && canal.githubtoken.token !== undefined && canal.githubtoken.token !== '' &&
-                                        canal.githubtoken.username !== null && canal.githubtoken.username !== undefined && canal.githubtoken.username !== ''
-                                    ){
-
-                                        /* si hay errores decirle cuales mal y que los borre a pelo *
-                                        githubapiservice.deleteHooks(canal.githubRepositories, canal.githubtoken).then(function (error, result) {
-                                            if (error) {
-
-                                                console.log("error en services channel borrando hooks");
-
-
-                                                if (error.message !== undefined || error.message !== null) {
-                                                    console.log("error en controller githubapi creando hooks1");
-                                                    /* entra xaqui *
-                                                    error.message = JSON.parse(error.message);
-
-
-                                                }
-
-                                                /*
-                                                 *
-                                                 * 404 not found:: no existe
-                                                 *
-                                                 * */
-
-                                                /* si hay error de estos decir que lo borre,
-                                                como saber que el error es de esto, aun asi debería seguir con el otro proceso */
-
-                                                /* si hay error hay que hacer lo mismo, pero mandando tambien la respuesta *
-
-                                                console.log("antes de enviar eerror en services/channel de deletehooks");
-                                                /* err.arrReposError = arrErrors;
-                                                 err.arrReposOk = arrOk; *
-
-                                                /* metemos en vuelta lo devuelto *
-                                                vuelta.errordeletehooks = error;
-
-
-
-
-
-                                            }
-
-                                            /* si no hay error *
-                                            else {
-                                                /* si no hay error ay que hacer lo otro y añadir en vuelta eso *
-
-                                                /*
-                                                *
-                                                * var errores = {};
-
-                                                 errores.code = 200;
-                                                 errores.arrReposError = arrErrors;
-                                                 errores.arrReposOk = arrOk;
-                                                *
-                                                * *
-                                                /*
-                                                * var ok = {};
-
-                                                 ok.code = 201;
-                                                 ok.arrReposOk = arrOk;
-
-
-
-                                                 return promise.done(null,ok);
-                                                *
-                                                * ***esto estaba comentado
-
-
-                                                vuelta.resultdeletehooks = result;
-
-
-
-
-
-
-
-
-
-
-                                            }
-                                            updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
-
-
-                                        });
-
-
-
-
-                                    }/* end if canal.githubRepositories.lenght && canal.githubtoken.token/username !== null *
-                                    else{
-                                        updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
-
-                                    }
-
-
-
-
-
-
-                                }/* end if canal.githubRepositories!== null && canal.githubtoken !== null *
-                                else{
-                                    updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
-                                }
-
-*/
 
                             }/* end if canal !== null */
                             /* si no encuentra el canal no debería hacer nada */
@@ -864,12 +658,6 @@ exports.removechannel = function removechannel(userid,groupid,channelid){
                                 updateChannelOnDeleteCascade(groupid, channelid, vuelta, canal, Group, Message, User, promise);
 
                             }
-
-
-
-
-
-
 
 
 

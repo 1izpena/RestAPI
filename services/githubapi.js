@@ -257,13 +257,13 @@ exports.getUserAccounts = function getUserAccounts (userid) {
     /* solo tiene que ser 1 */
     User.searchConToken(query).then(function(error, user) {
 
-        if (user === null) {
+        if (user == null || user == undefined || user == '') {
             return promise.done(error,null);
 
 
         } else {
 
-            if(user.length !== undefined){
+            if(user.length > 0){
                 var user = user[0];
 
                 /* devolvemos array con tokens o null */
@@ -374,6 +374,19 @@ exports.saveUserToken = function saveUserToken(userid, username, auth, oldToken)
 
 
     }
+    /*else if(username !== null && username !== undefined && username !== ''){
+
+        query = {_id: userid, "githubtoken" :{$elemMatch: {"username": username}}};
+
+        update = {$set : {
+            "githubtoken.$.username": username,
+            "githubtoken.$.token": auth.token,
+            "githubtoken.$.authid": auth.id
+        }};
+
+
+
+    }*/
     else {
 
         console.log("con push");
@@ -383,7 +396,9 @@ exports.saveUserToken = function saveUserToken(userid, username, auth, oldToken)
 
     }
     /* return the modified document rather than the original */
-    options = { new: true};
+    options = { new: true, upsert: true};
+
+
 
     User.updateusergithubtoken(query,update,options).then(function (error,user){
 
@@ -544,75 +559,82 @@ exports.getUserToken = function getUserToken(userid, username){
 
     /* solo tiene que ser 1 */
     User.searchConToken(query).then(function(error, user) {
-        if (user === null) {
+        if(error){
             return promise.done(error,null);
+        }
+        else{
+            if (user == null || user == undefined || user == '') {
+                return promise.done(null,null);
 
 
-        } else {
+            } else {
 
 
-            console.log("esto vale user");
-            console.log(user);
-
-            /* es 1 array de usuarios, siempre solo 1*/
-            if(user.length !== undefined){
-                var user = user[0];
-
-                console.log("esto vale user en searchcontoken");
+                console.log("esto vale user");
                 console.log(user);
-                var githubtokentemp = {};
 
-                if(user.githubtoken !== undefined && user.githubtoken !== null){
+                /* es 1 array de usuarios, siempre solo 1*/
+                if(user.length > 0){
+                    var user = user[0];
+
+                    console.log("esto vale user en searchcontoken");
+                    console.log(user);
+                    var githubtokentemp = {};
+
+                    if(user.githubtoken !== undefined && user.githubtoken !== null){
 
 
-                    if(user.githubtoken[0] !== undefined){
+                        if(user.githubtoken[0] !== undefined){
 
 
-                        for(var i = 0; i< user.githubtoken.length; i++){
-                            if(user.githubtoken[i].username !== undefined){
-                                if(user.githubtoken[i].username == username){
-                                    githubtokentemp = user.githubtoken[i];
+                            for(var i = 0; i< user.githubtoken.length; i++){
+                                if(user.githubtoken[i].username !== undefined){
+                                    if(user.githubtoken[i].username == username){
+                                        githubtokentemp = user.githubtoken[i];
+                                    }
                                 }
+
                             }
 
-                        }
+                            if(githubtokentemp.token == undefined){
+                                return promise.done(null,null);
 
-                        if(githubtokentemp.token == undefined){
-                            return promise.done(null,null);
+                            }
+                            else{
+                                return promise.done(null,githubtokentemp);
+
+                            }
+
 
                         }
                         else{
-                            return promise.done(null,githubtokentemp);
+                            /* no hay token */
+                            return promise.done(null,null);
 
                         }
 
 
                     }
+                    //hay que crearse el token
                     else{
-                        /* no hay token */
                         return promise.done(null,null);
+
 
                     }
 
 
                 }
-                //hay que crearse el token
+                /* el array de usuarios es vacio */
                 else{
                     return promise.done(null,null);
-
-
                 }
 
 
-            }
-            /* el array de usuarios es vacio */
-            else{
-                return promise.done(null,null);
-            }
 
-
+            }
 
         }
+
     });
     return promise;
 };
@@ -979,31 +1001,47 @@ exports.deleteHooks = function deleteHooks(arrRepos, githubtoken){
 
             }, function(err, res) {
                 if (err) {
+
                     console.log("dentro del foreach de delete con rror");
-                    console.log(err);
+                    console.log(err.code);
                     console.log(item);
 
-
-                    var githubMessageErrors = {};
-                    githubMessageErrors.item = item;
-                    githubMessageErrors.code = err.code;
-
-                    if(err.code == '504'){
-
-                        githubMessageErrors.message = "Gateway Timeout";
-
-
+                    /* bad credentials */
+                    if(err.code == 401){
+                        console.log("entro en services err.code == 401");
+                        return promise.done(err,null);
 
                     }
+
+
                     else{
-                        githubMessageErrors.message = JSON.parse(err.message);
+
+                        var githubMessageErrors = {};
+                        githubMessageErrors.item = item;
+                        githubMessageErrors.code = err.code;
+
+                        if(err.code == '504'){
+
+                            githubMessageErrors.message = "Gateway Timeout";
 
 
+
+                        }
+                        else{
+                            githubMessageErrors.message = JSON.parse(err.message);
+
+
+
+                        }
+
+                        arrErrors.push(githubMessageErrors);
+                        githuberror = true;
 
                     }
 
-                    arrErrors.push(githubMessageErrors);
-                    githuberror = true;
+
+
+
 
 
                 }
@@ -1037,11 +1075,6 @@ exports.deleteHooks = function deleteHooks(arrRepos, githubtoken){
             if(err){
                 console.log('Error:' + err);
 
-
-                /* esta bien saber cuales estan bien borrados y cuales no */
-                /* hay que controlarlo en angular */
-                err.arrReposError = arrErrors;
-                err.arrReposOk = arrOk;
                 return promise.done(err,null);
             }
 

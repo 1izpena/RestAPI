@@ -7,6 +7,7 @@ var issueservice  = require('../services/issue');
 var taskservice  = require('../services/task');
 var userstoryservice  = require('../services/userstory');
 var sprintservice  = require('../services/sprint');
+var githubapiservice = require('../services/githubapi');
 
 
 var mongoose = require('mongoose');
@@ -681,12 +682,226 @@ exports.unsuscribefromchannel = function unsuscribefromchannel (request, respons
     });
 };
 
+
+function updateTokenForChannelDelete (response, userid, channelid, groupid, username, pass) {
+
+    /* primero coger el canal */
+
+
+
+    console.log("***********esto vale userid en updateTokenForChannelDelete*************");
+    console.log(userid);
+
+    channelservice.getchannel(channelid)
+        .then(function (error, channelresult) {
+            if (error) {
+                response.status(error.code).json({message: error.message});
+            }
+            else {
+
+                console.log("esto vale channelresult");
+                console.log(channelresult);
+
+
+                if (channelresult !== null && channelresult !== undefined && channelresult !== '') {
+                    if (channelresult.githubUsername !== null && channelresult.githubUsername !== undefined && channelresult.githubUsername !== '') {
+
+
+                        githubapiservice.getUserToken(userid, username).then(function (error, oldToken) {
+
+                            if (error) {
+                                response.status(error.code).json({message: error.message});
+                                response.end();
+                                return;
+                            }
+
+                            else {
+
+                                /* aqui tengo el objeto entero *
+                                 * mirar si es nulo, hay que crear el token
+                                 */
+
+                                var newResult = {};
+
+
+                                githubapiservice.createToken(userid, username, pass).then(function (error, resultcreateToken) {
+                                    if (error) {
+
+                                        console.log("error en controller githubapi creando token2");
+                                        var messageJSON = JSON.parse(error.message);
+                                        console.log(error);
+
+                                        response.status(error.code).json({message: messageJSON.message});
+                                        response.end();
+                                        return;
+
+
+                                    }
+                                    else {
+                                        /* puede que no haya error pero tampoco token */
+                                        /* le avisamos */
+
+                                        if (resultcreateToken == null) {
+
+                                            response.status(503).json({
+                                                message: "Creating Github authorization for Meanstack failed. " +
+                                                "Please try again. "
+                                            });
+                                            response.end();
+                                            return;
+
+                                        }
+                                        else {
+
+                                            githubapiservice.saveUserToken(userid, username, resultcreateToken, oldToken).then(function (error, result) {
+                                                if (error) {
+                                                    githubapiservice.deleteAuth(username, pass, resultcreateToken.id)
+                                                        .then(function (error, resu){
+                                                            if (err) {
+
+                                                                /*si hay error al borrar, nos daria igual,que lo borre a pelo o igual no existe */
+
+                                                                console.log("hay error en deleteauth");
+                                                                console.log(err);
+                                                                response.status(err.code).json({message: err.message});
+
+
+
+
+                                                            } else {
+                                                                console.log("NO hay error en deleteauth Y ESTO VALE RESU");
+                                                                /* { meta:
+                                                                 { 'x-ratelimit-limit': '5000',
+                                                                 'x-ratelimit-remaining': '4983',
+                                                                 'x-ratelimit-reset': '1462933609',
+                                                                 status: '204 No Content' } }
+                                                                 */
+
+                                                                /* hay que decirle de alguna manera que flag a empty otra vez */
+
+                                                                console.log(resu);
+                                                                response.status(204).json({message: "Unable to save Github authorization. Please try again."});
+
+
+
+                                                            }
+
+                                                        });
+
+
+                                                }
+                                                else {
+
+                                                    /* si el token funciona, borramos canal */
+                                                    if (result !== null && result !== undefined) {
+
+                                                        if (result.token !== null && result.token !== undefined &&
+                                                            result.username !== null && result.username !== undefined) {
+                                                            newResult.githubtoken = result;
+
+
+
+                                                            if(channelresult.githubRepositories !== null && channelresult.githubRepositories !== undefined && channelresult.githubRepositories !== '') {
+                                                                if (channelresult.githubRepositories.length > 0) {
+
+
+                                                                    githubapiservice.deleteHooks(channelresult.githubRepositories, newResult.githubtoken).then(function (error, result) {
+
+                                                                        if (error) {
+
+
+                                                                            response.status(error.code).json({
+                                                                                error: error,
+                                                                                message: error.message,
+                                                                                service: "github"
+                                                                            });
+
+                                                                        }
+                                                                        else {
+
+                                                                            channelresult.resultdeletehooks = result;
+                                                                            removechannel(userid, groupid, channelid, response, channelresult);
+
+
+                                                                        }
+
+
+                                                                    });
+                                                                }
+                                                                else{
+                                                                    removechannel(userid, groupid, channelid, response);
+                                                                }
+                                                            }
+                                                            else{
+                                                                removechannel(userid, groupid, channelid, response);
+                                                            }
+
+
+                                                        }
+                                                        else {
+                                                            if (result.username !== null && result.username !== undefined) {
+
+
+                                                                response.status(error.code).json({
+                                                                    error: error,
+                                                                    message: error.message,
+                                                                    service: "github"
+                                                                });
+                                                            }
+                                                            else{
+
+                                                                removechannel(userid, groupid, channelid, response);
+
+                                                            }
+
+
+                                                        }
+                                                    }
+                                                    else {
+
+                                                        response.status(error.code).json({
+                                                            error: error,
+                                                            message: error.message,
+                                                            service: "github"
+                                                        });
+                                                    }
+
+
+
+
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+
+                        });
+
+                    } /* el canal tiene usernametoken */
+                    else{
+                        response.status(401).json({message: "Channel does not GitHub account linked "});
+                    }
+                } /*existe el canal */
+                else{
+                    response.status(401).json({message: "Channel does not exists"});
+                }
+
+
+            }
+        });
+}
+
+
+
+
 exports.updatechannelinfo = function updatechannelinfo (request, response){
     Auth(request, response).then(function(error, result) {
         if (error) {
             response.status(error.code).json({message: error.message});
         } else {
             if (request.params.userid == result._id){
+
                 chatErrors.checkuserinchannel(request.params.channelid,request.params.userid).then(function (error,result){
                     if(error){
                         response.status(error.code).json({message: error.message});
@@ -696,8 +911,28 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
                                 response.status(error.code).json({message: error.message});
                             }else{
                                 if (request.body.channelName == undefined || request.body.channelName == "" || request.body.channelName == null){
-                                    console.log("You must enter a valid channelName");
-                                    response.status(401).json({message: 'You must enter a valid channelName'});
+                                    if (request.body.githubChannelPass == undefined || request.body.githubChannelPass == "" || request.body.githubChannelPass == null ||
+                                        request.body.githubChannelUsername == undefined || request.body.githubChannelUsername == "" || request.body.githubChannelUsername == null) {
+
+                                        response.status(401).json({message: 'You must enter a valid fields to update channel'});
+                                    }
+                                    else {
+                                        /* si hay pass :: generamos token, si token valido borramos webhooks y channel */
+                                        /* si token no valido bad credentials */
+                                        updateTokenForChannelDelete(response, request.params.userid, request.params.channelid, request.params.groupid,
+                                                                    request.body.githubChannelUsername, request.body.githubChannelPass) ;
+
+
+
+
+
+                                    }
+
+
+
+
+
+
                                 } else {
                                     channelservice.updatechannelname(request.params.userid,request.params.groupid,request.params.channelid,request.body.channelName).then(function (error,result){
                                         if(error){
@@ -747,7 +982,7 @@ exports.updatechannelinfo = function updatechannelinfo (request, response){
 /* si el canal esta asociado al servicio de github hay que borrar los webhooks primero, todos ellos */
 
 
-function removechannel(userid, groupid, channelid, response){
+function removechannel(userid, groupid, channelid, response, channelresult){
 
     console.log("luego borro el canal");
     channelservice.removechannel(userid, groupid, channelid).then(function (error, result) {
@@ -787,7 +1022,13 @@ function removechannel(userid, groupid, channelid, response){
                             }
                         }
                     }
-                    response.json(result);
+                    if(channelresult !== undefined && channelresult !== null && channelresult !== ''){
+                        response.json(channelresult);
+                    }
+                    else{
+                        response.json(result);
+                    }
+
                 }
             });
         }
@@ -941,7 +1182,102 @@ exports.deletechannelfromgroup = function deletechannelfromgroup (request, respo
 
                                                     } /* channel es scrum */
                                                     else {
-                                                        removechannel(userid, groupid, channelid, response);
+
+                                                        if(channelresult.githubRepositories !== null && channelresult.githubRepositories !== undefined && channelresult.githubRepositories !== ''
+                                                            && channelresult.githubUsername !== null && channelresult.githubUsername !== undefined && channelresult.githubUsername !== ''){
+
+
+                                                            if(channelresult.githubRepositories.length >0){
+                                                                githubapiservice.getUserToken(userid, channelresult.githubUsername).then(function (error,result) {
+                                                                    if (error) {
+                                                                        return promise.done(error, null);
+                                                                    }
+
+                                                                    else {
+                                                                        var newGithubtoken = {};
+
+
+                                                                        if (result !== null) {
+                                                                            if (result.token !== null && result.token !== undefined &&
+                                                                                result.username !== null && result.username !== undefined) {
+
+                                                                                newGithubtoken.token = result.token;
+                                                                                newGithubtoken.username = result.username;
+
+
+                                                                                /* sino funciona token hay que mandarle a autentificarse con el username del canal */
+
+                                                                                githubapiservice.deleteHooks(channelresult.githubRepositories, newGithubtoken).then(function (error, result) {
+                                                                                    if (error) {
+
+
+
+                                                                                        console.log(error);
+                                                                                        response.status(error.code).json({
+                                                                                            error: error,
+                                                                                            message: error.message,
+                                                                                            service: "github"
+                                                                                        });
+
+                                                                                    }
+                                                                                    else {
+
+                                                                                        channelresult.resultdeletehooks = result;
+                                                                                        removechannel(userid, groupid, channelid, response, channelresult);
+
+
+                                                                                    }
+
+
+                                                                                });
+                                                                            }
+                                                                            else {
+                                                                                if (result.username !== null && result.username !== undefined) {
+
+
+                                                                                    response.status(error.code).json({
+                                                                                        error: error,
+                                                                                        message: error.message,
+                                                                                        service: "github"
+                                                                                    });
+                                                                                }
+                                                                                else{
+
+                                                                                    removechannel(userid, groupid, channelid, response);
+
+                                                                                }
+
+
+                                                                            }
+                                                                        }
+                                                                        else {
+
+                                                                            response.status(error.code).json({
+                                                                                error: error,
+                                                                                message: error.message,
+                                                                                service: "github"
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                });
+
+                                                            }
+                                                            else{
+                                                                removechannel(userid, groupid, channelid, response);
+
+                                                            }
+
+
+
+
+
+
+                                                            }
+                                                            else{
+                                                                removechannel(userid, groupid, channelid, response);
+                                                            }
+
+
                                                     }
                                                 } /* channel es undefined  */
                                                 else {

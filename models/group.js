@@ -194,9 +194,23 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
 
                         if(group.channels[i].scrum == true){
                             elto.scrum = true;
-                            console.log("entro en canal:");
-                            console.log(group.channels[i].channelName);
-                            console.log("tiene scrum");
+
+
+                        }
+                        if(group.channels[i].githubUsername !== null &&
+                            group.channels[i].githubUsername !== undefined &&
+                            group.channels[i].githubUsername !== ''){
+                            elto.githubUsername = group.channels[i].githubUsername;
+
+
+                        }
+                        if(group.channels[i].githubRepositories !== null &&
+                            group.channels[i].githubRepositories !== undefined &&
+                            group.channels[i].githubRepositories !== ''){
+                            if(group.channels[i].githubRepositories.length > 0 ){
+                                elto.githubRepositories = group.channels[i].githubRepositories;
+
+                            }
 
                         }
 
@@ -229,9 +243,22 @@ groupSchema.statics.parsepopulated = function parsepopulated (userid,groupid) {
 
                                 if(group.channels[i].scrum == true){
                                     elto2.scrum = true;
-                                    console.log("entro en canal:");
-                                    console.log(group.channels[i].channelName);
-                                    console.log("tiene scrum");
+
+                                }
+                                if(group.channels[i].githubUsername !== null &&
+                                    group.channels[i].githubUsername !== undefined &&
+                                    group.channels[i].githubUsername !== ''){
+                                    elto.githubUsername = group.channels[i].githubUsername;
+
+
+                                }
+                                if(group.channels[i].githubRepositories !== null &&
+                                    group.channels[i].githubRepositories !== undefined &&
+                                    group.channels[i].githubRepositories !== ''){
+                                    if(group.channels[i].githubRepositories.length > 0 ){
+                                        elto.githubRepositories = group.channels[i].githubRepositories;
+
+                                    }
 
                                 }
 
